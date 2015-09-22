@@ -3,9 +3,30 @@
 .ifndef ::_METASPRITE_DATAFORMAT_H_
 ::_METASPRITE_DATAFORMAT_H_ = 1
 
+.struct MetaSprite__Frame
+	;; Addrss of the `MetaSprite__FrameObjectsList` struct within the
+	;; `METASPRITE_FRAME_OBJECTS_BLOCK` bank.
+	frameObjectsList	.addr
+
+	;; Address of the `MetaSprite__Tileset` struct within the
+	;; `METASPRITE_TILESET_BLOCK` bank.
+	tilesetTable		.addr
+
+	;; Address of the `MetaSprite__EntityCollisionHitboxes` struct within the
+	;; `METASPRITE_ENTITY_COLLISION_HITBOXES_BLOCK` bank.
+	entityCollisionHitbox	.addr
+
+	;; Address of the `MetaSprite__TileCollisionHitbox` struct within the
+	;; `METASPRITE_TILE_COLLISION_HITBOXES_BLOCK` bank.
+	tileCollisionHitbox	.addr
+
+	;; Address of the `MetaSprite__ActionPoints` struct within the
+	;; `METASPRITE_ACTION_POINT_BLOCK` bank.
+	actionPoints		.addr
+.endstruct
 
 
-;; Represents a single metasprite frame.
+;; Represents the metasprite frames objects.
 ;;
 ;; In order to simplify processing of the metasprite frame, there are no
 ;; signed integers in both frame/object data structures.
@@ -45,7 +66,7 @@
 ;;	else:
 ;;		oam.charAttr = (frameObject.charAttr & 0xF01F) + entity.blockTwoCharAttrOffset
 
-.struct MetaSprite__Frame
+.struct MetaSprite__FrameObjectsList
 	;; The number of objects
 	count		.byte
 
@@ -81,6 +102,40 @@
 	.endstruct
 .endstruct
 
+.enum MetaSprite__Tileset_Type
+	;; The tileset uses a single 16x16 tile
+	ONE_16_TILE
+
+	;; The tileset uses two 16x16 tiles
+	TWO_16_TILE
+
+	;; The tileset uses a single VRAM row of 8 16x16 tiles
+	ONE_VRAM_ROW
+
+	;; The tileset uses two VRAM rows of 8 16x16 tiles.
+	TWO_VRAM_ROWS
+.endenum
+
+;; The tileset that is used by the frame (or frames).
+.struct MetaSprite__Tileset
+	;; The type of tile
+	;; Matches `MetaSprite__Tileset_Type`
+	type		.byte
+
+	;; The bank tha contains the tiles
+	bank		.byte
+
+	;; Number of tiles to copy
+	count		.byte
+
+	;; The address of the 16x16 tile within the `bank`
+	;;
+	;; The tileset is arranged so that each of the 4 tiles
+	;; are one after another.
+	;;
+	;; Repeated count times
+	tileAddress	.word
+.endstruct
 
 
 ;; The hitbox of the entity, used by the physics engine for entity
