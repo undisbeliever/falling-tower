@@ -122,19 +122,27 @@
 	;; Matches `MetaSprite__Tileset_Type`
 	type		.byte
 
-	;; The bank tha contains the tiles
-	bank		.byte
-
 	;; Number of tiles to copy
 	count		.byte
 
-	;; The address of the 16x16 tile within the `bank`
+	;; The address of the 16x16 4pp tile.
 	;;
-	;; The tileset is arranged so that each of the 4 tiles
-	;; are one after another.
+	;; As each tile is 128 bytes in size and the SNES mirrors banks $80-FF,
+	;; only 16 bits are needed to store the data, assuming 128 byte alignment.
+	;;
+	;; As DMA is always operates in slowrom mode, tiles are accessed in
+	;; banks $00-$7F, not banks $80-$FF.
+	;;
+	;; To convert from a tileAddress to a SNES Memory the following routine
+	;; is used:
+	;;	snesAddress = tileAddress << 7
+	;;
+	;; To convert from a SNES Memory location to a tileAddress, simply:
+	;;	tileAddress = (snesAddress >> 7) & $FFFF
+	;;
 	;;
 	;; Repeated count times
-	tileAddress	.word
+	.word tileAddress
 .endstruct
 
 
