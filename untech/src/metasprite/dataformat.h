@@ -142,7 +142,7 @@
 	;;
 	;;
 	;; Repeated count times
-	.word tileAddress
+	tileAddress	.word
 .endstruct
 
 
@@ -208,17 +208,9 @@
 			;;
 			;; It is processed ONLY if count is 0.
 			;;
-			;; The format/value of this parameter depends on the entity
+			;; The format/value of this byte depends on the entity
 			;; and is parsed by the entity's update routine.
-			OuterHitboxType		.byte
-
-			;; The parameter for the outer hitbox type
-			;;
-			;; It is processed ONLY if count is 0.
-			;;
-			;; The format/value of this parameter depends on the
-			;; entity and hitbox type and is parsed by the entity's update routine
-			parameter	.byte
+			type		.byte
 		.endstruct
 
 		;; The inner hitboxes, repeated `count` times
@@ -247,15 +239,9 @@
 
 			;; The type of hitbox
 			;;
-			;; The format/value of this parameter depends on the
+			;; The format/value of this byte depends on the
 			;; entity and is parsed by the entity's update routine
 			type		.byte
-
-			;; The parameter for the hitbox type
-			;;
-			;; The format/value of this parameter depends on the
-			;; entity and hitbox type and is parsed by the entity's update routine
-			parameter	.byte
 		.endstruct
 	.endunion
 .endstruct
@@ -320,15 +306,9 @@
 	.struct Point
 		;; The type of action point
 		;;
-		;; The format/value of this parameter depends on the entity
+		;; The format/value of this byte depends on the entity
 		;; code and is parsed by the entity's update routine.
 		type		.byte
-
-		;; The parameter of the action point
-		;;
-		;; The format/value of this parameter depends on the entity
-		;; and/or type and is parsed by the entity's update routine.
-		parameter	.byte
 
 		;; xPos of the point, relative to `origin.x - 128`
 		;;
