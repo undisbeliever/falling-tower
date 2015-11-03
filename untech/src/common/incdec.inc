@@ -3,8 +3,6 @@
 .ifndef ::_COMMON__INCDEC_INC_
 ::_COMMON__INCDEC_INC_ = 1
 
-; ::TODO test these macros::
-
 
 ;; Increment XY pair
 ;;

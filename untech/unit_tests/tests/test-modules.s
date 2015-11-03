@@ -18,6 +18,7 @@ TestModuleTable:
 .code
 
 	; ::TODO autogenerate::
+	.include	"common/incdec.asm"
 	.include	"common/math.asm"
 	.include	"common/string.asm"
 
