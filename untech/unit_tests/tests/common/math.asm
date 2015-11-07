@@ -6,6 +6,26 @@
 .module UnitTest_Math
 
 	UnitTestHeader Math
+		UnitTest	Multiply_U8Y_U8X_UY
+		UnitTest	Multiply_U16Y_U8A_U16Y
+		UnitTest	Multiply_U16Y_U8A_U32XY
+		UnitTest	Multiply_U16Y_U16X_U16Y
+		UnitTest	Multiply_U16Y_S16X_16Y
+		UnitTest	Multiply_S16Y_U16X_16Y
+		UnitTest	Multiply_S16Y_S16X_S16Y
+		UnitTest	Multiply_U16Y_U16X_U32XY
+		UnitTest	Multiply_S16Y_S16X_S32XY
+		UnitTest	Multiply_S32_S16Y_S32XY
+		UnitTest	Multiply_U32_S16Y_32XY
+		UnitTest	Multiply_U32_U16Y_U32XY
+		UnitTest	Multiply_S32_U16Y_S32XY
+		UnitTest	Multiply_U32_U32XY_U32XY
+		UnitTest	Multiply_U32_S32XY_32XY
+		UnitTest	Multiply_S32_U32XY_32XY
+		UnitTest	Multiply_S32_S32XY_S32XY
+		UnitTest	Multiply_U32XY_U8A_U32XY
+		UnitTest	Multiply_S32XY_U8A_S32XY
+
 		UnitTest	Divide_U16Y_U8A
 		UnitTest	Divide_U16Y_U16X
 		UnitTest	Divide_S16Y_U16X
@@ -14,24 +34,467 @@
 		UnitTest	Divide_U32_U32
 		UnitTest	Divide_S32_S32
 		UnitTest	Divide_U32_U8A
+
 		UnitTest	Negate32
 	EndUnitTestHeader
 
 
 .define MATH_REPEAT 10
+.define TABLE_BANK "BANK2"
 
 .segment "SHADOW"
 	tmp:		.res 4
+	routinePtr:	.res 2
+	tablePos:	.res 2
+	endTable:	.res 2
 
-tablePos := tmp
+
+.struct Multiply_16_16_Table
+	factorY		.word
+	factorX		.word
+	result		.word
+.endstruct
+
+.struct Multiply_16_32_Table
+	factorY		.word
+	factorX		.word
+	result		.dword
+.endstruct
+
+.struct Multiply_32_Table
+	factor32	.dword
+	XY		.dword
+	result		.dword
+.endstruct
+
+.macro Process_Multiply_16_16_Table routine, table
+	LDX	#.loword(table)
+	LDY	#.loword(routine)
+	JMP	_Process_Multiply_16_16_Table
+.endmacro
+
+.macro Process_Multiply_16_32_Table routine, table
+	LDX	#.loword(table)
+	LDY	#.loword(routine)
+	JMP	_Process_Multiply_16_32_Table
+.endmacro
+
+.macro Process_Multiply_32_Table routine, table
+	LDX	#.loword(table)
+	LDY	#.loword(routine)
+	JMP	_Process_Multiply_32_Table
+.endmacro
+
+
 
 .code
+
+.A8
+.I16
+.routine Multiply_U8Y_U8X_UY
+	.repeat	4
+		STATIC_RANDOM_MIN_MAX factorA, 0, $FF
+		STATIC_RANDOM_MIN_MAX factorB, 0, $FF
+
+		LDY	#factorA
+		LDX	#factorB
+		JSR	Math::Multiply_U8Y_U8X_UY
+
+		CPY	#factorA * factorB
+		BNE	Failure
+	.endrepeat
+
+	SEC
+	RTS
+
+Failure:
+	CLC
+	RTS
+.endroutine
+
+
+.A8
+.I16
+.routine Multiply_U16Y_U8A_U16Y
+	.repeat	4
+		STATIC_RANDOM_MIN_MAX factorA, 0, $FF
+		STATIC_RANDOM_MIN_MAX factorB, 0, $FFFF
+
+		LDA	#factorA
+		LDY	#factorB
+		JSR	Math::Multiply_U16Y_U8A_U16Y
+
+		CPY	#.loword(factorA * factorB)
+		BNE	Failure
+	.endrepeat
+
+	SEC
+	RTS
+
+Failure:
+	CLC
+	RTS
+.endroutine
+
+
+.A8
+.I16
+.routine Multiply_U16Y_U8A_U32XY
+	.repeat	4
+		STATIC_RANDOM_MIN_MAX factorA, 0, $FF
+		STATIC_RANDOM_MIN_MAX factorB, 0, $FFFF
+
+		LDA	#factorA
+		LDY	#factorB
+		JSR	Math::Multiply_U16Y_U8A_U32XY
+
+		CPY	#.loword(factorA * factorB)
+		BNE	Failure
+		CPX	#.hiword(factorA * factorB)
+		BNE	Failure
+	.endrepeat
+
+	SEC
+	RTS
+
+Failure:
+	CLC
+	RTS
+.endroutine
+
+
+.A8
+.I16
+.routine Multiply_U16Y_U16X_U16Y
+	Process_Multiply_16_16_Table Math::Multiply_U16Y_U16X_U16Y, Table
+
+.segment TABLE_BANK
+Table:
+	.repeat	MATH_REPEAT
+		STATIC_RANDOM_MIN_MAX factorA, 0, $FFFF
+		STATIC_RANDOM_MIN_MAX factorB, 0, $FFFF
+
+		.word	factorA
+		.word	factorB
+		.word	.loword(factorA * factorB)
+	.endrepeat
+.code
+.endroutine
+
+
+.A8
+.I16
+.routine Multiply_U16Y_S16X_16Y
+	Process_Multiply_16_16_Table Math::Multiply_U16Y_S16X_16Y, Table
+
+.segment TABLE_BANK
+Table:
+	.repeat	MATH_REPEAT
+		STATIC_RANDOM_MIN_MAX factorA, 0, $FFFF
+		STATIC_RANDOM_MIN_MAX factorB, -$7FFF, $7FFF
+
+		.word	.loword(factorA)
+		.word	.loword(factorB)
+		.word	.loword(factorA * factorB)
+	.endrepeat
+.code
+.endroutine
+
+
+.A8
+.I16
+.routine Multiply_S16Y_U16X_16Y
+	Process_Multiply_16_16_Table Math::Multiply_S16Y_U16X_16Y, Table
+
+.segment TABLE_BANK
+Table:
+	.repeat	MATH_REPEAT
+		STATIC_RANDOM_MIN_MAX factorA, -$7FFF, $7FFF
+		STATIC_RANDOM_MIN_MAX factorB, 0, $FFFF
+
+		.word	.loword(factorA)
+		.word	.loword(factorB)
+		.word	.loword(factorA * factorB)
+	.endrepeat
+.code
+.endroutine
+
+
+.A8
+.I16
+.routine Multiply_S16Y_S16X_S16Y
+	Process_Multiply_16_16_Table Math::Multiply_S16Y_S16X_S16Y, Table
+
+.segment TABLE_BANK
+Table:
+	.repeat	MATH_REPEAT
+		STATIC_RANDOM_MIN_MAX factorA, -$7FFF, $7FFF
+		STATIC_RANDOM_MIN_MAX factorB, -$7FFF, $7FFF
+
+		.word	.loword(factorA)
+		.word	.loword(factorB)
+		.word	.loword(factorA * factorB)
+	.endrepeat
+.code
+.endroutine
+
+
+.A8
+.I16
+.routine Multiply_U16Y_U16X_U32XY
+	Process_Multiply_16_32_Table Math::Multiply_U16Y_U16X_U32XY, Table
+
+.segment TABLE_BANK
+Table:
+	; This one was caught by the Unit Testing
+	.word	.loword($e587)
+	.word	.loword($6af2)
+	.dword	($e587 * $6af2) & $FFFFFFFF
+
+	; More tests
+	.repeat	MATH_REPEAT - 1
+		STATIC_RANDOM_MIN_MAX factorA, 0, $FFFF
+		STATIC_RANDOM_MIN_MAX factorB, 0, $FFFF
+
+		.word	.loword(factorA)
+		.word	.loword(factorB)
+		.dword	(factorA * factorB) & $FFFFFFFF
+	.endrepeat
+.code
+.endroutine
+
+
+.A8
+.I16
+.routine Multiply_S16Y_S16X_S32XY
+	Process_Multiply_16_32_Table Math::Multiply_S16Y_S16X_S32XY, Table
+
+.segment TABLE_BANK
+Table:
+	.repeat	MATH_REPEAT
+		STATIC_RANDOM_MIN_MAX factorA, -$7FFF, $7FFF
+		STATIC_RANDOM_MIN_MAX factorB, -$7FFF, $7FFF
+
+		.word	.loword(factorA)
+		.word	.loword(factorB)
+		.dword	(factorA * factorB) & $FFFFFFFF
+	.endrepeat
+.code
+.endroutine
+
+
+.A8
+.I16
+.routine Multiply_S32_S16Y_S32XY
+	Process_Multiply_32_Table Math::Multiply_S32_S16Y_S32XY, Table
+
+.segment TABLE_BANK
+Table:
+	.repeat	MATH_REPEAT
+		STATIC_RANDOM_MIN_MAX factorA, -$7FFFFFFF, $7FFFFFFF
+		STATIC_RANDOM_MIN_MAX factorB, -$7FFF, $7FFF
+
+		.dword	factorA & $FFFFFFFF
+		.dword	.loword(factorB)
+		.dword	(factorA * factorB) & $FFFFFFFF
+	.endrepeat
+.code
+.endroutine
+
+
+.A8
+.I16
+.routine Multiply_U32_S16Y_32XY
+	Process_Multiply_32_Table Math::Multiply_U32_S16Y_32XY, Table
+
+.segment TABLE_BANK
+Table:
+	.repeat	MATH_REPEAT
+		STATIC_RANDOM_MIN_MAX factorA, 0, $FFFFFFFF
+		STATIC_RANDOM_MIN_MAX factorB, -$7FFF, $7FFF
+
+		.dword	factorA
+		.dword	.loword(factorB)
+		.dword	(factorA * factorB) & $FFFFFFFF
+	.endrepeat
+.code
+.endroutine
+
+
+.A8
+.I16
+.routine Multiply_U32_U16Y_U32XY
+	Process_Multiply_32_Table Math::Multiply_U32_U16Y_U32XY, Table
+
+.segment TABLE_BANK
+Table:
+	.repeat	MATH_REPEAT
+		STATIC_RANDOM_MIN_MAX factorA, 0, $FFFFFFFF
+		STATIC_RANDOM_MIN_MAX factorB, 0, $FFFF
+
+		.dword	factorA
+		.dword	factorB
+		.dword	(factorA * factorB) & $FFFFFFFF
+	.endrepeat
+.code
+.endroutine
+
+
+.A8
+.I16
+.routine Multiply_S32_U16Y_S32XY
+	Process_Multiply_32_Table Math::Multiply_S32_U16Y_S32XY, Table
+
+.segment TABLE_BANK
+Table:
+	.repeat	MATH_REPEAT
+		STATIC_RANDOM_MIN_MAX factorA, -$7FFFFFFF, $7FFFFFFF
+		STATIC_RANDOM_MIN_MAX factorB, 0, $FFFF
+
+		.dword	factorA & $FFFFFFFF
+		.dword	factorB
+		.dword	(factorA * factorB) & $FFFFFFFF
+	.endrepeat
+.code
+.endroutine
+
+
+.A8
+.I16
+.routine Multiply_U32_U32XY_U32XY
+	Process_Multiply_32_Table Math::Multiply_U32_U32XY_U32XY, Table
+
+.segment TABLE_BANK
+Table:
+	.repeat	MATH_REPEAT
+		STATIC_RANDOM_MIN_MAX factorA, 0, $FFFFFFFF
+		STATIC_RANDOM_MIN_MAX factorB, 0, $FFFFFFFF
+
+		.dword	factorA
+		.dword	factorB
+		.dword	(factorA * factorB) & $FFFFFFFF
+	.endrepeat
+.code
+.endroutine
+
+
+.A8
+.I16
+.routine Multiply_U32_S32XY_32XY
+	Process_Multiply_32_Table Math::Multiply_U32_S32XY_32XY, Table
+
+.segment TABLE_BANK
+Table:
+	.repeat	MATH_REPEAT
+		STATIC_RANDOM_MIN_MAX factorA, 0, $FFFFFFFF
+		STATIC_RANDOM_MIN_MAX factorB, -$7FFFFFFF, $7FFFFFFF
+
+		.dword	factorA
+		.dword	factorB & $FFFFFFFF
+		.dword	(factorA * factorB) & $FFFFFFFF
+	.endrepeat
+.code
+.endroutine
+
+
+.A8
+.I16
+.routine Multiply_S32_U32XY_32XY
+	Process_Multiply_32_Table Math::Multiply_S32_U32XY_32XY, Table
+
+.segment TABLE_BANK
+Table:
+	.repeat	MATH_REPEAT
+		STATIC_RANDOM_MIN_MAX factorA, -$7FFFFFFF, $7FFFFFFF
+		STATIC_RANDOM_MIN_MAX factorB, 0, $FFFFFFFF
+
+		.dword	factorA & $FFFFFFFF
+		.dword	factorB
+		.dword	(factorA * factorB) & $FFFFFFFF
+	.endrepeat
+.code
+.endroutine
+
+
+.A8
+.I16
+.routine Multiply_S32_S32XY_S32XY
+	Process_Multiply_32_Table Math::Multiply_S32_S32XY_S32XY, Table
+
+.segment TABLE_BANK
+Table:
+	.repeat	MATH_REPEAT
+		STATIC_RANDOM_MIN_MAX factorA, -$7FFFFFFF, $7FFFFFFF
+		STATIC_RANDOM_MIN_MAX factorB, -$7FFFFFFF, $7FFFFFFF
+
+		.dword	factorA & $FFFFFFFF
+		.dword	factorB & $FFFFFFFF
+		.dword	(factorA * factorB) & $FFFFFFFF
+	.endrepeat
+.code
+.endroutine
+
+
+.A8
+.I16
+.routine Multiply_U32XY_U8A_U32XY
+	Process_Multiply_32_Table Multiply_U32XY_U8A_U32XY_Caller, Table
+
+.segment TABLE_BANK
+Table:
+	.repeat	MATH_REPEAT
+		STATIC_RANDOM_MIN_MAX factorA, 0, $FFFFFFFF
+		STATIC_RANDOM_MIN_MAX factorB, 0, $FF
+
+		.dword	factorA
+		.dword	factorB
+		.dword	(factorA * factorB) & $FFFFFFFF
+	.endrepeat
+.code
+
+.A16
+.I16
+Multiply_U32XY_U8A_U32XY_Caller:
+	TYA
+	LDXY	Math::factor32
+	SEP	#$20
+.A8
+	JMP	Math::Multiply_U32XY_U8A_U32XY
+.endroutine
+
+
+.A8
+.I16
+.routine Multiply_S32XY_U8A_S32XY
+	Process_Multiply_32_Table Multiply_S32XY_U8A_S32XY_Caller, Table
+
+.segment TABLE_BANK
+Table:
+	.repeat	MATH_REPEAT
+		STATIC_RANDOM_MIN_MAX factorA, -$7FFFFFFF, $7FFFFFFF
+		STATIC_RANDOM_MIN_MAX factorB, 0, $FF
+
+		.dword	(factorA) & $FFFFFFFF
+		.dword	factorB
+		.dword	(factorA * factorB) & $FFFFFFFF
+	.endrepeat
+.code
+
+.A16
+.I16
+Multiply_S32XY_U8A_S32XY_Caller:
+	TYA
+	LDXY	Math::factor32
+	SEP	#$20
+.A8
+	JMP	Math::Multiply_S32XY_U8A_S32XY
+.endroutine
 
 
 .A8
 .I16
 .routine Divide_U16Y_U8A
-	.repeat	2
+	.repeat	4
 		STATIC_RANDOM_MIN_MAX dividend, $FF, $FFFF
 		STATIC_RANDOM_MIN_MAX divisor, 0, $FF
 
@@ -110,7 +573,7 @@ Failure:
 .routine Divide_U16Y_U16X
 	Process_Divide_16_Table Math::Divide_U16Y_U16X, Table
 
-.segment "BANK2"
+.segment TABLE_BANK
 Table:
 	; Test that divisors < 256 work
 	STATIC_RANDOM_MIN_MAX dividend, 0, $FFFF
@@ -143,7 +606,7 @@ Table:
 .routine Divide_S16Y_U16X
 	Process_Divide_16_Table Math::Divide_S16Y_U16X, Table
 
-.segment "BANK2"
+.segment TABLE_BANK
 Table:
 	.repeat	MATH_REPEAT
 		STATIC_RANDOM_MIN_MAX dividend, -$7FFF, $7FFF
@@ -168,7 +631,7 @@ Table:
 .routine Divide_U16Y_S16X
 	Process_Divide_16_Table Math::Divide_U16Y_S16X, Table
 
-.segment "BANK2"
+.segment TABLE_BANK
 Table:
 	.repeat	MATH_REPEAT
 		STATIC_RANDOM_MIN_MAX dividend, $FF, $FFFF
@@ -196,7 +659,7 @@ Table:
 .routine Divide_S16Y_S16X
 	Process_Divide_16_Table Math::Divide_S16Y_S16X, Table
 
-.segment "BANK2"
+.segment TABLE_BANK
 Table:
 	.repeat	MATH_REPEAT
 		STATIC_RANDOM_MIN_MAX dividend, -$7FFF, $7FFF
@@ -285,7 +748,7 @@ Failure:
 .routine Divide_U32_U32
 	Process_Divide_32_Table Math::Divide_U32_U32, Table
 
-.segment "BANK2"
+.segment TABLE_BANK
 Table:
 	.repeat	MATH_REPEAT
 		STATIC_RANDOM_MIN_MAX dividend, 1, $FFFFFFFF
@@ -302,7 +765,7 @@ Table:
 .routine Divide_S32_S32
 	Process_Divide_32_Table Math::Divide_S32_S32, Table
 
-.segment "BANK2"
+.segment TABLE_BANK
 Table:
 	.repeat	MATH_REPEAT
 		STATIC_RANDOM_MIN_MAX dividend, -$7FFFFFFF, $7FFFFFFF
@@ -381,7 +844,7 @@ Failure:
 	CLC
 	RTS
 
-.segment "BANK2"
+.segment TABLE_BANK
 Table:
 	.repeat	MATH_REPEAT
 		STATIC_RANDOM_MIN_MAX dividend, 1, $FFFFFFFF
@@ -435,6 +898,200 @@ Failure:
 	CLC
 	RTS
 .endroutine
+
+.code
+
+.proc GotoRoutinePtr
+	JMP	(routinePtr)
+.endproc
+
+
+; IN: X - table
+; IN: Y - routine
+.A8
+.proc _Process_Multiply_16_16_Table
+	.assert .bankbyte(*) & $7E < $30, error, "Can't access shadow"
+
+	LDA	#$7E
+	PHA
+	PLB
+
+	REP	#$30
+.A16
+.I16
+	STY	routinePtr
+
+	TXA
+	ADD	#MATH_REPEAT * .sizeof(Multiply_16_16_Table)
+	STA	endTable
+
+	TXA
+	REPEAT
+		STA	tablePos
+		TAX
+
+		LDA	f:tableBankOffset + Multiply_16_16_Table::factorY, X
+		TAY
+		LDA	f:tableBankOffset + Multiply_16_16_Table::factorX, X
+		TAX
+
+		PHP
+		JSR	GotoRoutinePtr
+		PLP
+
+		LDX	tablePos
+		TYA
+		CMP	f:tableBankOffset + Multiply_16_16_Table::result, X
+		BNE	Failure
+
+		TXA
+		ADD	#.sizeof(Multiply_16_16_Table)
+		CMP	endTable
+	UNTIL_GE
+
+	SEC
+	RTS
+
+Failure:
+	CLC
+	RTS
+.endproc
+
+
+; IN: X - table
+; IN: Y - routine
+.A8
+.proc _Process_Multiply_16_32_Table
+	.assert .bankbyte(*) & $7E < $30, error, "Can't access shadow"
+
+	LDA	#$7E
+	PHA
+	PLB
+
+	REP	#$30
+.A16
+.I16
+	STY	routinePtr
+
+	TXA
+	ADD	#MATH_REPEAT * .sizeof(Multiply_16_32_Table)
+	STA	endTable
+
+	TXA
+	REPEAT
+		STA	tablePos
+		TAX
+
+		LDA	f:tableBankOffset + Multiply_16_32_Table::factorY, X
+		TAY
+		LDA	f:tableBankOffset + Multiply_16_32_Table::factorX, X
+		TAX
+
+		PHP
+		JSR	GotoRoutinePtr
+		PLP
+
+		CPY	Math::product32
+		BNE	Failure
+		CPX	Math::product32 + 2
+		BNE	Failure
+
+		TXA
+		LDX	tablePos
+		CMP	f:tableBankOffset + Multiply_16_32_Table::result + 2, X
+		BNE	Failure
+
+		TYA
+		CMP	f:tableBankOffset + Multiply_16_32_Table::result, X
+		BNE	Failure
+
+		TXA
+		ADD	#.sizeof(Multiply_16_32_Table)
+		CMP	endTable
+	UNTIL_GE
+
+	SEC
+	RTS
+
+Failure:
+	CLC
+	RTS
+.endproc
+
+
+; IN: X - table
+; IN: Y - routine
+.A8
+.proc _Process_Multiply_32_Table
+	.assert .bankbyte(*) & $7E < $30, error, "Can't access shadow"
+
+	LDA	#$7E
+	PHA
+	PLB
+
+	REP	#$30
+.A16
+.I16
+	STY	routinePtr
+
+	TXA
+	ADD	#MATH_REPEAT * .sizeof(Multiply_32_Table)
+	STA	endTable
+
+	TXA
+	REPEAT
+		STA	tablePos
+		TAX
+
+		LDA	f:tableBankOffset + Multiply_32_Table::factor32, X
+		STA	Math::factor32
+		LDA	f:tableBankOffset + Multiply_32_Table::factor32 + 2, X
+		STA	Math::factor32 + 2
+
+		LDA	f:tableBankOffset + Multiply_32_Table::XY, X
+		TAY
+		LDA	f:tableBankOffset + Multiply_32_Table::XY + 2, X
+		TAX
+
+		PHP
+		JSR	GotoRoutinePtr
+		PLP
+
+		CPY	Math::product32
+		BNE	Failure
+		CPX	Math::product32 + 2
+		BNE	Failure
+
+		TXA
+		LDX	tablePos
+		CMP	f:tableBankOffset + Multiply_32_Table::result + 2, X
+		BNE	Failure
+
+		TYA
+		CMP	f:tableBankOffset + Multiply_32_Table::result, X
+		BNE	Failure
+
+		TXA
+		ADD	#.sizeof(Multiply_32_Table)
+		CMP	endTable
+	UNTIL_GE
+
+	SEC
+	RTS
+
+Failure:
+	CLC
+	RTS
+.endproc
+
+
+.segment TABLE_BANK
+	tableBankOffset = .bankbyte(*) << 16
+
+
+.delmacro Process_Multiply_16_16_Table
+.delmacro Process_Multiply_16_32_Table
+.delmacro Process_Multiply_32_Table
 
 .endmodule
 

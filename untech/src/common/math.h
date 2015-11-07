@@ -6,6 +6,9 @@
 .include "common/modules.inc"
 
 .importmodule Math
+	.importlabel product32
+	.importlabel factor32
+
 
 	.importlabel dividend32
 	.importlabel divisor32
@@ -15,7 +18,147 @@
 
 	;; Multiplication
 
-	;;; ::TODO multiplication::
+	;;; Mutliply an 8 bit unsigned integer by an 8 bit unsigned integer
+	;;;
+	;;; REQUIRES: nothing
+	;;;
+	;;; INPUT:
+	;;;	Y: unsigned integer (only low 8 bits are used)
+	;;;	X: unsigned integer (only low 8 bit are used)
+	;;;
+	;;; OUTPUT:
+	;;;	Y: result (8 or 16 bits depending on Index size)
+	.importroutine Multiply_U8Y_U8X_UY
+
+
+	;;; Mutliply a 16 bit integer by an 8 bit unsigned integer
+	;;;
+	;;; REQUIRES: 8 bit A, 16 bit Index
+	;;;
+	;;; INPUT:
+	;;;	Y: 16 bit integer
+	;;;	A: 8 bit unsigned integer
+	;;;
+	;;; OUTPUT:
+	;;;	Y: 16 bit product
+	.importroutine Multiply_U16Y_U8A_U16Y
+	Multiply_S16Y_U8A_S16Y := Multiply_U16Y_U8A_U16Y
+
+
+	;;; Mutliply a 16 bit unsigned integer by an 8 bit unsigned integer, resulting in a 32 bit unsigned integer
+	;;;
+	;;; REQUIRES: 8 bit A, 16 bit Index, DB access shadow
+	;;;
+	;;; INPUT:
+	;;;	Y: 16 bit unsigned integer
+	;;;	A: 8 bit unsigned integer
+	;;;
+	;;; OUTPUT:
+	;;;	XY: 32 bit unsigned product
+	;;;	product32: 32 bit unsigned product
+	.importroutine Multiply_U16Y_U8A_U32XY
+	Multiply_U16Y_U8A_U32 := Multiply_U16Y_U8A_U32XY
+
+
+	;;; Multiply two 16 bit integers.
+	;;;
+	;;; The signs of the inputs and ouputs are in the parameters.
+	;;;
+	;;; REQUIRES: nothing, reccomend 16 bit Index, DB access shadow
+	;;;
+	;;; INPUT:
+	;;;	Y: 16 bit factor
+	;;;	X: 16 bit factor
+	;;;
+	;;; OUTPUT:
+	;;;	Y: 16 bit product
+	.importroutine Multiply_U16Y_U16X_U16Y
+	Multiply_U16Y_S16X_16Y := Multiply_U16Y_U16X_U16Y
+	Multiply_S16Y_U16X_16Y := Multiply_U16Y_U16X_U16Y
+	Multiply_S16Y_S16X_S16Y := Multiply_U16Y_U16X_U16Y
+
+
+	;;; Multiply two 16 bit integers resulting in a 32 integer.
+	;;;
+	;;; The signs of the inputs and ouputs are in the parameters.
+	;;;
+	;;; REQUIRES: 16 bit Index, DB access shadow
+	;;;
+	;;; INPUT:
+	;;;	Y: 16 bit factor
+	;;;	X: 16 bit factor
+	;;;
+	;;; OUTPUT:
+	;;;	XY: 32 bit product
+	;;;	product32: 32 bit product
+	.importroutine Multiply_U16Y_U16X_U32XY
+	Multiply_U16Y_U16X_U32 := Multiply_U16Y_U16X_U32XY
+	Multiply_U16Y_S16X_32XY := Multiply_U16Y_U16X_U32XY
+	.importroutine Multiply_S16Y_S16X_S32XY
+	Multiply_S16Y_S16X_S32 := Multiply_U16Y_U16X_U32XY
+
+
+
+	;;; Multiply a 32 bit integer by a 16 bit integer
+	;;;
+	;;; The signs of the inputs and ouputs are in the parameters.
+	;;;
+	;;; REQUIRES: 16 bit Index, DB access shadow
+	;;;
+	;;; INPUT:
+	;;; 	factor32: 32 bit factor
+	;;;	Y: 16 bit factor
+	;;;
+	;;; OUTPUT:
+	;;;	XY: 32 bit product
+	;;;	product32: 32 bit product
+	.importroutine Multiply_U32_U16Y_U32XY
+	Multiply_U32_U16Y_U32 := Multiply_U32_U16Y_U32XY
+	Multiply_S32_U16Y_S32 := Multiply_U32_U16Y_U32XY
+	Multiply_S32_U16Y_S32XY := Multiply_U32_U16Y_U32XY
+	.importroutine Multiply_S32_S16Y_S32XY
+	Multiply_S32_S16Y_S32 := Multiply_S32_S16Y_S32XY
+	Multiply_U32_S16Y_32XY := Multiply_S32_S16Y_S32XY
+	Multiply_U32_S16Y_32 := Multiply_S32_S16Y_S32XY
+
+
+	;;; Multiply a 32 bit integer by another 32 bit integer.
+	;;;
+	;;; REQUIRES: 16 bit Index, DB access shadow
+	;;;
+	;;; INPUT:
+	;;;	factor32: 32 bit factor
+	;;;	XY: 32 bit factor (Y = loword)
+	;;;
+	;;; OUTPUT:
+	;;;	XY: 32 bit product
+	;;;	product32: 32 bit product
+	.importroutine Multiply_U32_U32XY_U32XY
+	Multiply_U32_U32XY_U32 := Multiply_U32_U32XY_U32XY
+	Multiply_U32_S32XY_32XY := Multiply_U32_U32XY_U32XY
+	Multiply_U32_S32XY_32 := Multiply_U32_U32XY_U32XY
+	Multiply_S32_U32XY_32XY := Multiply_U32_U32XY_U32XY
+	Multiply_S32_U32XY_32 := Multiply_U32_U32XY_U32XY
+	Multiply_S32_S32XY_S32XY := Multiply_U32_U32XY_U32XY
+	Multiply_S32_S32XY_S32 := Multiply_U32_U32XY_U32XY
+
+
+	;;; Mutliply a 32 bit integer by an 8 bit unsigned integer
+	;;;
+	;;; REQUIRES: 16 bit Index, DB access shadow
+	;;;
+	;;; INPUT:
+	;;;	XY: 32 bit factor (Y loword)
+	;;;	A: 8 bit unsigned factor
+	;;;
+	;;; OUTPUT:
+	;;;	XY: 32 bit product
+	;;;	product32: 32 bit product
+	.importroutine Multiply_U32XY_U8A_U32XY
+	Multiply_U32XY_U8A_U32 := Multiply_U32XY_U8A_U32XY
+	Multiply_S32XY_U8A_S32XY := Multiply_U32XY_U8A_U32XY
+	Multiply_S32XY_U8A_S32 := Multiply_U32XY_U8A_U32XY
+
 
 
 	;; Division
