@@ -39,7 +39,7 @@
 	EndUnitTestHeader
 
 
-.define MATH_REPEAT 10
+.define MATH_REPEAT 100
 .define TABLE_BANK "BANK2"
 
 .segment "SHADOW"
@@ -67,6 +67,27 @@
 	result		.dword
 .endstruct
 
+.struct Divide_16_Table
+	dividend	.addr
+	divisor		.addr
+	result		.addr
+	remainder	.addr
+.endstruct
+
+.struct Divide_32_8_Table
+	dividend32	.dword
+	divisor		.byte
+	result32	.dword
+	remainder	.byte
+.endstruct
+
+.struct Divide_32_Table
+	dividend32	.dword
+	divisor32	.dword
+	result32	.dword
+	remainder32	.dword
+.endstruct
+
 .macro Process_Multiply_16_16_Table routine, table
 	LDX	#.loword(table)
 	LDY	#.loword(routine)
@@ -85,9 +106,21 @@
 	JMP	_Process_Multiply_32_Table
 .endmacro
 
+.macro	Process_Divide_16_Table routine, table
+	LDX	#.loword(table)
+	LDY	#.loword(routine)
+	JMP	_Process_Divide_16_Table
+.endmacro
+
+.macro	Process_Divide_32_Table routine, table
+	LDX	#.loword(table)
+	LDY	#.loword(routine)
+	JMP	_Process_Divide_32_Table
+.endmacro
 
 
 .code
+
 
 .A8
 .I16
@@ -496,7 +529,7 @@ Multiply_S32XY_U8A_S32XY_Caller:
 .routine Divide_U16Y_U8A
 	.repeat	4
 		STATIC_RANDOM_MIN_MAX dividend, $FF, $FFFF
-		STATIC_RANDOM_MIN_MAX divisor, 0, $FF
+		STATIC_RANDOM_MIN_MAX divisor, 1, $FF
 
 		LDY	#dividend
 		LDA	#divisor
@@ -517,55 +550,6 @@ Failure:
 	RTS
 .endroutine
 
-
-
-.struct Divide_16_Table
-	dividend	.addr
-	divisor		.addr
-	result		.addr
-	remainder	.addr
-.endstruct
-
-
-.macro	Process_Divide_16_Table routine, table
-	.local Failure
-
-	REP	#$30
-.A16
-.I16
-	LDA	#(MATH_REPEAT - 1) * .sizeof(Divide_16_Table)
-
-	REPEAT
-		STA	tablePos
-		TAX
-
-		LDA	f:table + Divide_16_Table::dividend, X
-		TAY
-		LDA	f:table + Divide_16_Table::divisor, X
-		TAX
-
-		JSR	routine
-
-		TXA
-		LDX	tablePos
-		CMP	f:table + Divide_16_Table::remainder, X
-		BNE	Failure
-
-		TYA
-		CMP	f:table + Divide_16_Table::result, X
-		BNE	Failure
-
-		TXA
-		SUB	#.sizeof(Divide_16_Table)
-	UNTIL_MINUS
-
-	SEC
-	RTS
-
-Failure:
-	CLC
-	RTS
-.endmacro
 
 
 .A8
@@ -615,7 +599,7 @@ Table:
 		.word	.loword(dividend)
 		.word	.loword(divisor)
 		.word	.loword(dividend / divisor)
-		.if dividend .mod divisor > 0
+		.if (dividend .mod divisor) > 0
 			.word	.loword(dividend .mod divisor)
 		.else
 			.word	.loword(-(dividend .mod divisor))
@@ -681,70 +665,9 @@ Table:
 .code
 .endroutine
 
-.delmacro Process_Divide_16_Table
 
-.struct Divide_32_Table
-	dividend32	.dword
-	divisor32	.dword
-	result32	.dword
-	remainder32	.dword
-.endstruct
-
-
-.macro	Process_Divide_32_Table routine, table
-	.local Failure
-
-	REP	#$30
-.A16
+.A8
 .I16
-	LDA	#(MATH_REPEAT - 1) * .sizeof(Divide_32_Table)
-
-	REPEAT
-		STA	tablePos
-		TAX
-
-		LDA	f:table + Divide_32_Table::dividend32, X
-		STA	Math::dividend32
-		LDA	f:table + Divide_32_Table::dividend32 + 2, X
-		STA	Math::dividend32 + 2
-
-		LDA	f:table + Divide_32_Table::divisor32, X
-		STA	Math::divisor32
-		LDA	f:table + Divide_32_Table::divisor32 + 2, X
-		STA	Math::divisor32 + 2
-
-		JSR	routine
-
-		LDX	tablePos
-		LDA	Math::result32
-		CMP	f:table + Divide_32_Table::result32, X
-		BNE	Failure
-
-		LDA	Math::result32 + 2
-		CMP	f:table + Divide_32_Table::result32 + 2, X
-		BNE	Failure
-
-		LDA	Math::remainder32
-		CMP	f:table + Divide_32_Table::remainder32, X
-		BNE	Failure
-
-		LDA	Math::remainder32 + 2
-		CMP	f:table + Divide_32_Table::remainder32 + 2, X
-		BNE	Failure
-
-		TXA
-		SUB	#.sizeof(Divide_32_Table)
-	UNTIL_MINUS
-
-	SEC
-	RTS
-
-Failure:
-	CLC
-	RTS
-.endmacro
-
-
 .routine Divide_U32_U32
 	Process_Divide_32_Table Math::Divide_U32_U32, Table
 
@@ -762,6 +685,9 @@ Table:
 .code
 .endroutine
 
+
+.A8
+.I16
 .routine Divide_S32_S32
 	Process_Divide_32_Table Math::Divide_S32_S32, Table
 
@@ -787,18 +713,9 @@ Table:
 .code
 .endroutine
 
-.delmacro Process_Divide_32_Table
 
-
-
-.struct Divide_32_8_Table
-	dividend32	.dword
-	divisor		.byte
-	result32	.dword
-	remainder	.byte
-.endstruct
-
-
+.A8
+.I16
 .routine Divide_U32_U8A
 	REP	#$30
 .A16
@@ -857,6 +774,7 @@ Table:
 	.endrepeat
 .code
 .endroutine
+
 
 .A8
 .I16
@@ -1085,6 +1003,130 @@ Failure:
 .endproc
 
 
+; IN: X - table
+; IN: Y - routine
+.A8
+.proc _Process_Divide_16_Table
+	.assert .bankbyte(*) & $7E < $30, error, "Can't access shadow"
+
+	LDA	#$7E
+	PHA
+	PLB
+
+	REP	#$30
+.A16
+.I16
+	STY	routinePtr
+
+	TXA
+	ADD	#MATH_REPEAT * .sizeof(Divide_16_Table)
+	STA	endTable
+
+	TXA
+	REPEAT
+		STA	tablePos
+		TAX
+
+		LDA	f:tableBankOffset + Divide_16_Table::dividend, X
+		TAY
+		LDA	f:tableBankOffset + Divide_16_Table::divisor, X
+		TAX
+
+		PHP
+		JSR	GotoRoutinePtr
+		PLP
+
+		TXA
+		LDX	tablePos
+		CMP	f:tableBankOffset + Divide_16_Table::remainder, X
+		BNE	Failure
+
+		TYA
+		CMP	f:tableBankOffset + Divide_16_Table::result, X
+		BNE	Failure
+
+		TXA
+		ADD	#.sizeof(Divide_16_Table)
+		CMP	endTable
+	UNTIL_GE
+
+	SEC
+	RTS
+
+Failure:
+	CLC
+	RTS
+.endproc
+
+
+; IN: X - table
+; IN: Y - routine
+.A8
+.proc	_Process_Divide_32_Table
+	.assert .bankbyte(*) & $7E < $30, error, "Can't access shadow"
+
+	LDA	#$7E
+	PHA
+	PLB
+
+	REP	#$30
+.A16
+.I16
+	STY	routinePtr
+
+	TXA
+	ADD	#MATH_REPEAT * .sizeof(Divide_32_Table)
+	STA	endTable
+
+	TXA
+	REPEAT
+		STA	tablePos
+		TAX
+
+		LDA	f:tableBankOffset + Divide_32_Table::dividend32, X
+		STA	Math::dividend32
+		LDA	f:tableBankOffset + Divide_32_Table::dividend32 + 2, X
+		STA	Math::dividend32 + 2
+
+		LDA	f:tableBankOffset + Divide_32_Table::divisor32, X
+		STA	Math::divisor32
+		LDA	f:tableBankOffset + Divide_32_Table::divisor32 + 2, X
+		STA	Math::divisor32 + 2
+
+		PHP
+		JSR	GotoRoutinePtr
+		PLP
+
+		LDX	tablePos
+		LDA	Math::result32
+		CMP	f:tableBankOffset + Divide_32_Table::result32, X
+		BNE	Failure
+
+		LDA	Math::result32 + 2
+		CMP	f:tableBankOffset + Divide_32_Table::result32 + 2, X
+		BNE	Failure
+
+		LDA	Math::remainder32
+		CMP	f:tableBankOffset + Divide_32_Table::remainder32, X
+		BNE	Failure
+
+		LDA	Math::remainder32 + 2
+		CMP	f:tableBankOffset + Divide_32_Table::remainder32 + 2, X
+		BNE	Failure
+
+		TXA
+		ADD	#.sizeof(Divide_32_Table)
+		CMP	endTable
+	UNTIL_GE
+
+	SEC
+	RTS
+
+Failure:
+	CLC
+	RTS
+.endproc
+
 .segment TABLE_BANK
 	tableBankOffset = .bankbyte(*) << 16
 
@@ -1092,6 +1134,8 @@ Failure:
 .delmacro Process_Multiply_16_16_Table
 .delmacro Process_Multiply_16_32_Table
 .delmacro Process_Multiply_32_Table
+.delmacro Process_Divide_16_Table
+.delmacro Process_Divide_32_Table
 
 .endmodule
 
