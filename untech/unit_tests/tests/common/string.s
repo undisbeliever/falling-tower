@@ -1,3 +1,11 @@
+; Unit tests modules
+
+.include "common/config.inc"
+.include "common/modules.inc"
+.include "common/structure.inc"
+.include "common/registers.inc"
+.include "tests/tests.h"
+.include "tests/static-random.inc"
 
 .include "common/string.h"
 

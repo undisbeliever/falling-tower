@@ -39,7 +39,6 @@ obj/tests/%.o: tests/%.s
 	ca65 -I . -I $(UNTECH_DIR) -o $@ $<
 
 obj/tests/font.o: $(wildcard resources/*)
-obj/tests/test-modules.o: $(wildcard $(TEST_DIR)/*/*.asm $(TEST_DIR)/*/*/*.asm)
 
 
 .PHONY: dirs

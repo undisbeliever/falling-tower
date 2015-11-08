@@ -9,8 +9,6 @@
 .include "common/console.h"
 .include "font.h"
 
-.import TestModuleTable, TestModuleTable_End
-
 .setcpu "65816"
 
 .segment "SHADOW"
@@ -20,6 +18,10 @@
 	previousCursor:		.res 2
 .code
 
+.import __TEST_MODULE_TABLE_SIZE__
+.import __TEST_MODULE_TABLE_LOAD__
+
+TestModuleTable := __TEST_MODULE_TABLE_LOAD__
 
 .routine RunTests
 	REP	#$30
@@ -146,7 +148,7 @@
 		LDX	moduleTablePos
 		INX
 		INX
-		CPX	#TestModuleTable_End - TestModuleTable
+		CPX	#__TEST_MODULE_TABLE_SIZE__
 	UNTIL_GE
 
 
