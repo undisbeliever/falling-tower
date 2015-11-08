@@ -37,6 +37,13 @@
 	.importlabel tilemapOffset, abs
 
 
+	;; location of the cursor in bytes
+	;; Should not edit this directly, instead can be saved/loaded
+	;; to create stack functionity
+	;; (word)
+	.importlabel cursor
+
+
 	;; Initializes the text module
 	;;  * Resets the margins
 	;;  * Clears the buffer

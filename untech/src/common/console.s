@@ -59,6 +59,7 @@ CONFIG CONSOLE_LAST_CHARACTER, 144
 	buffer:		.res CONSOLE_WIDTH * CONSOLE_HEIGHT * 2
 	buffer_size	= CONSOLE_WIDTH * CONSOLE_HEIGHT * 2
 
+.exportlabel cursor
 .exportlabel buffer, far
 .exportconst buffer_size, abs
 .exportlabel tilemapOffset, abs

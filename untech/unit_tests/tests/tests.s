@@ -14,9 +14,10 @@
 .setcpu "65816"
 
 .segment "SHADOW"
-
-	moduleTablePos:	.res 2
-	headerPos:	.res 2
+	moduleTablePos:		.res 2
+	headerPos:		.res 2
+	functionStringPtr:	.res 2
+	previousCursor:		.res 2
 .code
 
 
@@ -73,7 +74,7 @@
 			LDA	f:rodataBank << 16 + UnitTestRoutineHeader::name, X
 
 		WHILE_NOT_ZERO
-			PHA
+			STA	functionStringPtr
 
 			SEP	#$20
 .A8
@@ -86,10 +87,12 @@
 			LDA	#' '
 			JSR	Console::PrintChar
 
-			LDA	#stringBank
-			PLX
-			JSR	Console::PrintString
+			LDX	Console::cursor
+			STX	previousCursor
 
+			LDA	#stringBank
+			LDX	functionStringPtr
+			JSR	Console::PrintString
 
 			LDX	headerPos
 			JSR	(UnitTestRoutineHeader::routinePtr, X)
@@ -107,11 +110,16 @@
 			PHA
 			PLB
 
+			LDX	previousCursor
+			STX	Console::cursor
+
 			IF_C_CLEAR
 				LDA	#Font::RED
 				JSR	Console::SetColor
 
-				CPrintString " FAIL"
+				LDA	#stringBank
+				LDX	functionStringPtr
+				JSR	Console::PrintString
 
 				; ::TODO print address of routine for debugging purposes::
 				REPEAT
@@ -120,7 +128,9 @@
 				LDA	#Font::GREEN
 				JSR	Console::SetColor
 
-				CPrintString " PASS"
+				LDA	#stringBank
+				LDX	functionStringPtr
+				JSR	Console::PrintString
 			ENDIF
 
 			REP	#$31		; include carry for ADC
