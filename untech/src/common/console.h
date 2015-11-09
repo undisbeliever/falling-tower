@@ -43,6 +43,13 @@
 	;; (word)
 	.importlabel cursor
 
+	;; When 0:
+	;;	Screen is scrolled upwards when the cursor reaches the end
+	;; When non-zero:
+	;;	Cursor wraps to start of margin
+	;; (byte)
+	.importlabel scrollScreenOnZero
+
 
 	;; Initializes the text module
 	;;  * Resets the margins
@@ -77,8 +84,15 @@
 
 	;; Prints a newline
 	;; Will also clear the new line of text
+	;; If this is the last line and `scrollScreenOnZero` is zero then
+	;; the screen is scrolled up one line
 	;; REQUIRES: 8 bit A, 16 bit Index, DB access shadow
 	.importroutine NewLine
+
+	;; Scrolls the screen up one line
+	;; Cursor will also move up one line
+	;; REQUIRES: DB access shadow
+	.importroutine ScrollUp
 
 	;; Prints a single character to the console
 	;; REQUIRES: 8 bit A, 16 bit Index, DB access shadow

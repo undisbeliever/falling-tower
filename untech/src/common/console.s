@@ -45,14 +45,22 @@ CONFIG CONSOLE_LAST_CHARACTER, 144
 	;; The current position (byte address) of the buffer
 	cursor:		.res 2
 
-
 	;; The index of the end of the current line
 	endOfLine:	.res 2
+
+	;; When 0:
+	;;	Screen is scrolled upwards when the cursor reaches the end
+	;; When non-zero:
+	;;	Cursor wraps to start of margin
+	scrollScreenOnZero:	.res 1
 
 	;; This word is appended to each character to convert it into a tileset
 	;; It represents the ' ' character in a fixed tileset
 	;; Bits 10-12 are also used to set the text color (palette).
 	tilemapOffset:	.res 2
+
+
+	tmp1:		.res 2
 
 
 .segment "WRAM7E"
@@ -63,6 +71,7 @@ CONFIG CONSOLE_LAST_CHARACTER, 144
 .exportlabel buffer, far
 .exportconst buffer_size, abs
 .exportlabel tilemapOffset, abs
+.exportlabel scrollScreenOnZero
 
 
 EOL = Console::EOL
@@ -85,6 +94,7 @@ CURSOR_YMASK = $FFFF - CURSOR_XMASK
 	STX	endMargin
 
 	LDX	#0
+	STZ	scrollScreenOnZero	; doesn't matter if A=16
 	STX	tilemapOffset
 
 	.assert * = Clear, error, "Bad Flow"
@@ -219,14 +229,95 @@ CURSOR_YMASK = $FFFF - CURSOR_XMASK
 .endroutine
 
 
+.routine ScrollUp
+	PHP
+	PHB
+
+tmpBytesToCopy = endOfLine
+tmpEndBlock = cursor
+tmpCurrent	= tmp1
+
+	REP	#$30
+.A16
+.I16
+	; Location of line to copy to
+	LDA	cursor
+	PHA
+	EOR	startMargin
+	AND	#CURSOR_YMASK
+	EOR	startMargin
+	ADD	#.loword(buffer)
+	STA	tmpEndBlock
+
+
+	; Number of bytes to copy per line
+	LDA	endMargin
+	SUB	startMargin
+	AND	#CURSOR_XMASK
+	DEC
+	STA	tmpBytesToCopy
+
+	; Starting address
+	LDA	startMargin
+	ADD	#.loword(buffer)
+	STA	tmpCurrent
+
+	REPEAT
+		LDA	tmpCurrent
+		TAY
+		ADD	#64
+		STA	tmpCurrent
+		TAX
+		LDA	tmpBytesToCopy
+		MVN	.bankbyte(buffer), .bankbyte(buffer)
+
+		CPX	tmpEndBlock
+	UNTIL_GE
+
+	; Clear the last line
+	LDA	#' ' - CONSOLE_ASCII_DELTA
+	ADD	tilemapOffset
+	STA	f:buffer, X
+
+	LDX	#.loword(buffer)
+	TXY
+	INY
+	INY
+	LDA	tmpBytesToCopy
+	DEC
+	DEC
+	MVN	.bankbyte(buffer), .bankbyte(buffer)
+
+	PLA
+	SUB	#64
+	CMP	startMargin
+	IF_MINUS
+		LDA	startMargin
+	ENDIF
+	STA	cursor
+
+	EOR	endMargin
+	AND	#CURSOR_YMASK
+	EOR	endMargin
+	STA	endOfLine
+
+	PLB
+	PLP
+.endroutine
+
+
 
 .A8
 .I16
 .routine NewLine
-	; cursor += 64
-	; if cursor >= endMargin:
-	;	cursor = startMargin
+	; if cursor + 64 >= endMargin:
+	;	if scrollScreenOnZero:
+	;	 	cursor = (cursor & CURSOR_YMASK) | (startMargin & ~CURSOR_YMASK)
+	;		return ScrollUp()
+	;	else:
+	;		cursor = startMargin
 	; else
+	;	cursor += 64
 	; 	cursor = (cursor & CURSOR_YMASK) | (startMargin & ~CURSOR_YMASK)
 	; endOfLine = (cursor & CURSOR_YMASK) | (endMargin & ~CURSOR_YMASK)
 
@@ -236,6 +327,20 @@ CURSOR_YMASK = $FFFF - CURSOR_XMASK
 	ADD	#64
 	CMP	endMargin
 	IF_GE
+		LDA	scrollScreenOnZero
+		AND	#$00FF
+		IF_EQ
+			; Move cursor to start of margin
+			; ScrollUp will move cursor up one line
+			LDA	cursor
+			EOR	startMargin
+			AND	#CURSOR_YMASK
+			EOR	startMargin
+			STA	cursor
+
+			JMP	ScrollUp
+		ENDIF
+
 		LDA	startMargin
 	ELSE
 		EOR	startMargin
@@ -254,6 +359,7 @@ CURSOR_YMASK = $FFFF - CURSOR_XMASK
 
 	; Clear the next line
 	LDA	#' ' - CONSOLE_ASCII_DELTA
+	ADD	tilemapOffset
 	REPEAT
 		STA	f:buffer, X
 		INX
