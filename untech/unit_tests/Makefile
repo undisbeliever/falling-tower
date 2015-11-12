@@ -15,6 +15,7 @@ TEST_INC    = $(wildcard $(TEST_DIR)/*.h)
 TEST_INC   += $(wildcard $(TEST_DIR)/*.inc)
 SRC_INC     = $(wildcard $(UNTECH_DIR)/*/*.h $(UNTECH_DIR)/*/*/*.h)
 SRC_INC    += $(wildcard $(UNTECH_DIR)/*/*.inc $(UNTECH_DIR)/*/*/*.inc)
+SRC_INC    += $(wildcard $(UNTECH_DIR)/*/*.asm $(UNTECH_DIR)/*/*/*.asm)
 
 OBJECT_DIRS = $(sort $(dir $(UNTECH_OBJ) $(TEST_OBJ)))
 

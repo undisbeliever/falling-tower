@@ -7,7 +7,6 @@
 
 .setcpu "65816"
 
-
 ; The Renderer assumes:
 ;	* The sprites are 8x8 and 16x16
 ;	* The screen size is 256x224
@@ -21,18 +20,10 @@
 ;
 ; [1] http://forums.nesdev.com/viewtopic.php?p=92234#p92234
 
-.module MetaSprite
-
-.segment METASPRITE_FRAME_DATA_BLOCK
-	frameDataOffset = .bankbyte(*) << 16
-
-.segment METASPRITE_FRAME_OBJECTS_BLOCK
-	fobjDataOffset	= .bankbyte(*) << 16
-
 
 .exportlabel xPos
 .exportlabel yPos
-.exportlabel updateBufferOnZero
+.exportlabel updateOamBufferOnZero
 .exportlabel oamBuffer, far
 .assert oamHiBuffer = oamBuffer + 128 * 4, error, "Bad Alignment"
 
@@ -41,15 +32,9 @@ FRAME_CHARATTR_SIZEBIT	= $0100
 FRAME_CHARATTR_BLOCKBIT	= $0020
 FRAME_CHARATTR_MASK	= $F01F
 
-; ::DEBUG::
-; ::TODO make it entity::metaSpriteState in the future::
-.export MetaSpriteDpOffset = 0
-.define MSDP MetaSpriteDpOffset + MetaSpriteStruct
-
-
 
 .segment "SHADOW"
-	updateBufferOnZero:	.res 1
+	updateOamBufferOnZero:	.res 1
 
 .segment "WRAM7E"
 	oamBuffer:		.res 128 * 4
@@ -66,15 +51,17 @@ FRAME_CHARATTR_MASK	= $F01F
 	yPos		:= xposBuffer + 2*4 + 2
 
 	tmp1		:= xposBuffer + 3*4 + 2
-
-
+	tmp2		:= xposBuffer + 3*4 + 2
+	tmp3		:= xposBuffer + 3*4 + 2
 .code
 
 
 ; DB = $7E
+.A16
 .I16
-.routine Init
-
+.macro Init__Render
+	SEP	#$20
+.A8
 	; Reset the xPosBuffer - prevent possible bugs
 	LDX	#127 * 4
 	REPEAT
@@ -85,8 +72,12 @@ FRAME_CHARATTR_MASK	= $F01F
 		DEX
 	UNTIL_MINUS
 
-	RTS
-.endroutine
+	LDA	#1
+	STA	updateOamBufferOnZero
+
+	REP	#$20
+.A16
+.endmacro
 
 
 ; DB = $7E
@@ -96,42 +87,19 @@ FRAME_CHARATTR_MASK	= $F01F
 .A8
 	; Prevent VBlank from copying a bad sprite state
 	LDA	#$FF
-	STA	updateBufferOnZero
+	STA	updateOamBufferOnZero
 	REP	#$20
 .A16
 
 	STZ	bufferPos
 
+::RenderFrame_Return:
 	RTS
 .endroutine
 
 
 ; INPUT:
-; A: MetaSprite__State address
-; xPos: sprite.xPos - POSITION_OFFSET
-; yPos: sprite.yPos - POSITION_OFFSET
-; DB = $7E
-.A16
-.I16
-.routine RenderFrame_A
-	; Faster to do this then to store the three
-	; required variables to tmp.
-
-	PHD
-	SEC
-	SBC	#MetaSpriteDpOffset
-	TCD
-
-	JSR	RenderFrame
-
-	PLD
-::Return:
-	RTS
-.endroutine
-
-
-; INPUT:
-; DP: MetaSprite__State address - MetaSpriteDpOffset
+; DP: MetaSpriteStruct address - MetaSpriteDpOffset
 ; xPos: sprite.xPos - POSITION_OFFSET
 ; yPos: sprite.yPos - POSITION_OFFSET
 ; DB = $7E
@@ -143,12 +111,12 @@ nObjectsLeft := tmp1
 
 	LDX	z:MSDP::currentFrame
 	LDA	f:frameDataOffset + MetaSprite__Frame::frameObjectsList, X
-	BEQ	Return
+	BEQ	RenderFrame_Return
 	TAX
 
 	LDA	f:fobjDataOffset + MetaSprite__FrameObjectsList::count, X
 	AND	#$001F
-	BEQ	Return
+	BEQ	RenderFrame_Return
 	STA	nObjectsLeft
 
 	; Do a single buffer overflow check here instead of muliple ones in the loop
@@ -157,7 +125,7 @@ nObjectsLeft := tmp1
 	; carry clear
 	ADC	bufferPos
 	CMP	#128 * 4 + 1
-	BGE	Return
+	BGE	RenderFrame_Return
 
 	INX
 	LDY	bufferPos
@@ -322,12 +290,10 @@ SkipHiTable:
 		UNTIL_GE
 	ENDIF
 
-	STZ	updateBufferOnZero
+	STZ	updateOamBufferOnZero
 
 	REP	#$30
 .A16
 	RTS
 .endroutine
-
-.endmodule
 

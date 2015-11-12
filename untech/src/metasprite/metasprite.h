@@ -9,7 +9,15 @@
 
 .setcpu "65816"
 
+
+METASPRITE_STATUS_PALETTE_SET_FLAG	= %10000000
+
 .struct MetaSpriteStruct
+	;; The state of the metasprite
+	;; 	%p0000000
+	;;
+	;; p: palette set
+	status			.byte
 	currentFrame		.addr
 	blockOneCharAttrOffset	.word
 	blockTwoCharAttrOffset	.word
@@ -47,54 +55,107 @@
 
 
 	;; When zero, load the buffer into OAM during VBlank
-	;; When buffer is loaded, set this variabel to non-zero
+	;; When buffer is copied, the variable is set to non-zero
 	;; (byte, shadow)
-	.importlabel updateBufferOnZero
+	.importlabel updateOamBufferOnZero
 
 	;; The buffer to load into OAM
 	;; (oamBuffer_size bytes, WRAM7E)
-	.importlabel oamBuffer
+	.importlabel oamBuffer, far
 	oamBuffer_size = 128 * 4 + 128 / 4
 
+
+	;; When zero, load the palette buffer into CGRAM during VBlank
+	;; When buffer is copied, the variable is set to non-zero
+	;; (byte, shadow)
+	.importlabel updatePaletteBufferOnZero
+
+	;; The buffer to load into CGRAM for the sprite palettes
+	;; (paletteBuffer_size bytes, WRAM7E)
+	.importlabel paletteBuffer, far
+	paletteBuffer_size = 32 * 8
 
 
 
 	;; Initialize the metasprite module
 	;;
-	;; REQUIRES: 16 bit Index, DB = $7E
+	;; REQUIRES: 16 bit A, 16 bit Index, DB = $7E
 	.importroutine Init
 
 
-	;; Start a render loop
-	;;
-	;; REQUIRES: 16 bit A, DB = $7E
+	;; Palettes
+	;; ========
+
+	;;; Sets the palette of a metasprite.
+	;;;
+	;;; REQUIRES: 16 bit A, 16 bit Index, DB = $7E
+	;;;
+	;;; INPUT:
+	;;;	DP: MetaSpriteStruct address - MetaSpriteDpOffset
+	;;;	A: palette address in METASPRITE_PALETTE_DATA_BLOCK
+	;;;	   points to the 15 colors in metasprite
+	;;;	   MUST not be NULL
+	;;;
+	;;; OUTPUT: C set if succeeded
+	.importroutine SetPaletteAddress
+
+	;;; Removes the palette from the metasprite
+	;;;
+	;;; This function should not be called directly,
+	;;; instead you should call `Deactive` ::CHECK name::
+	;;;
+	;;; REQUIRES: 16 bit A, 16 bit Index, DB = $7E
+	;;;
+	;;; INPUT:
+	;;;	DP: MetaSpriteStruct address - MetaSpriteDpOffset
+	.importroutine RemovePalette
+
+	;;; Retrieves the palette of a metasprite.
+	;;;
+	;;; REQUIRES: 16 bit A, 16 bit Index, DB = $7E
+	;;;
+	;;; INPUT:
+	;;;	DP: MetaSpriteStruct address - MetaSpriteDpOffset
+	;;;
+	;;; RETURN:
+	;;;	A: palette address in METASPRITE_PALETTE_DATA_BLOCK
+	;;;	   points to the 15 colors in metasprite
+	;;;	   NULL (0) if metasprite has no palette (in which case it is removed)
+	;;;	zero: set if no metasprite has no palette
+	.importroutine GetPaletteAddress
+
+	;;; Rebuilds the palette buffer
+	;;;
+	;;; REQUIRES: 16 bit A, 16 bit Index, DB = $7E
+	;;;
+	.importroutine ReloadPalettes
+
+
+
+	;; ::TODO handle rest of metasprite modules, tiles, etc::
+
+
+	;; Render Loop
+	;; ===========
+
+	;;; Start a render loop
+	;;;
+	;;; REQUIRES: 16 bit A, DB = $7E
 	.importroutine RenderLoopInit
 
-	;; ::TODO handle rest of metasprite modules, tiles, palettes, etc::
-
-	;; Renders a metasprite frame
-	;;
-	;; REQUIRES: 16 bit A, 16 bit Index, DB = $7E
-	;;
-	;; INPUT:
-	;;	A: MetaSprite__State address
-	;; 	xPos: sprite.xPos - POSITION_OFFSET
-	;; 	yPos: sprite.yPos - POSITION_OFFSET
-	.importroutine RenderFrame_A
-
-	;; Renders a metasprite frame
-	;;
-	;; REQUIRES: 16 bit A, 16 bit Index, DB = $7E
-	;;
-	;; INPUT:
-	;;	DP: MetaSprite__State address - MetaSpriteDpOffset
-	;; 	xPos: sprite.xPos - POSITION_OFFSET
-	;; 	yPos: sprite.yPos - POSITION_OFFSET
+	;;; Renders a metasprite frame
+	;;;
+	;;; REQUIRES: 16 bit A, 16 bit Index, DB = $7E
+	;;;
+	;;; INPUT:
+	;;;	DP: MetaSpriteStruct address - MetaSpriteDpOffset
+	;;; 	xPos: sprite.xPos - POSITION_OFFSET
+	;;; 	yPos: sprite.yPos - POSITION_OFFSET
 	.importroutine RenderFrame
 
-	;; Finalizes the render loop
-	;;
-	;; REQUIRES: 16 bit A, 16 bit Index, DB = $7E
+	;;; Finalizes the render loop
+	;;;
+	;;; REQUIRES: 16 bit A, 16 bit Index, DB = $7E
 	.importroutine RenderLoopEnd
 
 .endimportmodule
