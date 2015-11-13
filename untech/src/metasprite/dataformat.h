@@ -3,14 +3,13 @@
 .ifndef ::_METASPRITE_DATAFORMAT_H_
 ::_METASPRITE_DATAFORMAT_H_ = 1
 
+; ::TODO metasprite frameSet::
+; ::: include wether fixed or dynamic metasprites::
+
 .struct MetaSprite__Frame
 	;; Addrss of the `MetaSprite__FrameObjectsList` struct within the
 	;; `METASPRITE_FRAME_OBJECTS_BLOCK` bank.
 	frameObjectsList	.addr
-
-	;; Address of the `MetaSprite__Tileset` struct within the
-	;; `METASPRITE_TILESET_BLOCK` bank.
-	tilesetTable		.addr
 
 	;; Address of the `MetaSprite__EntityCollisionHitboxes` struct within the
 	;; `METASPRITE_ENTITY_COLLISION_HITBOXES_BLOCK` bank.
@@ -23,6 +22,12 @@
 	;; Address of the `MetaSprite__ActionPoints` struct within the
 	;; `METASPRITE_ACTION_POINT_BLOCK` bank.
 	actionPoints		.addr
+
+	;; Address of the `MetaSprite__Tileset` struct within the
+	;; `METASPRITE_TILESET_BLOCK` bank.
+	;;
+	;; Only read if the frameSet uses a dynamic tileset.
+	tilesetTable		.addr
 .endstruct
 
 
@@ -102,18 +107,19 @@
 	.endstruct
 .endstruct
 
+
 .enum MetaSprite__Tileset_Type
 	;; The tileset uses a single 16x16 tile
-	ONE_16_TILE
+        ONE_16_TILE
 
 	;; The tileset uses two 16x16 tiles
-	TWO_16_TILE
+        TWO_16_TILES
 
 	;; The tileset uses a single VRAM row of 8 16x16 tiles
 	ONE_VRAM_ROW
 
 	;; The tileset uses two VRAM rows of 8 16x16 tiles.
-	TWO_VRAM_ROWS
+        TWO_VRAM_ROWS
 .endenum
 
 ;; The tileset that is used by the frame (or frames).
@@ -122,27 +128,27 @@
 	;; Matches `MetaSprite__Tileset_Type`
 	type		.byte
 
-	;; Number of tiles to copy
+	;; Number of tiles in tileset
 	count		.byte
 
-	;; The address of the 16x16 4pp tile.
-	;;
-	;; As each tile is 128 bytes in size and the SNES mirrors banks $80-FF,
-	;; only 16 bits are needed to store the data, assuming 128 byte alignment.
-	;;
-	;; As DMA is always operates in slowrom mode, tiles are accessed in
-	;; banks $00-$7F, not banks $80-$FF.
-	;;
-	;; To convert from a tileAddress to a SNES Memory the following routine
-	;; is used:
-	;;	snesAddress = tileAddress << 7
-	;;
-	;; To convert from a SNES Memory location to a tileAddress, simply:
-	;;	tileAddress = (snesAddress >> 7) & $FFFF
-	;;
-	;;
-	;; Repeated count times
-	tileAddress	.word
+	;; The MetaSprite__DmaTable of the first block
+	dmaTable0	.addr
+
+	;; The MetaSprite__DmaTable of the second block
+	;; Only used if the tileset type uses two blocks
+	dmaTable1	.addr
+.endstruct
+
+;; The DMA table that is processed during VBlank
+.struct MetaSprite__DmaTable
+	;; The type of transfer to VBlank
+	;; equal to `(nTiles - 1) * 2`
+	transferType	.byte
+
+	;; The address of the tile.
+	;; Each tile is 128 bytes in size
+	;; Repeated nTiles times
+	address		.faraddr
 .endstruct
 
 

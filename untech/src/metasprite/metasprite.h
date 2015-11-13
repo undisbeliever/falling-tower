@@ -11,12 +11,16 @@
 
 
 METASPRITE_STATUS_PALETTE_SET_FLAG	= %10000000
+METASPRITE_STATUS_VRAM_INDEX_MASK	= %01111110
+METASPRITE_STATUS_VRAM_SET_FLAG		= %00000001
 
 .struct MetaSpriteStruct
 	;; The state of the metasprite
-	;; 	%p0000000
+	;; 	%piiiiiiv
 	;;
 	;; p: palette set
+	;; iiiiii: vram slot table index / 2
+	;; v: vram set
 	status			.byte
 	currentFrame		.addr
 	blockOneCharAttrOffset	.word
@@ -43,6 +47,12 @@ METASPRITE_STATUS_PALETTE_SET_FLAG	= %10000000
 	CONFIG	METASPRITE_ACTION_POINT_BLOCK, "METASPRITE_ACTION_POINT"
 	CONFIG	METASPRITE_PALETTE_DATA_BLOCK, "METASPRITE_PALETTE"
 	CONFIG	METASPRITE_DMA_TABLE_BLOCK, "METASPRITE_DMA_TABLE"
+
+	;; MetaSprite VRAM settings
+	CONFIG METASPRITE_VRAM_WORD_ADDRESS, $6000
+	CONFIG METASPRITE_DMA_TABLE_COUNT, 30
+	CONFIG METASPRITE_VRAM_TILE_SLOTS, 16
+	CONFIG METASPRITE_VRAM_ROW_SLOTS, 14
 
 	;; The offset between the sprite xpos/ypos and the frame xpos/ypos
 	POSITION_OFFSET = 128
@@ -81,6 +91,7 @@ METASPRITE_STATUS_PALETTE_SET_FLAG	= %10000000
 	;;
 	;; REQUIRES: 16 bit A, 16 bit Index, DB = $7E
 	.importroutine Init
+
 
 
 	;; Palettes

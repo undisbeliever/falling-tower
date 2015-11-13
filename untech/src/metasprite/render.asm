@@ -51,8 +51,10 @@ FRAME_CHARATTR_MASK	= $F01F
 	yPos		:= xposBuffer + 2*4 + 2
 
 	tmp1		:= xposBuffer + 3*4 + 2
-	tmp2		:= xposBuffer + 3*4 + 2
-	tmp3		:= xposBuffer + 3*4 + 2
+	tmp2		:= xposBuffer + 4*4 + 2
+	tmp3		:= xposBuffer + 5*4 + 2
+	tmp4		:= xposBuffer + 6*4 + 2
+	tmp5		:= xposBuffer + 7*4 + 2
 .code
 
 

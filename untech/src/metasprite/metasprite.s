@@ -15,8 +15,9 @@
 .define MSDP MetaSpriteDpOffset + MetaSpriteStruct
 
 
-.include "render.asm"
 .include "palette.asm"
+.include "render.asm"
+.include "vram.asm"
 
 
 ; DB = $7E
@@ -25,6 +26,7 @@
 .routine Init
 	Init__Render
 	Init__Palette
+	Init__Vram
 
 	RTS
 .endroutine
@@ -39,6 +41,9 @@
 
 .segment METASPRITE_PALETTE_DATA_BLOCK
 	paletteDataBank = .bankbyte(*)
+
+.segment METASPRITE_TILESET_BLOCK
+	tilesetBankOffset = .bankbyte(*) << 16
 
 .endmodule
 
