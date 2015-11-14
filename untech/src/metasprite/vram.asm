@@ -43,8 +43,6 @@
 	vramSlots_RowsOffset = METASPRITE_VRAM_TILE_SLOTS * 2
 
 
-
-	; ::TODO write VBlank routine to transfer this data
 	.proc	dmaTable
 		vramAddress:	.res	METASPRITE_DMA_TABLE_COUNT * 2
 		tablePtr:	.res	METASPRITE_DMA_TABLE_COUNT * 2

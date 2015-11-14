@@ -18,6 +18,7 @@
 .include "palette.asm"
 .include "render.asm"
 .include "vram.asm"
+.include "dma.asm"
 
 
 ; DB = $7E
@@ -44,6 +45,9 @@
 
 .segment METASPRITE_TILESET_BLOCK
 	tilesetBankOffset = .bankbyte(*) << 16
+
+.segment METASPRITE_DMA_TABLE_BLOCK
+	dmaTableBank = .bankbyte(*)
 
 .endmodule
 

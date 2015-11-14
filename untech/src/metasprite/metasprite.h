@@ -93,6 +93,16 @@ METASPRITE_STATUS_VRAM_SET_FLAG		= %00000001
 	.importroutine Init
 
 
+	;; Transfers the tile data to VRAM
+	;;
+	;; REQUIRES: Force-Blank
+	.importroutine TransferTileBuffer
+
+	;; Transfers data to PPU during VBlank
+	;;
+	;; REQUIRES: 16 bit A, 8 bit Index, DB = $80, DP = $4300, VBlank or Force Blank
+	.importroutine VBlank
+
 
 	;; Palettes
 	;; ========
