@@ -51,10 +51,13 @@
 .define TABLE_BANK "BANK2"
 
 .segment "SHADOW"
-	tmp:		.res 4
-	routinePtr:	.res 2
-	tablePos:	.res 2
-	endTable:	.res 2
+tmp		:= tmp1
+ .assert tmp + 2 = tmp2, error, "Bad alignment"
+routinePtr	:= tmp3
+tablePos	:= tmp4
+endTable	:= tmp5
+
+
 
 
 .struct Multiply_16_16_Table

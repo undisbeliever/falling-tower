@@ -6,6 +6,22 @@
 .include "common/config.inc"
 .include "common/modules.inc"
 
+
+.global _Tests_tmp1
+.global _Tests_tmp2
+.global _Tests_tmp3
+.global _Tests_tmp4
+.global _Tests_tmp5
+.global _Tests_tmp6
+
+tmp1 := _Tests_tmp1
+tmp2 := _Tests_tmp2
+tmp3 := _Tests_tmp3
+tmp4 := _Tests_tmp4
+tmp5 := _Tests_tmp5
+tmp6 := _Tests_tmp6
+
+
 CONFIG TEST_STRING_BANK, "BANK1"
 
 .struct UnitTestRoutineHeader

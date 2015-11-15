@@ -25,8 +25,7 @@
 
 
 .segment "SHADOW"
-	tmp:	.res 2
-
+	tmp := tmp1
 
 .code
 

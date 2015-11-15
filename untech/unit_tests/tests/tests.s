@@ -16,6 +16,14 @@
 	headerPos:		.res 2
 	functionStringPtr:	.res 2
 	previousCursor:		.res 2
+
+	_Tests_tmp1:		.res 2
+	_Tests_tmp2:		.res 2
+	_Tests_tmp3:		.res 2
+	_Tests_tmp4:		.res 2
+	_Tests_tmp5:		.res 2
+	_Tests_tmp6:		.res 2
+
 .code
 
 .import __TEST_MODULE_TABLE_SIZE__
