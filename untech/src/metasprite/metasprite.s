@@ -9,9 +9,6 @@
 
 .module MetaSprite
 
-; ::DEBUG::
-; ::TODO make it entity::metaSpriteState in the future::
-.export MetaSpriteDpOffset = 2
 .define MSDP MetaSpriteDpOffset + MetaSpriteStruct
 
 
