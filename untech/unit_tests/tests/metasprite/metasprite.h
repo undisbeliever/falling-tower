@@ -14,7 +14,7 @@
 	metasprite	.tag MetaSpriteStruct
 .endstruct
 
-.define N_ENTITIES 16
+.define N_ENTITIES 20
 
 .importmodule UnitTest_MetaSprite
 	.importlabel	entities

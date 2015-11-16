@@ -36,8 +36,6 @@ entities_size = entities_end - entities
 	REP	#$30
 .A16
 .I16
-	; ::SHOULDO memclear::
-
 	LDX	#entities_size - 2
 	REPEAT
 		STZ	entities, X
