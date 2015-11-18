@@ -45,16 +45,18 @@ FRAME_CHARATTR_MASK	= $F01F
 	xposBuffer:		.res 128 * 4
 
 	; Only hald of xPosBuffer is acutally used, save the bytes for variables
-	bufferPos	:= xposBuffer + 0*4 + 2
 
-	xPos		:= xposBuffer + 1*4 + 2
-	yPos		:= xposBuffer + 2*4 + 2
+	bufferPos		:= xposBuffer + 0*4 + 2
+	previousBufferPos	:= xposBuffer + 1*4 + 2
 
-	tmp1		:= xposBuffer + 3*4 + 2
-	tmp2		:= xposBuffer + 4*4 + 2
-	tmp3		:= xposBuffer + 5*4 + 2
-	tmp4		:= xposBuffer + 6*4 + 2
-	tmp5		:= xposBuffer + 7*4 + 2
+	xPos			:= xposBuffer + 2*4 + 2
+	yPos			:= xposBuffer + 3*4 + 2
+
+	tmp1			:= xposBuffer + 4*4 + 2
+	tmp2			:= xposBuffer + 5*4 + 2
+	tmp3			:= xposBuffer + 6*4 + 2
+	tmp4			:= xposBuffer + 7*4 + 2
+	tmp5			:= xposBuffer + 8*4 + 2
 .code
 
 
@@ -73,6 +75,9 @@ FRAME_CHARATTR_MASK	= $F01F
 		DEX
 		DEX
 	UNTIL_MINUS
+
+	LDY	#128*4
+	STY	previousBufferPos
 
 	LDA	#1
 	STA	updateOamBufferOnZero
@@ -273,25 +278,37 @@ Continue:
 
 
 SkipHiTable:
+	; Move all sprites that were onscreen in the previous frame offscreen
 
-	; Move all other sprites offscreen
-
-	SEP	#$20
-.A8
-	LDA	#224
 	LDX	bufferPos
-	CPX	#128 * .sizeof(OamFormat)
+	CPX	previousBufferPos
 	IF_LT
+		LDA	previousBufferPos
+		STX	previousBufferPos
+
+		SEC
+		SBC	bufferPos
+		LSR
+		LSR
+		TAY
+
+		SEP	#$20
+.A8
+		LDA	#224
 		REPEAT
 			STA	oamBuffer + OamFormat::yPos, X
 			INX
 			INX
 			INX
 			INX
-			CPX	#128 * .sizeof(OamFormat)
-		UNTIL_GE
+			DEY
+		UNTIL_ZERO
+	ELSE
+		STX	previousBufferPos
 	ENDIF
 
+	SEP	#$20
+.A8
 	STZ	updateOamBufferOnZero
 
 	REP	#$30

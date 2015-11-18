@@ -27,6 +27,7 @@
 		UnitTest	RenderFrame_XMinus
 		UnitTest	RenderFrame_Offscreen
 		UnitTest	RenderFrame_Overflow
+		UnitTest	RenderLoopEnd
 	EndUnitTestHeader
 
 
@@ -547,6 +548,58 @@ Failure:
 	CLC
 	RTS
 .endroutine
+
+
+
+; Tests that rendering 3 objects after rendering 12 objects works correctly
+.A8
+.I16
+.routine RenderLoopEnd
+	JSR	_Init
+.A16
+.I16
+	LDA	#.loword(Frame_Multiple0)
+	STA	z:MSDP::currentFrame
+	JSR	MetaSprite::RenderFrame
+
+	LDA	#.loword(Frame_Multiple1)
+	STA	z:MSDP::currentFrame
+	JSR	MetaSprite::RenderFrame
+
+	JSR	MetaSprite::RenderLoopEnd
+
+	; New frame - 3 objects
+	JSR	MetaSprite::RenderLoopInit
+
+	LDA	#.loword(Frame_OneLarge)
+	STA	z:MSDP::currentFrame
+	JSR	MetaSprite::RenderFrame
+	JSR	MetaSprite::RenderFrame
+	JSR	MetaSprite::RenderFrame
+
+	JSR	MetaSprite::RenderLoopEnd
+
+	; Test that sprites 3-127 are offscreen
+
+	LDX	#3 * 4
+	JSR	_TestRestOfBuffer
+	BCC	Failure
+
+	; New frame - only 0 objects
+	JSR	MetaSprite::RenderLoopInit
+	JSR	MetaSprite::RenderLoopEnd
+
+	; Test that all sprites are offscreen
+
+	LDX	#0
+	JSR	_TestRestOfBuffer
+	RTS
+
+Failure:
+	CLC
+	RTS
+.endroutine
+
 
 
 ;; Initialize the test
