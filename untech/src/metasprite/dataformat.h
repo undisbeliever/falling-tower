@@ -6,8 +6,67 @@
 ; ::TODO metasprite frameSet::
 ; ::: include wether fixed or dynamic metasprites::
 
+; ::TODO animation format::
+
+.enum MetaSprite__FrameSet_TilesetLifecycle
+	;; The entity's tileset doesn't change.
+	;; It is loaded into VRAM once and shared amonst entities
+	FIXED
+
+	;; The entity has a dynamic tileset
+	;; It is loaded into VRAM every metasprite frame change
+	; ::TODO implement::
+	DYNAMIC
+
+	;; The entity has a dynamic tilset, with some fixed components
+	;; The last X tiles of the frameSet are fixed.
+	;; The first (size - X) tiles are dynamic and change every msFrame.
+	; ::TODO implement::
+	DYNAMIC_FIXED
+.endenum
+
+;; Frame Sets are stored sequentially in order
+.struct MetaSprite__FrameSet
+	;; Address of the fixed tileset used by the FrameSet (if fixed)
+	;;
+	;; The tilset must be in the `METASPRITE_TILESET_BLOCK` bank.
+	;;
+	;; If this value is NULL (0) then no tileset is loaded.
+	tileset			.addr
+
+	;; The tileset lifestyle of the FrameSet used by the system
+	tilesetLifestyle	.byte
+
+	;; Address of the palette table in the `METASPRITE_PALETTE_LIST_BLOCK` bank.
+	;;
+	;; The table is a list of `.addr`s that point to the palette data
+	;; in the `METASPRITE_PALETTE_DATA_BLOCK`.
+	paletteList		.addr
+	;; Number of palettes in the palette table
+	nPalettes		.byte
+
+	;; Address of the frame table in `METASPRITE_FRAME_LIST_BLOCK` bank
+	;;
+	;; The table is a list of `.addr`s that point to the frame data
+	;; in the `METASPRITE_FRAME_DATA_BLOCK`
+	;;
+	;; This table may contain more than nFrames. But they will only
+	;; be accessable by the animation subsystem.
+	frameList		.addr
+	;; Number of frames in the frame table
+	nFrames			.byte
+
+	;; Address of the animation table in `METASPRITE_ANIMATION_LIST_BLOCK` bank.
+	;;
+	;; The table is a list of `.addr`s that point to the animation data
+	;; in the `METASPRITE_ANIMATION_DATA_BLOCK`
+	animationList		.addr
+	;; Number of animations in the animation table
+	nAnimations		.byte
+.endstruct
+
 .struct MetaSprite__Frame
-	;; Addrss of the `MetaSprite__FrameObjectsList` struct within the
+	;; Address of the `MetaSprite__FrameObjectsList` struct within the
 	;; `METASPRITE_FRAME_OBJECTS_BLOCK` bank.
 	frameObjectsList	.addr
 
