@@ -11,19 +11,26 @@
 
 
 METASPRITE_STATUS_PALETTE_SET_FLAG	= %10000000
-METASPRITE_STATUS_VRAM_INDEX_MASK	= %01111110
+METASPRITE_STATUS_DYNAMIC_TILESET_FLAG	= %01000000
+METASPRITE_STATUS_VRAM_INDEX_MASK	= %00111110
 METASPRITE_STATUS_VRAM_SET_FLAG		= %00000001
 
 .struct MetaSpriteStruct
-	;; The state of the metasprite
-	;; 	%piiiiiiv
+	;; Current frame being rendered/processedk
+	currentFrame		.addr
+
+	;; The state of the metasprite's VRAM/Palette allocations
+	;; 	%pdiiiiiv
 	;;
 	;; p: palette set
-	;; iiiiii: vram slot table index / 2
+	;; d: dynamic tileset active (MUST NOT be set if vram is clear)
+	;; iiiii: vram slot table number (index / 2)
 	;; v: vram set
 	status			.byte
-	currentFrame		.addr
+
+	;; Offset between frame object data and the OAM charattr data
 	blockOneCharAttrOffset	.word
+	;; Offset between frame object data and the OAM charattr data (second block)
 	blockTwoCharAttrOffset	.word
 .endstruct
 
@@ -58,9 +65,9 @@ METASPRITE_STATUS_VRAM_SET_FLAG		= %00000001
 
 	;; MetaSprite VRAM settings
 	CONFIG METASPRITE_VRAM_WORD_ADDRESS, $6000
-	CONFIG METASPRITE_DMA_TABLE_COUNT, 30
-	CONFIG METASPRITE_VRAM_TILE_SLOTS, 16
-	CONFIG METASPRITE_VRAM_ROW_SLOTS, 14
+	CONFIG_RANGE METASPRITE_DMA_TABLE_COUNT, 30, 0, 96
+	CONFIG_RANGE METASPRITE_VRAM_ROW_SLOTS, 14, 0, 16
+	CONFIG_RANGE METASPRITE_VRAM_TILE_SLOTS, 16, 0, 32
 
 	;; The offset between the sprite xpos/ypos and the frame xpos/ypos
 	POSITION_OFFSET = 128

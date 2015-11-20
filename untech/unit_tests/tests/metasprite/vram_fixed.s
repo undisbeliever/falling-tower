@@ -365,8 +365,8 @@ Failure:
 	TCD
 	JSR	MetaSprite__RemoveTileset
 
-	; test vram status flag is clear
-	LDA	#METASPRITE_STATUS_VRAM_SET_FLAG
+	; test vram status flags are clear
+	LDA	#METASPRITE_STATUS_VRAM_SET_FLAG | METASPRITE_STATUS_DYNAMIC_TILESET_FLAG
 	AND	z:ExampleEntity::metasprite + MetaSpriteStruct::status
 	BNE	Failure
 
@@ -384,8 +384,8 @@ Failure:
 	TCD
 	JSR	MetaSprite__RemoveTileset
 
-	; test vram status flag is clear
-	LDA	#METASPRITE_STATUS_VRAM_SET_FLAG
+	; test vram status flags are clear
+	LDA	#METASPRITE_STATUS_VRAM_SET_FLAG | METASPRITE_STATUS_DYNAMIC_TILESET_FLAG
 	AND	z:ExampleEntity::metasprite + MetaSpriteStruct::status
 	BNE	Failure
 
@@ -428,8 +428,8 @@ Failure:
 	TCD
 	JSR	MetaSprite__RemoveTileset
 
-	; test vram status flag is clear
-	LDA	#METASPRITE_STATUS_VRAM_SET_FLAG
+	; test vram status flags are clear
+	LDA	#METASPRITE_STATUS_VRAM_SET_FLAG | METASPRITE_STATUS_DYNAMIC_TILESET_FLAG
 	AND	z:ExampleEntity::metasprite + MetaSpriteStruct::status
 	BNE	Failure
 
@@ -479,8 +479,8 @@ Failure:
 	TCD
 	JSR	MetaSprite__RemoveTileset
 
-	; test vram status flag is clear
-	LDA	#METASPRITE_STATUS_VRAM_SET_FLAG
+	; test vram status flags are clear
+	LDA	#METASPRITE_STATUS_VRAM_SET_FLAG | METASPRITE_STATUS_DYNAMIC_TILESET_FLAG
 	AND	z:ExampleEntity::metasprite + MetaSpriteStruct::status
 	BNE	Failure
 
@@ -498,8 +498,8 @@ Failure:
 	TCD
 	JSR	MetaSprite__RemoveTileset
 
-	; test vram status flag is clear
-	LDA	#METASPRITE_STATUS_VRAM_SET_FLAG
+	; test vram status flags are clear
+	LDA	#METASPRITE_STATUS_VRAM_SET_FLAG | METASPRITE_STATUS_DYNAMIC_TILESET_FLAG
 	AND	z:ExampleEntity::metasprite + MetaSpriteStruct::status
 	BNE	Failure
 
@@ -542,8 +542,8 @@ Failure:
 	TCD
 	JSR	MetaSprite__RemoveTileset
 
-	; test vram status flag is clear
-	LDA	#METASPRITE_STATUS_VRAM_SET_FLAG
+	; test vram status flags are clear
+	LDA	#METASPRITE_STATUS_VRAM_SET_FLAG | METASPRITE_STATUS_DYNAMIC_TILESET_FLAG
 	AND	z:ExampleEntity::metasprite + MetaSpriteStruct::status
 	BNE	Failure
 
@@ -586,7 +586,7 @@ Failure:
 	TCD
 	JSR	MetaSprite__RemoveTileset
 
-	; test vram status flag is clear
+	; test vram status flags are clear
 	LDA	#METASPRITE_STATUS_VRAM_SET_FLAG
 	AND	z:ExampleEntity::metasprite + MetaSpriteStruct::status
 	BNE	Failure
@@ -645,9 +645,10 @@ tmp_table0	:= tmp6
 	BCC	Failure
 
 
-	LDA	#METASPRITE_STATUS_VRAM_SET_FLAG
-	AND	z:ExampleEntity::metasprite + MetaSpriteStruct::status
-	BEQ	Failure
+	LDA	z:ExampleEntity::metasprite + MetaSpriteStruct::status
+	AND	#METASPRITE_STATUS_VRAM_SET_FLAG | METASPRITE_STATUS_DYNAMIC_TILESET_FLAG
+	CMP	#METASPRITE_STATUS_VRAM_SET_FLAG
+	BNE	Failure
 
 
 	; Test that the dma table has been updated
@@ -700,6 +701,10 @@ tmp_table1	:= tmp6
 	JSR	MetaSprite__UploadFixedTileset
 	BCC	Failure
 
+	LDA	z:ExampleEntity::metasprite + MetaSpriteStruct::status
+	AND	#METASPRITE_STATUS_VRAM_SET_FLAG | METASPRITE_STATUS_DYNAMIC_TILESET_FLAG
+	CMP	#METASPRITE_STATUS_VRAM_SET_FLAG
+	BNE	Failure
 
 	; Test that the dma table has been updated twice
 
