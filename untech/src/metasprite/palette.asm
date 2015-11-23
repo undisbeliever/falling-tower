@@ -57,7 +57,7 @@
 ; Does not reset MSDP::palette
 .A16
 .I16
-.routine RemovePalette
+.macro RemovePalette
 	; Decrement counter
 
 	BIT	z:MSDP::status - 1
@@ -78,15 +78,13 @@
 		LDA	#METASPRITE_STATUS_PALETTE_SET_FLAG
 		TRB	z:MSDP::status
 	ENDIF
+.endmacro
 
-	RTS
-.endroutine
 
 
 SetPalette_Failure:
 	CLC
 	RTS
-
 
 ; A: Palette Id
 ; DP: MetaSpriteStruct address - MetaSpriteDpOffset
@@ -255,31 +253,6 @@ DuplicateSlotFound:
 	RTS
 .endroutine
 
-
-
-; DP: MetaSpriteStruct address - MetaSpriteDpOffset
-; DB: $7E
-; Return: A - palette address
-;	zero: set if no metasprite has no palette
-.A16
-.I16
-.routine GetPaletteAddress
-
-	BIT	z:MSDP::status - 1
-	.assert METASPRITE_STATUS_PALETTE_SET_FLAG = $80, error, "BIT optimisation"
-	IF_N_CLEAR
-		LDA	#0
-		RTS
-	ENDIF
-
-	; luckally palette bits match the palette slot index
-	LDA	z:MSDP::blockOneCharAttrOffset + 1
-	AND	#OAM_ATTR_PALETTE_MASK
-	TAX
-
-	LDA	paletteSlots::ptr, X
-	RTS
-.endroutine
 
 
 ; DB: $7E

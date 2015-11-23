@@ -97,11 +97,6 @@ FunctionTable:
 	.addr	Activate_Dynamic
 .code
 
-Activate_FixedTileset:
-	LDX	z:MSDP::frameSet
-	LDA	f:MetaSpriteFrameSetTable + MetaSprite__FrameSet::tileset, X
-	JMP	UploadFixedTileset
-
 Activate_Dynamic:
 Activate_DynamicFixed:
 	; ::TODO implement::
@@ -115,8 +110,8 @@ Activate_DynamicFixed:
 .A16
 .I16
 .routine Deactivate
-	JSR	RemovePalette
-	JSR	RemoveTileset
+	RemovePalette
+	RemoveTileset
 .endroutine
 
 

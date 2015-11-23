@@ -110,7 +110,7 @@ METASPRITE_STATUS_VRAM_SET_FLAG		= %00000001
 
 
 
-	;; Initialize the metasprite module
+	;; Rests the state of and Initializes the metasprite module
 	;;
 	;; REQUIRES: 16 bit A, 16 bit Index, DB = $7E
 	.importroutine Reset
@@ -127,8 +127,8 @@ METASPRITE_STATUS_VRAM_SET_FLAG		= %00000001
 	.importroutine VBlank
 
 
-	;; MetaSpriteStruct
-	;; ================
+	;; Allocation
+	;; ==========
 
 	;;; Initialises a MetaSpriteStruct.
 	;;;
@@ -182,6 +182,27 @@ METASPRITE_STATUS_VRAM_SET_FLAG		= %00000001
 
 	;;; Sets the palette of a metasprite.
 	;;;
+	;;; The MetaSpriteStruct SHOULD BE be active and in play.
+	;;; Failure to do this will allocate the palette to CGRAM.
+	;;;
+	;;; Will set the `palette` field of MetaSpriteStruct
+	;;;
+	;;; REQUIRES: 16 bit A, 16 bit Index, DB = $7E
+	;;;
+	;;; INPUT:
+	;;;	DP: MetaSpriteStruct address - MetaSpriteDpOffset
+	;;;	A: palette id of the frameSet
+	;;;
+	;;; OUTPUT: C set if succeeded
+	.importroutine SetPalette
+
+	;;; Sets the palette of a metasprite.
+	;;;
+	;;; The MetaSpriteStruct SHOULD BE be active and in play.
+	;;; Failure to do this will allocate the palette to CGRAM.
+	;;;
+	;;; Will set the `palette` field of MetaSpriteStruct
+	;;;
 	;;; REQUIRES: 16 bit A, 16 bit Index, DB = $7E
 	;;;
 	;;; INPUT:
@@ -192,31 +213,6 @@ METASPRITE_STATUS_VRAM_SET_FLAG		= %00000001
 	;;;
 	;;; OUTPUT: C set if succeeded
 	.importroutine SetPaletteAddress
-
-	;;; Removes the palette from the metasprite
-	;;;
-	;;; This function should not be called directly,
-	;;; instead you should call `Deactive` ::CHECK name::
-	;;;
-	;;; REQUIRES: 16 bit A, 16 bit Index, DB = $7E
-	;;;
-	;;; INPUT:
-	;;;	DP: MetaSpriteStruct address - MetaSpriteDpOffset
-	.importroutine RemovePalette
-
-	;;; Retrieves the palette of a metasprite.
-	;;;
-	;;; REQUIRES: 16 bit A, 16 bit Index, DB = $7E
-	;;;
-	;;; INPUT:
-	;;;	DP: MetaSpriteStruct address - MetaSpriteDpOffset
-	;;;
-	;;; RETURN:
-	;;;	A: palette address in METASPRITE_PALETTE_DATA_BLOCK
-	;;;	   points to the 15 colors in metasprite
-	;;;	   NULL (0) if metasprite has no palette (in which case it is removed)
-	;;;	zero: set if no metasprite has no palette
-	.importroutine GetPaletteAddress
 
 	;;; Rebuilds the palette buffer
 	;;;

@@ -12,7 +12,7 @@
 
 .setcpu "65816"
 
-.import MetaSprite__RemoveTileset
+MetaSprite__RemoveTileset := MetaSprite::Deactivate
 .import MetaSprite__UploadFixedTileset
 .import MetaSprite__dmaTableIndex
 .import MetaSprite__dmaTable_vramAddress

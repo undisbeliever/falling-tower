@@ -24,6 +24,8 @@ entity8 := UnitTest_MetaSprite::entities + .sizeof(ExampleEntity) * 8
 entity9 := UnitTest_MetaSprite::entities + .sizeof(ExampleEntity) * 9
 entity10:= UnitTest_MetaSprite::entities + .sizeof(ExampleEntity) * 10
 
+MetaSprite__RemovePalette := MetaSprite::Deactivate
+
 .module UnitTest_MetaSprite_Palette
 
 	UnitTestHeader MetaSprite_Palette
@@ -33,8 +35,6 @@ entity10:= UnitTest_MetaSprite::entities + .sizeof(ExampleEntity) * 10
 		UnitTest	SetPaletteAddress_NULL
 		UnitTest	RemovePalette
 		UnitTest	RemovePalette_DoubleFree
-		UnitTest	GetPaletteAddress
-		UnitTest	GetPaletteAddress_Empty
 		UnitTest	ReloadPalettes
 	EndUnitTestHeader
 
@@ -192,7 +192,7 @@ Failure:
 	; Free entity 0
 	LDA	#entity0
 	TCD
-	JSR	MetaSprite::RemovePalette
+	JSR	MetaSprite__RemovePalette
 
 	; Now the 9th palette will load successfully
 	LDA	#entity8
@@ -225,8 +225,8 @@ Failure:
 	; Free entity 0 twice
 	LDA	#entity0
 	TCD
-	JSR	MetaSprite::RemovePalette
-	JSR	MetaSprite::RemovePalette
+	JSR	MetaSprite__RemovePalette
+	JSR	MetaSprite__RemovePalette
 
 	; Now the 9th palette will load successfully
 	LDA	#entity8
@@ -249,55 +249,6 @@ Failure:
 	LDA	#METASPRITE_STATUS_PALETTE_SET_FLAG
 	AND	z:ExampleEntity::metasprite + MetaSpriteStruct::status
 	BEQ	Failure
-
-	SEC
-	RTS
-
-Failure:
-	CLC
-	RTS
-.endroutine
-
-
-.routine GetPaletteAddress
-	STATIC_RANDOM_MIN_MAX rng, 0, 7
-
-	JSR	UnitTest_MetaSprite::Reset
-.A16
-.I16
-	JSR	_Load8Palettes
-	BCC	Failure
-
-	LDA	#.ident(.sprintf("entity%i", rng))
-	TCD
-	JSR	MetaSprite::GetPaletteAddress
-
-	CMP	#.loword(.ident(.sprintf("Palette%i", rng)))
-	BNE	Failure
-
-	SEC
-	RTS
-
-Failure:
-	CLC
-	RTS
-.endroutine
-
-
-
-.routine GetPaletteAddress_Empty
-	JSR	UnitTest_MetaSprite::Reset
-.A16
-.I16
-	JSR	_Load8Palettes
-	BCC	Failure
-
-	LDA	#entity10
-	TCD
-	JSR	MetaSprite::GetPaletteAddress
-
-	CMP	#0
-	BNE	Failure
 
 	SEC
 	RTS

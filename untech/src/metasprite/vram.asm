@@ -115,9 +115,7 @@ TileSlots_VramAddresses:
 ;;	DP: MetaSpriteStruct address - MetaSpriteDpOffset
 .A16
 .I16
-.routine RemoveTileset
-; ::TODO call from close metasprite routine::
-
+.macro RemoveTileset
 	LDA	z:MSDP::status
 	LSR
 	IF_C_SET
@@ -149,9 +147,18 @@ TileSlots_VramAddresses:
 		LDA	#METASPRITE_STATUS_VRAM_INDEX_MASK | METASPRITE_STATUS_VRAM_SET_FLAG | METASPRITE_STATUS_DYNAMIC_TILESET_FLAG
 		TRB	z:MSDP::status
 	ENDIF
+.endmacro
 
-	RTS
-.endroutine
+
+;; A hook for unit testing Init Fixed Tileset
+;;
+;; IN:
+;;	DP: MetaSpriteStruct address - MetaSpriteDpOffset
+;;	A: tileset address
+;;
+;; OUTPUT:
+;;	C set if succeesful
+.exportlabel UploadFixedTileset
 
 
 ;; Uploads (if necessary) a fixed metasprite tileset into VRAM.
@@ -161,29 +168,28 @@ TileSlots_VramAddresses:
 ;; of this we can scan though all the slots in order to detect
 ;; duplicates.
 ;;
-;; This routine should not be called directly.
-;;
+;; This routine should only be called by Activate.
 ;;
 ;; REQUIRES: 16 bit A, 16 bit Index, DB = $7E
 ;;
 ;; INPUT:
 ;;	DP: MetaSpriteStruct address - MetaSpriteDpOffset
-;;	A: tileset address in METASPRITE_TILESET_DATA_BLOCK
 ;;
 ;; OUTPUT:
 ;;	C set if succeesful
 .A16
 .I16
-.routine UploadFixedTileset
-; ::TODO call from initialisation routine::
-; ::TODO make macro??::
-
+.routine Activate_FixedTileset
 tmp_tileset	:= tmp1
 tmp_firstFreeSlot  := tmp2
 tmp_secondFreeSlot := tmp3
 tmp_firstSlot	:= tmp4
 tmp_secondSlot	:= tmp5
 
+	LDX	z:MSDP::frameSet
+	LDA	f:frameSetOffset + MetaSprite__FrameSet::tileset, X
+
+::UploadFixedTileset:
 	STA	tmp_tileset
 
 	LDA	z:MSDP::status
