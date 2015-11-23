@@ -50,9 +50,15 @@ entities_size = entities_end - entities
 		DEX
 	UNTIL_ZERO
 
-	JMP	MetaSprite::Init
+	JMP	MetaSprite::Reset
 .endroutine
 
+; ::DEBUG fix import error::
+.segment "BANK1"
+.export MetaSpriteFrameSetTable: far
+.export MetaSpriteFrameSetTable_end: far
+MetaSpriteFrameSetTable:
+MetaSpriteFrameSetTable_end:
 
 .endmodule
 

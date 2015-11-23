@@ -16,8 +16,8 @@ METASPRITE_STATUS_VRAM_INDEX_MASK	= %00111110
 METASPRITE_STATUS_VRAM_SET_FLAG		= %00000001
 
 .struct MetaSpriteStruct
-	;; Current frame being rendered/processedk
-	currentFrame		.addr
+	;; The frameSet that the metasprite belongs to
+	frameSet		.addr
 
 	;; The state of the metasprite's VRAM/Palette allocations
 	;; 	%pdiiiiiv
@@ -27,6 +27,12 @@ METASPRITE_STATUS_VRAM_SET_FLAG		= %00000001
 	;; iiiii: vram slot table number (index / 2)
 	;; v: vram set
 	status			.byte
+
+	;; Current frame address
+	currentFrame		.addr
+
+	;; The current palette address
+	palette			.addr
 
 	;; Offset between frame object data and the OAM charattr data
 	blockOneCharAttrOffset	.word
@@ -50,10 +56,12 @@ METASPRITE_STATUS_VRAM_SET_FLAG		= %00000001
 
 .importmodule MetaSprite
 	;; The segment that holds the frame data.
-	CONFIG	METASPRITE_ANIMATION_LIST_BLOCK, "METASPRITE_ANIMATION"
-	CONFIG	METASPRITE_ANIMATION_DATA_BLOCK, "METASPRITE_ANIMATION"
+	CONFIG	METASPRITE_FRAMESET_LIST_BLOCK, "METASPRITE_FRAMESET"
+	CONFIG	METASPRITE_FRAMESET_DATA_BLOCK, "METASPRITE_FRAMESET"
 	CONFIG	METASPRITE_FRAME_LIST_BLOCK, "METASPRITE_FRAME"
 	CONFIG	METASPRITE_FRAME_DATA_BLOCK, "METASPRITE_FRAME"
+	CONFIG	METASPRITE_ANIMATION_LIST_BLOCK, "METASPRITE_ANIMATION"
+	CONFIG	METASPRITE_ANIMATION_DATA_BLOCK, "METASPRITE_ANIMATION"
 	CONFIG	METASPRITE_FRAME_OBJECTS_BLOCK, "METASPRITE_FRAME_OBJECTS"
 	CONFIG	METASPRITE_TILESET_BLOCK, "METASPRITE_TILESET_TABLE"
 	CONFIG	METASPRITE_ENTITY_COLLISION_HITBOXES_BLOCK, "METASPRITE_ENTITY_COLLISION_HITBOXES"
@@ -105,7 +113,7 @@ METASPRITE_STATUS_VRAM_SET_FLAG		= %00000001
 	;; Initialize the metasprite module
 	;;
 	;; REQUIRES: 16 bit A, 16 bit Index, DB = $7E
-	.importroutine Init
+	.importroutine Reset
 
 
 	;; Transfers the tile data to VRAM
@@ -117,6 +125,56 @@ METASPRITE_STATUS_VRAM_SET_FLAG		= %00000001
 	;;
 	;; REQUIRES: 16 bit A, 8 bit Index, DB = $80, DP = $4300, VBlank or Force Blank
 	.importroutine VBlank
+
+
+	;; MetaSpriteStruct
+	;; ================
+
+	;;; Initialises a MetaSpriteStruct.
+	;;;
+	;;; REQUIRES: 16 bit A, 16 bit Index, DB = $7E
+	;;;
+	;;; IN:
+	;;;	DP: MetaSpriteStruct address - MetaSpriteDpOffset
+	;;;	A: FrameSet Id
+	;;;	Y: paletteId within the FrameSet
+	.importroutine Init
+
+	;;; Activates a MetaSprite, allocating and uploading vram/palette
+	;;;
+	;;; REQUIRES: 16 bit A, 16 bit Index, DB = $7E
+	;;;
+	;;; IN:
+	;;;	DP: MetaSpriteStruct address - MetaSpriteDpOffset
+	;;;
+	;;; OUT: C set if vram tiles allocated
+	.importroutine Activate
+
+	;;; Deactivates a MetaSprite, releasing vram and palettes resources
+	;;;
+	;;; After calling Deactivate, you can reuse the memory contained
+	;;; in DP (equivalent to free).
+	;;;
+	;;; REQUIRES: 16 bit A, 16 bit Index, DB = $7E
+	;;;
+	;;; IN:
+	;;;	DP: MetaSpriteStruct address - MetaSpriteDpOffset
+	.importroutine Deactivate
+
+
+	;; Frames
+	;; ======
+
+	;;; Sets the current frame of a metasprite.
+	;;;
+	;;; REQUIRES: 16 bit A, 16 bit Index, DB = $7E
+	;;;
+	;;; INPUT:
+	;;;	DP: MetaSpriteStruct address - MetaSpriteDpOffset
+	;;;	A: frame id of the frameSet
+	;;;
+	;;; OUTPUT: C set if succeeded
+	.importroutine SetFrame
 
 
 	;; Palettes

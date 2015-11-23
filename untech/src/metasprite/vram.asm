@@ -84,7 +84,7 @@ TileSlots_VramAddresses:
 ; DB = $7E
 .A16
 .I16
-.macro Init__Vram
+.macro Reset__Vram
 	.assert .asize = 16, error, "Bad asize"
 	.assert .isize = 16, error, "Bad isize"
 

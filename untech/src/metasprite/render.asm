@@ -63,7 +63,7 @@ FRAME_CHARATTR_MASK	= $F01F
 ; DB = $7E
 .A16
 .I16
-.macro Init__Render
+.macro Reset__Render
 	SEP	#$20
 .A8
 	; Reset the xPosBuffer - prevent possible bugs

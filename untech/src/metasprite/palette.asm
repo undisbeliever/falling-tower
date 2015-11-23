@@ -38,7 +38,7 @@
 ; DB = $7E
 .A16
 .I16
-.macro Init__Palette
+.macro Reset__Palette
 	LDX	#(N_PALETTE_SLOTS - 1) * 2
 	REPEAT
 		STZ	paletteSlots::ptr, X
@@ -54,6 +54,7 @@
 
 ; DP: MetaSpriteStruct address - MetaSpriteDpOffset
 ; DB: $7E
+; Does not reset MSDP::palette
 .A16
 .I16
 .routine RemovePalette
@@ -78,8 +79,40 @@
 		TRB	z:MSDP::status
 	ENDIF
 
-Return:
 	RTS
+.endroutine
+
+
+SetPalette_Failure:
+	CLC
+	RTS
+
+
+; A: Palette Id
+; DP: MetaSpriteStruct address - MetaSpriteDpOffset
+; OUT: carry set if succeeded
+; DB: $7E
+.A16
+.I16
+.routine SetPalette
+	LDX	z:MSDP::frameSet
+	BEQ	SetPalette_Failure
+
+	SEP	#$20
+.A8
+	CMP	f:frameSetOffset + MetaSprite__FrameSet::nPalettes, X
+	REP	#$20
+.A16
+	BGE	SetPalette_Failure
+
+	AND	#$00FF
+	ASL
+	; Carry clear
+	ADC	f:frameSetOffset + MetaSprite__FrameSet::paletteList, X
+	TAX
+	LDA	f:paletteListOffset, X
+
+	.assert * = SetPaletteAddress, error, "Bad Flow"
 .endroutine
 
 
@@ -125,10 +158,10 @@ firstFreeSlot	:= tmp3
 		TYA
 	ENDIF
 
+	STA	z:MSDP::palette
+
 	CMP	#0
 	BEQ	ReturnFalse
-
-	STA	tmp_palettePtr
 
 	; Search for an duplicate/free palette slot
 	LDX	#$8000
@@ -165,7 +198,7 @@ Return:
 
 	LDA	#1
 	STA	paletteSlots::count, X
-	LDA	tmp_palettePtr
+	LDA	z:MSDP::palette
 	STA	paletteSlots::ptr, X
 
 
@@ -182,7 +215,7 @@ CopyPalette:
 	ADC	#.loword(paletteBuffer + 2)
 	TAY
 
-	LDX	tmp_palettePtr
+	LDX	z:MSDP::palette
 
 	LDA	#15 * 2 - 1
 	MVN	$7E, paletteDataBank		; ca65 uses dest,src
