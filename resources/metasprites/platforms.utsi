@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE untech>
+<framesetimporter name="Platforms" tilesettype="TWO_16_TILE" image="platforms.png">
+    <grid width="64" height="16" xoffset="0" yoffset="0" xpadding="0" ypadding="0" xorigin="0" yorigin="0"/>
+    <frame name="platform-huge" order="2">
+        <gridlocation x="0" y="0"/>
+        <tilehitbox x="0" y="0" width="48" height="5"/>
+        <object x="0" y="0" size="small"/>
+        <object x="40" y="0" size="small"/>
+        <object x="8" y="0" size="large"/>
+        <object x="24" y="0" size="large"/>
+    </frame>
+    <frame name="platform-large" order="2">
+        <gridlocation x="0" y="1"/>
+        <tilehitbox x="0" y="0" width="40" height="5"/>
+        <object x="0" y="0" size="small"/>
+        <object x="32" y="0" size="small"/>
+        <object x="8" y="0" size="large"/>
+        <object x="24" y="0" size="small"/>
+    </frame>
+    <frame name="platform-medium" order="2">
+        <gridlocation x="0" y="2"/>
+        <tilehitbox x="0" y="0" width="32" height="5"/>
+        <object x="0" y="0" size="small"/>
+        <object x="24" y="0" size="small"/>
+        <object x="8" y="0" size="large"/>
+    </frame>
+    <frame name="platform-small" order="2">
+        <gridlocation x="0" y="3"/>
+        <tilehitbox x="0" y="0" width="24" height="5"/>
+        <object x="0" y="0" size="small"/>
+        <object x="16" y="0" size="small"/>
+        <object x="8" y="0" size="small"/>
+    </frame>
+</framesetimporter>
