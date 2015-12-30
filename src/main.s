@@ -4,6 +4,8 @@
 .include "common/structure.inc"
 .include "common/registers.inc"
 
+.include "gameloop.h"
+
 .setcpu "65816"
 
 .code
@@ -14,6 +16,7 @@
 .A8
 .I16
 	REPEAT
+		JSR	GameLoop::PlayGame
 	FOREVER
 .endroutine
 
