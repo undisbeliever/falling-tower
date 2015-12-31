@@ -13,7 +13,12 @@
 .entitystruct PlatformEntityStruct
 .endentitystruct
 
+;; This will start a large platform at a random X location
+;; and a given Y position (Init parameter)
 .import PlatformEntity
+
+;; This one will start the first platform at a constant position
+.import FirstPlatformEntity
 
 .endif
 

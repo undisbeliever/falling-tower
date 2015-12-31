@@ -61,8 +61,13 @@ CONFIG ENTITY_STRUCT_SIZE, 64
 
 
 .importmodule Entity
+
+	;; The linked list of all active platforms
+	.importlabel platformEntityLList
+
 	;; Initialize the entity module
 	;; REQUIRES: 8 bit A, 16 bit Index
+	;; IN: Y = parameter
 	.importroutine Init
 
 	;; Processes a single frame of the gameloop
@@ -73,6 +78,15 @@ CONFIG ENTITY_STRUCT_SIZE, 64
 	;; Renders the entities to the screen
 	;; REQUIRES: 16 bit A, 16 Index, DB = $7E
 	.importroutine RenderFrame
+
+
+	;; Add a platform to the system
+	;; REQUIRES: 16 bit A, 16 bit Index, DB = $7E
+	;; INPUT:
+	;;	A - the location of the entity function ptr
+	;;	Y - the parameter to pass to the Init Function
+	;; OUTPUT: DP - the memory location of the entity created
+	.importroutine NewPlatformEntity
 
 .endimportmodule
 

@@ -15,6 +15,7 @@
 .include "vram.h"
 
 .include "resources/font.h"
+.include "entities/platform.h"
 
 
 .setcpu "65816"
@@ -107,6 +108,17 @@
 	REP	#$30
 .A16
 	JSR	Entity::Init
+
+
+	LDA	#.loword(FirstPlatformEntity)
+	JSR	Entity::NewPlatformEntity
+
+	.repeat 10, i
+		LDA	#.loword(PlatformEntity)
+		LDY	#i * 20
+		JSR	Entity::NewPlatformEntity
+	.endrepeat
+
 
 	REPEAT
 Continue:
