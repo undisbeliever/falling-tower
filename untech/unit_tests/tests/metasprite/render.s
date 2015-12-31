@@ -26,6 +26,7 @@
 		UnitTest	RenderFrame_HiTable3
 		UnitTest	RenderFrame_XMinus
 		UnitTest	RenderFrame_Offscreen
+		UnitTest	RenderFrame_YOffscreenBFix
 		UnitTest	RenderFrame_Overflow
 		UnitTest	RenderLoopEnd
 	EndUnitTestHeader
@@ -484,7 +485,6 @@ Failure:
 
 	JSR	MetaSprite::RenderLoopEnd
 
-
 	; Test hi Buffer
 	LDA	oamHiBuffer
 	AND	#FrameObjects_Offscreen_ExpectedHi_Bitmask
@@ -505,6 +505,47 @@ Failure:
 	UNTIL_GE
 
 	JSR	_TestRestOfBuffer
+	RTS
+
+Failure:
+	CLC
+	RTS
+.endroutine
+
+
+
+.A8
+.I16
+.routine RenderFrame_YOffscreenBFix
+	JSR	_Init
+.A16
+.I16
+	; The previousBufferPos must be <= then bufferPos
+	JSR	MetaSprite::RenderLoopEnd
+	JSR	MetaSprite::RenderLoopInit
+
+
+	LDA	#.loword(Frame_YOffscreenBFix)
+	STA	z:MSDP::currentFrame
+
+	LDA	#.loword(120 - MetaSprite::POSITION_OFFSET)
+	STA	MetaSprite::xPos
+
+	LDA	#.loword(1000 - MetaSprite::POSITION_OFFSET)
+	STA	MetaSprite::yPos
+
+	JSR	MetaSprite::RenderFrame
+
+	JSR	MetaSprite::RenderLoopEnd
+
+
+	SEP	#$20
+.A8
+	LDA	oamBuffer + OamFormat::yPos
+	CMP	#224
+	BNE	Failure
+
+	SEC
 	RTS
 
 Failure:
@@ -693,6 +734,9 @@ Frame_Offscreen0:
 Frame_Offscreen1:
 	.addr	FrameObjects_Offscreen1
 
+Frame_YOffscreenBFix:
+	.addr	FrameObjects_YOffscreenBFix
+
 
 .segment METASPRITE_FRAME_OBJECTS_BLOCK
 
@@ -809,8 +853,14 @@ FrameObjects_Offscreen_Expected:
 FrameObjects_Offscreen_Expected_size = * - FrameObjects_Offscreen_Expected
 
 FrameObjects_Offscreen_ExpectedHi:
-	.byte	%00101101
+	.word	%00101101
 FrameObjects_Offscreen_ExpectedHi_Bitmask = $00FF
+
+
+
+FrameObjects_YOffscreenBFix:
+	.byte	1
+		Object  0,  0, 25, 1
 
 .endmodule
 

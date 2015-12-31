@@ -304,11 +304,21 @@ SkipHiTable:
 			DEY
 		UNTIL_ZERO
 	ELSE
+		SEP	#$20
+.A8
+		; yPos may be invalid when the last object processed by RenderFrame
+		; has an an on-screen xPos and an off-screen yPos.
+
+		CPX	#128 * 4
+		IF_LT
+			LDA	#224
+			STA	oamBuffer + OamFormat::yPos, X
+		ENDIF
+
 		STX	previousBufferPos
 	ENDIF
-
-	SEP	#$20
 .A8
+
 	STZ	updateOamBufferOnZero
 
 	REP	#$30
