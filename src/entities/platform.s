@@ -28,16 +28,19 @@ FIRST_START_Y	= 200
 	;; INPUT: Y: starting y location
 	.addr	Init
 	.addr	ProcessFrame
+	.addr	EntityTouchPlatform
 .endproc
 .export PlatformEntity
 
 .proc FirstPlatformEntity
 	.addr	FirstInit
 	.addr	ProcessFrame
+	.addr	EntityTouchPlatform
 .endproc
 .export FirstPlatformEntity
 
 .define PES PlatformEntityStruct
+
 
 .code
 
@@ -109,7 +112,65 @@ FIRST_START_Y	= 200
 	RTS
 .endroutine
 
+
+; DP = platform
+; DB = $7E
+;  A = address of entity that touched platform
+;  Y = tileCollisionHitbox address
+.A16
+.I16
+.routine EntityTouchPlatform
+	; Entity is only on platform IF:
+	;	- the tch bottom is above the platform's yPos line
+	;	- the player is falling
+
+	TYX
+	TAY
+
+	LDA	a:EntityStruct::yVecl, Y
+	IF_PLUS
+		LDA	Entity::tch_top
+		CLC
+		ADC	Entity::tch_height
+
+		CMP	z:PES::yPos + 1
+		IF_GE
+			LDA	f:tileCollisionDataOffset + MetaSprite__TileCollisionHitbox::yOffset, X
+			AND	#$00FF
+			SEC
+			SBC	#MetaSprite::POSITION_OFFSET
+			CLC
+			ADC	z:PES::yPos + 1
+
+			SEC
+			SBC	Entity::tch_height
+			SEC
+			SBC	Entity::tch_yOffset
+
+			STA	a:EntityStruct::yPos + 1, Y
+
+
+			LDA	#0
+			STA	a:EntityStruct::yVecl, Y
+
+
+			SEP	#$20
+.A8
+			LDA	z:EntityStruct::yPos
+			STA	a:EntityStruct::yPos, Y
+
+			REP	#$20
+.A16
+		ENDIF
+	ENDIF
+
+	RTS
+.endroutine
+
 .endmodule
+
+.segment METASPRITE_TILE_COLLISION_HITBOXES_BLOCK
+	tileCollisionDataOffset = .bankbyte(*) << 16
 
 ; vim: set ft=asm:
 

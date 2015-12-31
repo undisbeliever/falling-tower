@@ -65,6 +65,19 @@ CONFIG ENTITY_STRUCT_SIZE, 64
 	;; The linked list of all active platforms
 	.importlabel platformEntityLList
 
+
+	;; The tile collision hitbox of the entity being processed
+	;;
+	;; These values are exposed so that the platform entity
+	;; can access them in order to save processing time.
+	.importlabel tch_xOffset
+	.importlabel tch_yOffset
+	.importlabel tch_left
+	.importlabel tch_top
+	.importlabel tch_width
+	.importlabel tch_height
+
+
 	;; Initialize the entity module
 	;; REQUIRES: 8 bit A, 16 bit Index
 	;; IN: Y = parameter

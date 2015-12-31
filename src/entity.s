@@ -5,6 +5,9 @@
 .include "common/structure.inc"
 .include "common/registers.inc"
 
+.include "entity-collisions.asm"
+
+.include "entities/platform.h"
 .include "resources/metasprites.h"
 
 .setcpu "65816"
@@ -27,6 +30,24 @@ CONFIG N_ENTITIES, 12
 	firstFreeEntity:	.res	2
 
 	platformEntityLList:	.res	2
+
+
+	; Used for collision testing code
+	collisionTmp:		.res	2
+
+	tch_xOffset:		.res	2
+	tch_yOffset:		.res	2
+	tch_left:		.res	2
+	tch_top:		.res	2
+	tch_width:		.res	2
+	tch_height:		.res	2
+
+.exportlabel tch_xOffset
+.exportlabel tch_yOffset
+.exportlabel tch_left
+.exportlabel tch_top
+.exportlabel tch_width
+.exportlabel tch_height
 
 .exportlabel platformEntityLList
 
@@ -65,7 +86,7 @@ CONFIG N_ENTITIES, 12
 	.assert .asize = 16, error, "Bad asize"
 	.assert .isize = 16, error, "Bad asize"
 
-	; MUST NOT USE Y UNTIL AFTER INIT CALL
+	; MUST NOT USE Y UNTIL BEFORE INIT CALL
 
 	TAX
 
@@ -142,6 +163,9 @@ CONFIG N_ENTITIES, 12
 
 	LDX	z:EntityStruct::functionPtr
 	JSR	(EntityFunctions::ProcessFrame, X)
+
+
+	CheckPlatformCollisions	PlatformEntityFunctions::EntityTouchPlatform
 
 
 	LDA	platformEntityLList

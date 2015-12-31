@@ -45,6 +45,7 @@ obj/%.o: src/%.s
 obj/resources/font.o: $(wildcard resources/font.*)
 obj/resources/metasprites.o: $(wildcard resources/metasprites/*)
 
+obj/entity.o: src/entity-collisions.asm
 
 .PHONY: dirs
 dirs: bin/ $(OBJECT_DIRS)
