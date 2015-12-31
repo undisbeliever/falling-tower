@@ -29,6 +29,7 @@ FIRST_START_Y	= 200
 	.addr	Init
 	.addr	ProcessFrame
 	.addr	EntityTouchPlatform
+	.addr	EntityLeavePlatform
 .endproc
 .export PlatformEntity
 
@@ -36,6 +37,7 @@ FIRST_START_Y	= 200
 	.addr	FirstInit
 	.addr	ProcessFrame
 	.addr	EntityTouchPlatform
+	.addr	EntityLeavePlatform
 .endproc
 .export FirstPlatformEntity
 
@@ -61,6 +63,11 @@ FIRST_START_Y	= 200
 	STZ	z:PES::xPos
 	STA	z:PES::xPos + 1
 
+	STZ	z:PES::xVecl
+	STZ	z:PES::yVecl
+
+	; Reset platform state
+	STZ	z:PES::standingOnPlatform
 
 	LDA	#MetaSprites::Platforms::frameSetId
 	LDY	#0
@@ -161,8 +168,23 @@ FIRST_START_Y	= 200
 
 			REP	#$20
 .A16
+
+			TDC
+			STA	a:EntityStruct::standingOnPlatform, Y
 		ENDIF
 	ENDIF
+
+	RTS
+.endroutine
+
+
+
+; DP = platform
+; DB = $7E
+;  Y = address of entity that was previously on the platform
+.routine EntityLeavePlatform
+	TYX
+	STZ	a:EntityStruct::standingOnPlatform, X
 
 	RTS
 .endroutine

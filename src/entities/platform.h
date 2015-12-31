@@ -17,8 +17,8 @@
 
 	;; Called when an entity touches the platform
 	;;
-	;; Should set EntityStruct::platform to DP if the
-	;; entity is standing on the platform
+	;; Should set EntityStruct::standingOnPlatform to DP if the
+	;; entity is actually standing on the platform
 	;;
 	;; REGISTERS: 16 bit A, 16 bit Index, DB = $7E
 	;; INPUT: DP = platform
@@ -27,6 +27,17 @@
 	;;	   X = platform functionPtr
 	;;	   Entity::tch_ = tile collision hitbox of the entity
 	EntityTouchPlatform	= 4
+
+	;; Called when an entity leaves the platform
+	;;
+	;; Should clear EntityStruct::platform.
+	;;
+	;; REGISTERS: 16 bit A, 16 bit Index, DB = $7E
+	;; INPUT: DP = platform
+	;;	   Y = entity that was previously on the platform
+	;;	   X = platform functionPtr
+	;;	   Entity::tch_ = tile collision hitbox of the entity
+	EntityLeavePlatform	= 6
 .endenum
 
 .entitystruct PlatformEntityStruct

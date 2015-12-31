@@ -26,6 +26,7 @@ CONFIG N_ENTITIES, 12
 
 	entityPool:		.res	N_ENTITIES * ENTITY_STRUCT_SIZE
 
+
 .segment "WRAM7E"
 	firstFreeEntity:	.res	2
 
@@ -33,7 +34,8 @@ CONFIG N_ENTITIES, 12
 
 
 	; Used for collision testing code
-	collisionTmp:		.res	2
+	collisionTmp1:		.res	2
+	collisionTmp2:		.res	2
 
 	tch_xOffset:		.res	2
 	tch_yOffset:		.res	2
@@ -181,7 +183,7 @@ CONFIG N_ENTITIES, 12
 	JSR	(EntityFunctions::ProcessFrame, X)
 
 
-	CheckPlatformCollisions	PlatformEntityFunctions::EntityTouchPlatform
+	CheckPlatformCollisions	PlatformEntityFunctions::EntityTouchPlatform, PlatformEntityFunctions::EntityLeavePlatform
 
 	RTS
 .endroutine

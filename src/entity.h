@@ -47,6 +47,10 @@ CONFIG ENTITY_STRUCT_SIZE, 64
 		yVecl		.res 2
 
 		metasprite	.tag MetaSpriteStruct
+
+		;; Address of the platform the entity is standing on
+		;; If NULL (0) the entity is not on a platform
+		standingOnPlatform	.addr
 .endmacro
 
 .macro .endentitystruct

@@ -7,7 +7,10 @@
 .include "entity.h"
 .include "entity-physics.h"
 
+.include "controller.h"
 .include "resources/metasprites.h"
+
+CONFIG	JUMP_VELOCITY,	$0300
 
 .setcpu "65816"
 
@@ -43,6 +46,9 @@
 	STZ	z:PES::xVecl
 	STZ	z:PES::yVecl
 
+	; Reset platform state
+	STZ	z:PES::standingOnPlatform
+
 	LDA	#MetaSprites::Player::frameSetId
 	LDY	#0
 	JSR	MetaSprite::Init
@@ -60,6 +66,16 @@
 .A16
 .I16
 .routine ProcessFrame
+	; Jump only if standing on a platform
+	LDA	z:PES::standingOnPlatform
+	IF_NOT_ZERO
+		LDA	Controller::pressed
+		IF_BIT	#JOY_B | JOY_A
+			LDA	#.loword(-JUMP_VELOCITY)
+			STA	z:PES::yVecl
+		ENDIF
+	ENDIF
+
 	JSR	EntityPhysics::ProcessEntityPhyicsWithGravity
 
 	RTS
