@@ -154,7 +154,7 @@ Activate_DynamicFixed:
 
 Success:
 	SEC
-	CLC
+	RTS
 
 Failure:
 	CLC
