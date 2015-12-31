@@ -4,6 +4,9 @@
 .include "common/structure.inc"
 .include "common/registers.inc"
 
+.include "entity.h"
+.include "entity-physics.h"
+
 .include "resources/metasprites.h"
 
 .setcpu "65816"
@@ -33,7 +36,7 @@
 	STZ	z:PES::xPos
 	STA	z:PES::xPos + 1
 
-	LDA	#120
+	LDA	#8
 	STZ	z:PES::yPos
 	STA	z:PES::yPos + 1
 
@@ -57,6 +60,8 @@
 .A16
 .I16
 .routine ProcessFrame
+	JSR	EntityPhysics::ProcessEntityPhyicsWithGravity
+
 	RTS
 .endroutine
 
