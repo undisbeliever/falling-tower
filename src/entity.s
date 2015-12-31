@@ -14,7 +14,8 @@ MetaSpriteDpOffset = EntityStruct::metasprite
 .module Entity
 
 .segment "SHADOW"
-	player:	.res	ENTITY_STRUCT_SIZE
+	player:		.res	ENTITY_STRUCT_SIZE
+	platform:	.res	ENTITY_STRUCT_SIZE
 
 
 .code
@@ -41,6 +42,23 @@ MetaSpriteDpOffset = EntityStruct::metasprite
 
 	JSR	MetaSprite::Activate
 
+
+
+	; ::TODO AddEntity Routine::
+
+	LDA	#.loword(platform)
+	TCD
+
+	.import PlatformEntity
+
+	STZ	z:EntityStruct::nextPtr
+
+	LDX	#.loword(PlatformEntity)
+	STX	z:EntityStruct::functionPtr
+	JSR	(EntityFunctions::Init, X)
+
+	JSR	MetaSprite::Activate
+
 	PLD
 
 	RTS
@@ -54,6 +72,13 @@ MetaSpriteDpOffset = EntityStruct::metasprite
 	PHD
 
 	LDA	#.loword(player)
+	TCD
+
+	LDX	z:EntityStruct::functionPtr
+	JSR	(EntityFunctions::ProcessFrame, X)
+
+
+	LDA	#.loword(platform)
 	TCD
 
 	LDX	z:EntityStruct::functionPtr
@@ -86,6 +111,23 @@ MetaSpriteDpOffset = EntityStruct::metasprite
 	STA	MetaSprite::yPos
 
 	JSR	MetaSprite::RenderFrame
+
+
+	LDA	#.loword(platform)
+	TCD
+
+	LDA	z:EntityStruct::xPos + 1
+	SEC
+	SBC	#MetaSprite::POSITION_OFFSET
+	STA	MetaSprite::xPos
+
+	LDA	z:EntityStruct::yPos + 1
+	SEC
+	SBC	#MetaSprite::POSITION_OFFSET
+	STA	MetaSprite::yPos
+
+	JSR	MetaSprite::RenderFrame
+
 
 	JSR	MetaSprite::RenderLoopEnd
 
