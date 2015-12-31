@@ -158,15 +158,7 @@ CONFIG N_ENTITIES, 12
 .A16
 .I16
 .routine ProcessFrame
-	LDA	#.loword(player)
-	TCD
-
-	LDX	z:EntityStruct::functionPtr
-	JSR	(EntityFunctions::ProcessFrame, X)
-
-
-	CheckPlatformCollisions	PlatformEntityFunctions::EntityTouchPlatform
-
+	; Process platforms first (in case they move)
 
 	LDA	platformEntityLList
 	IF_NOT_ZERO
@@ -179,6 +171,17 @@ CONFIG N_ENTITIES, 12
 			LDA	z:EntityStruct::nextPtr
 		UNTIL_ZERO
 	ENDIF
+
+	; Process player
+
+	LDA	#.loword(player)
+	TCD
+
+	LDX	z:EntityStruct::functionPtr
+	JSR	(EntityFunctions::ProcessFrame, X)
+
+
+	CheckPlatformCollisions	PlatformEntityFunctions::EntityTouchPlatform
 
 	RTS
 .endroutine

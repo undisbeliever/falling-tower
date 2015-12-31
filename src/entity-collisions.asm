@@ -148,7 +148,7 @@ ReturnJump:
 				LDA	f:tileCollisionDataOffset + MetaSprite__TileCollisionHitbox::width, X
 				AND	#$00FF
 				; C clear
-				ADC	Entity::tch_left
+				ADC	collisionTmp
 
 				CMP	Entity::tch_left
 				BLT	SkipEntity
