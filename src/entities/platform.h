@@ -26,6 +26,7 @@
 	;;	   Y = tileCollisionHitbox address of the platform
 	;;	   X = platform functionPtr
 	;;	   Entity::tch_ = tile collision hitbox of the entity
+	;;	   Entity::previousYpos = the yPos of the entity before frame processing
 	EntityTouchPlatform	= 4
 
 	;; Called when an entity leaves the platform
@@ -37,6 +38,7 @@
 	;;	   Y = entity that was previously on the platform
 	;;	   X = platform functionPtr
 	;;	   Entity::tch_ = tile collision hitbox of the entity
+	;;	   Entity::previousYpos = the yPos of the entity before frame processing
 	EntityLeavePlatform	= 6
 .endenum
 

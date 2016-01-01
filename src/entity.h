@@ -74,6 +74,9 @@ ENTITY_POS_OFFSET = $1000
 	;; The linked list of all active platforms
 	.importlabel platformEntityLList
 
+	;; The previous y position of the entity being processed
+	;; (16 bit unsigned integer)
+	.importlabel previousYpos
 
 	;; The tile collision hitbox of the entity being processed
 	;;

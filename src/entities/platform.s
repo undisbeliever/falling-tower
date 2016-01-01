@@ -139,12 +139,19 @@ FIRST_START_Y	= 200
 
 	LDA	a:EntityStruct::yVecl, Y
 	IF_PLUS
-		LDA	Entity::tch_top
+		; Test to make sure that the entity was above the platform
+		; before physics processing before placing it on the platform
+
+		LDA	Entity::previousYpos
+		SEC
+		SBC	z:EntityStruct::yPos + 1
+		CLC
+		ADC	Entity::tch_top
 		CLC
 		ADC	Entity::tch_height
 
 		CMP	z:PES::yPos + 1
-		IF_GE
+		IF_LT
 			LDA	f:tileCollisionDataOffset + MetaSprite__TileCollisionHitbox::yOffset, X
 			AND	#$00FF
 			SEC

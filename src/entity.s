@@ -32,10 +32,11 @@ CONFIG N_ENTITIES, 12
 
 	platformEntityLList:	.res	2
 
-
 	; Used for collision testing code
 	collisionTmp1:		.res	2
 	collisionTmp2:		.res	2
+
+	previousYpos:		.res	2
 
 	tch_xOffset:		.res	2
 	tch_yOffset:		.res	2
@@ -44,6 +45,7 @@ CONFIG N_ENTITIES, 12
 	tch_width:		.res	2
 	tch_height:		.res	2
 
+.exportlabel previousYpos
 .exportlabel tch_xOffset
 .exportlabel tch_yOffset
 .exportlabel tch_left
@@ -167,6 +169,9 @@ CONFIG N_ENTITIES, 12
 		REPEAT
 			TCD
 
+			LDA	z:EntityStruct::yPos + 1
+			STA	previousYpos
+
 			LDX	z:EntityStruct::functionPtr
 			JSR	(EntityFunctions::ProcessFrame, X)
 
@@ -178,6 +183,9 @@ CONFIG N_ENTITIES, 12
 
 	LDA	#.loword(player)
 	TCD
+
+	LDA	z:EntityStruct::yPos + 1
+	STA	previousYpos
 
 	LDX	z:EntityStruct::functionPtr
 	JSR	(EntityFunctions::ProcessFrame, X)

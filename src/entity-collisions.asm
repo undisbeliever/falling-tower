@@ -17,6 +17,7 @@
 ;;	 Y = tileCollisionHitbox address
 ;;	 X = platform functionPtr
 ;;	 Entity::tch_ = tile collision hitbox of the entity
+;;	 Entity::previousYpos = the yPos of the entity before processing
 ;;
 ;;
 ;; If the entity was on a platform in the previous frame but not on the platform in
@@ -28,6 +29,7 @@
 ;;	 Y = entity that touched the platform
 ;;	 X = platform functionPtr
 ;;	 Entity::tch_ = tile collision hitbox of the entity
+;;	 Entity::previousYpos = the yPos of the entity before processing
 ;;
 ;; REQUIRES: 16 bit A, 16 bit Index, DB = $7E
 ;; INPUT: DP = entity to check, MUST NOT be in the platform list
