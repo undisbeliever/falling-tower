@@ -11,7 +11,8 @@
 
 .module EntityPhysics
 
-CONFIG GRAVITY,		40
+CONFIG GRAVITY,		$0026
+CONFIG WEAK_GRAVITY,	$0013
 
 CONFIG MAX_XVECL,	$0400
 CONFIG MAX_YVECL,	$0600
@@ -31,7 +32,21 @@ CONFIG	FRICTION,	$0028
 .A16
 .I16
 .routine ProcessEntityPhyicsWithMovement
+	TAY
 
+	; Gravity changes depending on if the player is pressing the jump button
+
+	IF_BIT	#JOY_B | JOY_A
+		LDA	#WEAK_GRAVITY
+	ELSE
+		LDA	#GRAVITY
+	ENDIF
+	CLC
+	ADC	z:ES::yVecl
+	STA	z:ES::yVecl
+
+
+	TYA
 	AND	#JOY_LEFT | JOY_RIGHT
 	IF_ZERO
 		; Not pressing left or right
@@ -91,7 +106,7 @@ CONFIG	FRICTION,	$0028
 		ENDIF
 	ENDIF
 
-	.assert * = ProcessEntityPhyicsWithGravity, error, "Bad Flow"
+	BRA	ProcessEntityPhyicsWithoutGravity
 .endroutine
 
 
