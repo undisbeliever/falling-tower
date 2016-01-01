@@ -26,6 +26,11 @@ CONFIG ENTITY_STRUCT_SIZE, 64
 	ProcessFrame	= 2
 .endenum
 
+
+;; This is the offset for all x/y entity coordinates
+;; It prevents signed comparisons in collision detection code
+ENTITY_POS_OFFSET = $1000
+
 .macro .entitystruct name
 	.define __ENTITY_STRUCT_NAME_ name
 

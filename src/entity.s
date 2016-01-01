@@ -200,12 +200,12 @@ CONFIG N_ENTITIES, 12
 
 	LDA	z:EntityStruct::xPos + 1
 	SEC
-	SBC	#MetaSprite::POSITION_OFFSET
+	SBC	#MetaSprite::POSITION_OFFSET + ENTITY_POS_OFFSET
 	STA	MetaSprite::xPos
 
 	LDA	z:EntityStruct::yPos + 1
 	SEC
-	SBC	#MetaSprite::POSITION_OFFSET
+	SBC	#MetaSprite::POSITION_OFFSET + ENTITY_POS_OFFSET
 	STA	MetaSprite::yPos
 
 	JSR	MetaSprite::RenderFrame
@@ -218,12 +218,12 @@ CONFIG N_ENTITIES, 12
 
 			LDA	z:EntityStruct::xPos + 1
 			SEC
-			SBC	#MetaSprite::POSITION_OFFSET
+			SBC	#MetaSprite::POSITION_OFFSET + ENTITY_POS_OFFSET
 			STA	MetaSprite::xPos
 
 			LDA	z:EntityStruct::yPos + 1
 			SEC
-			SBC	#MetaSprite::POSITION_OFFSET
+			SBC	#MetaSprite::POSITION_OFFSET + ENTITY_POS_OFFSET
 			STA	MetaSprite::yPos
 
 			JSR	MetaSprite::RenderFrame

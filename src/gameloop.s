@@ -115,7 +115,7 @@
 
 	.repeat 10, i
 		LDA	#.loword(PlatformEntity)
-		LDY	#i * 20
+		LDY	#i * 20 + ENTITY_POS_OFFSET
 		JSR	Entity::NewPlatformEntity
 	.endrepeat
 

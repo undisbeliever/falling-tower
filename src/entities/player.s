@@ -35,11 +35,11 @@ CONFIG	JUMP_VELOCITY,	$0300
 .I16
 .routine Init
 	; ::DEBUG example starting location::
-	LDA	#120
+	LDA	#120 + ENTITY_POS_OFFSET
 	STZ	z:PES::xPos
 	STA	z:PES::xPos + 1
 
-	LDA	#8
+	LDA	#8 + ENTITY_POS_OFFSET
 	STZ	z:PES::yPos
 	STA	z:PES::yPos + 1
 
