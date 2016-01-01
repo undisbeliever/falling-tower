@@ -66,9 +66,10 @@ CONFIG	JUMP_VELOCITY,	$0300
 .A16
 .I16
 .routine ProcessFrame
-	; Jump only if standing on a platform
+
 	LDA	z:PES::standingOnPlatform
 	IF_NOT_ZERO
+		; Jump only if standing on a platform
 		LDA	Controller::pressed
 		IF_BIT	#JOY_B | JOY_A
 			LDA	#.loword(-JUMP_VELOCITY)
@@ -76,9 +77,8 @@ CONFIG	JUMP_VELOCITY,	$0300
 		ENDIF
 	ENDIF
 
-	JSR	EntityPhysics::ProcessEntityPhyicsWithGravity
-
-	RTS
+	LDA	Controller::current
+	JMP	EntityPhysics::ProcessEntityPhyicsWithMovement
 .endroutine
 
 .endmodule

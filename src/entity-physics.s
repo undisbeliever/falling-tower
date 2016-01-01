@@ -11,13 +11,89 @@
 
 .module EntityPhysics
 
-CONFIG GRAVITY, 40
-CONFIG MAX_XVECL, $0400
-CONFIG MAX_YVECL, $0600
+CONFIG GRAVITY,		40
+
+CONFIG MAX_XVECL,	$0400
+CONFIG MAX_YVECL,	$0600
+
+CONFIG	WALK_ACCEL,	$0018
+CONFIG	WALK_MAX_VECL,	$0140
+
+CONFIG	FRICTION,	$0028
 
 .define ES EntityStruct
 
 .code
+
+; DB = $7E
+; IN: DP = entity
+;  A: controls
+.A16
+.I16
+.routine ProcessEntityPhyicsWithMovement
+
+	AND	#JOY_LEFT | JOY_RIGHT
+	IF_ZERO
+		; Not pressing left or right
+		LDA	z:ES::xVecl
+		IF_PLUS
+			CMP	#FRICTION
+			IF_LT
+				LDA	#0
+			ELSE
+				; C set
+				SBC	#FRICTION
+			ENDIF
+		ELSE
+			CMP	#.loword(-FRICTION)
+			IF_C_SET
+				; xVecl > -friction
+				LDA	#0
+			ELSE
+				; C clear
+				ADC	#FRICTION
+			ENDIF
+		ENDIF
+
+		STA	z:ES::xVecl
+	ELSE
+		CMP	#JOY_LEFT | JOY_RIGHT
+		IF_NE
+			; Only left or right is pressed
+			IF_BIT	#JOY_LEFT
+				LDA	z:ES::xVecl
+				IF_PLUS
+					SEC
+					SBC	#WALK_ACCEL + FRICTION
+				ELSE
+					CMP	#.loword(-WALK_MAX_VECL)
+					IF_C_SET
+						SBC	#WALK_ACCEL
+					ENDIF
+				ENDIF
+
+				STA	z:ES::xVecl
+			ELSE
+				LDA	z:ES::xVecl
+				IF_MINUS
+					CLC
+					ADC	#WALK_ACCEL + FRICTION
+				ELSE
+					CMP	#WALK_MAX_VECL
+					IF_LT
+						; C Clear
+						ADC	#WALK_ACCEL
+					ENDIF
+				ENDIF
+
+				STA	z:ES::xVecl
+			ENDIF
+		ENDIF
+	ENDIF
+
+	.assert * = ProcessEntityPhyicsWithGravity, error, "Bad Flow"
+.endroutine
+
 
 ; DB = $7E
 ; IN: DP = entity

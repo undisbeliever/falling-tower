@@ -10,6 +10,13 @@
 
 .importmodule EntityPhysics
 
+	;; Processes an entity's physics (including movement and gravity)
+	;;
+	;; REQUIRES: 16 bit A, 16 Index, DB = $7E
+	;; INPUT: DP = entity to process
+	;;	   A = controls
+	.importroutine ProcessEntityPhyicsWithMovement
+
 	;; Processes an entity's physics (including gravity)
 	;;
 	;; REQUIRES: 16 bit A, 16 Index, DB = $7E
