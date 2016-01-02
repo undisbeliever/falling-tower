@@ -25,7 +25,15 @@
 .segment "SHADOW"
 	state:		.res 2
 
+.segment "WRAM7E"
+	score:		.res 4
+
+	; Address of the console cursor
+	scoreCursor:	.res 2
+
+
 .exportlabel state
+.exportlabel score
 
 .code
 
@@ -102,11 +110,22 @@
 
 	JSR	Console::Init
 
+	; Have text in front of everything else
+	LDA	#TILEMAP_ORDER_FLAG >> 8
+	TSB	Console::tilemapOffset + 1
+
+
 	PEA	$807E
 	PLB			; $7E
 
 	REP	#$30
 .A16
+
+	LDX	Console::cursor
+	STX	scoreCursor
+
+	STZ	score
+	STZ	score + 2
 
 	JSR	Entity::Init
 
@@ -120,10 +139,25 @@ Continue:
 			JSR	Controller::Update
 			JSR	Random::AddJoypadEntropy
 
+			; Print score
+			LDA	#0
+			TCD
+
+			SEP	#$20
+.A8
+			LDX	scoreCursor
+			STX	Console::cursor
+
+			LDXY	score
+			JSR	Console::PrintInt_U32XY
+
+			REP	#$30
+.A16
+
+			; Process frame
+
 			JSR	Entity::ProcessFrame
-
 			JSR	Camera::ProcessFrame
-
 			JSR	Entity::RenderFrame
 
 			; Handle pausing the game
@@ -152,7 +186,6 @@ End:
 
 ;; These functions are called when the game state changes
 ;; They will jump to either `PlayGame::Continue` or `PlayGame::End` upon completion.
-;; 
 .rodata
 .proc GameStateTable
 	.addr	PlayGame::Continue	; PLAYING

@@ -21,6 +21,11 @@
 	;; (word)
 	.importlabel	state
 
+	;; The game's score
+	;; (uint32, WRAM7E)
+	.importlabel score
+
+
 	;; Initializes and plays the game
 	;; REQUIRES: 8 bit A, 16 bit Index, DB = $80
 	.importroutine PlayGame

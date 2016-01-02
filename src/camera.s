@@ -5,6 +5,7 @@
 .include "common/structure.inc"
 
 .include "entity.h"
+.include "gameloop.h"
 .include "entities/player.h"
 .include "entities/platform.h"
 
@@ -15,12 +16,13 @@ CONFIG STARTING_PLATFORM_SPACING, 20
 
 
 .segment "WRAM7E"
-	xPos:		.res 2
-	yPos:		.res 2
-
+	xPos:			.res 2
+	yPos:			.res 2
 
 	; The next yPos in which a platform spawns
 	nextPlatformSpawnYpos:	.res	2
+
+	tmp1:			.res 2
 
 
 .exportlabel xPos
@@ -39,7 +41,6 @@ CONFIG STARTING_PLATFORM_SPACING, 20
 	LDA	#Camera::STARTING_YOFFSET
 	STA	yPos
 
-
 	; Create the initial platforms
 	LDA	#.loword(FirstPlatformEntity)
 	JSR	Entity::NewPlatformEntity
@@ -55,8 +56,13 @@ CONFIG STARTING_PLATFORM_SPACING, 20
 .A16
 .I16
 .routine ProcessFrame
+
+tmp_prevYpos	= tmp1
+
 	; Check to see if another platform needs spawning in the spawn window
 	LDA	yPos
+	STA	tmp_prevYpos
+
 	SBC	#STARTING_PLATFORM_SPACING
 	CMP	nextPlatformSpawnYpos
 	IF_LT
@@ -71,6 +77,16 @@ CONFIG STARTING_PLATFORM_SPACING, 20
 	CMP	yPos
 	IF_LT
 		STA	yPos
+
+		; increase score by how much the frame moved
+		RSB	tmp_prevYpos
+
+		CLC
+		ADC	GameLoop::score
+		STA	GameLoop::score
+		IF_C_SET
+			INC	GameLoop::score + 2
+		ENDIF
 	ENDIF
 
 	RTS
