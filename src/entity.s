@@ -16,7 +16,7 @@
 
 MetaSpriteDpOffset = EntityStruct::metasprite
 
-CONFIG N_ENTITIES, 12
+CONFIG N_ENTITIES, 20
 
 .import PlayerEntity
 

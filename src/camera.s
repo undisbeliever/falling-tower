@@ -11,11 +11,16 @@
 .module Camera
 
 CONFIG CAMERA_TOP_MARGIN, 64
+CONFIG STARTING_PLATFORM_SPACING, 20
 
 
 .segment "WRAM7E"
 	xPos:		.res 2
 	yPos:		.res 2
+
+
+	; The next yPos in which a platform spawns
+	nextPlatformSpawnYpos:	.res	2
 
 
 .exportlabel xPos
@@ -39,11 +44,8 @@ CONFIG CAMERA_TOP_MARGIN, 64
 	LDA	#.loword(FirstPlatformEntity)
 	JSR	Entity::NewPlatformEntity
 
-	.repeat 10, i
-		LDA	#.loword(PlatformEntity)
-		LDY	#i * 20 + Camera::STARTING_YOFFSET
-		JSR	Entity::NewPlatformEntity
-	.endrepeat
+	LDA	#Camera::STARTING_YOFFSET + PlatformEntity::FIRST_START_Y - STARTING_PLATFORM_SPACING
+	STA	nextPlatformSpawnYpos
 
 	RTS
 .endroutine
@@ -53,7 +55,15 @@ CONFIG CAMERA_TOP_MARGIN, 64
 .A16
 .I16
 .routine ProcessFrame
+	; Check to see if another platform needs spawning in the spawn window
+	LDA	yPos
+	SBC	#STARTING_PLATFORM_SPACING
+	CMP	nextPlatformSpawnYpos
+	IF_LT
+		JSR	SpawnNextPlatform
+	ENDIF
 
+	; Move the window if necessary
 	LDA	Entity::player + PlayerEntityStruct::yPos + 1
 	SEC
 	SBC	#CAMERA_TOP_MARGIN
@@ -62,6 +72,31 @@ CONFIG CAMERA_TOP_MARGIN, 64
 	IF_LT
 		STA	yPos
 	ENDIF
+
+	RTS
+.endroutine
+
+
+
+; Spawns the next platform
+; Sets nextPlatformSpawnYpos to the appropriate value
+; DP = $7E
+.A16
+.I16
+.routine SpawnNextPlatform
+	; ::TODO random platform types::
+	LDA	#.loword(PlatformEntity)
+	LDY	nextPlatformSpawnYpos
+
+	JSR	Entity::NewPlatformEntity
+
+	; Generate next placement
+	; ::TODO randomize::
+	; ::TODO make spacing wider::
+	LDA	nextPlatformSpawnYpos
+	SEC
+	SBC	#STARTING_PLATFORM_SPACING
+	STA	nextPlatformSpawnYpos
 
 	RTS
 .endroutine
