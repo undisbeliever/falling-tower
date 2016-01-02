@@ -9,13 +9,13 @@
 .include "common/console.h"
 .include "common/ppu.h"
 
+.include "camera.h"
 .include "controller.h"
-.include "random.h"
 .include "entity.h"
+.include "random.h"
 .include "vram.h"
 
 .include "resources/font.h"
-.include "entities/platform.h"
 
 
 .setcpu "65816"
@@ -107,17 +107,10 @@
 
 	REP	#$30
 .A16
+
 	JSR	Entity::Init
 
-
-	LDA	#.loword(FirstPlatformEntity)
-	JSR	Entity::NewPlatformEntity
-
-	.repeat 10, i
-		LDA	#.loword(PlatformEntity)
-		LDY	#i * 20 + ENTITY_POS_OFFSET
-		JSR	Entity::NewPlatformEntity
-	.endrepeat
+	JSR	Camera::Init
 
 
 	REPEAT
@@ -128,6 +121,9 @@ Continue:
 			JSR	Random::AddJoypadEntropy
 
 			JSR	Entity::ProcessFrame
+
+			JSR	Camera::ProcessFrame
+
 			JSR	Entity::RenderFrame
 
 			; Handle pausing the game

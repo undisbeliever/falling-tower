@@ -5,6 +5,7 @@
 .include "common/structure.inc"
 .include "common/registers.inc"
 
+.include "camera.h"
 .include "entity-collisions.asm"
 
 .include "entities/platform.h"
@@ -53,6 +54,7 @@ CONFIG N_ENTITIES, 12
 .exportlabel tch_width
 .exportlabel tch_height
 
+.exportlabel player
 .exportlabel platformEntityLList
 
 .code
@@ -208,12 +210,16 @@ CONFIG N_ENTITIES, 12
 
 	LDA	z:EntityStruct::xPos + 1
 	SEC
-	SBC	#MetaSprite::POSITION_OFFSET + ENTITY_POS_OFFSET
+	SBC	#MetaSprite::POSITION_OFFSET
+	SEC
+	SBC	Camera::xPos
 	STA	MetaSprite::xPos
 
 	LDA	z:EntityStruct::yPos + 1
 	SEC
-	SBC	#MetaSprite::POSITION_OFFSET + ENTITY_POS_OFFSET
+	SBC	#MetaSprite::POSITION_OFFSET
+	SEC
+	SBC	Camera::yPos
 	STA	MetaSprite::yPos
 
 	JSR	MetaSprite::RenderFrame
@@ -226,12 +232,16 @@ CONFIG N_ENTITIES, 12
 
 			LDA	z:EntityStruct::xPos + 1
 			SEC
-			SBC	#MetaSprite::POSITION_OFFSET + ENTITY_POS_OFFSET
+			SBC	#MetaSprite::POSITION_OFFSET
+			SEC
+			SBC	Camera::xPos
 			STA	MetaSprite::xPos
 
 			LDA	z:EntityStruct::yPos + 1
 			SEC
-			SBC	#MetaSprite::POSITION_OFFSET + ENTITY_POS_OFFSET
+			SBC	#MetaSprite::POSITION_OFFSET
+			SEC
+			SBC	Camera::yPos
 			STA	MetaSprite::yPos
 
 			JSR	MetaSprite::RenderFrame

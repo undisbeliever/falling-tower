@@ -6,15 +6,20 @@
 
 .include "entity.h"
 .include "entity-physics.h"
+.include "entities/platform.h"
 
 .include "controller.h"
+.include "camera.h"
 .include "resources/metasprites.h"
 
 CONFIG	JUMP_VELOCITY,	$0300
+CONFIG	PLAYER_Y_BOTTOM_OFFSET,	15
 
 .setcpu "65816"
 
 .module PlayerEntity
+
+START_X = 256 / 2
 
 .rodata
 
@@ -35,11 +40,11 @@ CONFIG	JUMP_VELOCITY,	$0300
 .I16
 .routine Init
 	; ::DEBUG example starting location::
-	LDA	#120 + ENTITY_POS_OFFSET
+	LDA	#START_X + Camera::STARTING_XOFFSET
 	STZ	z:PES::xPos
 	STA	z:PES::xPos + 1
 
-	LDA	#8 + ENTITY_POS_OFFSET
+	LDA	#PlatformEntity::FIRST_START_Y + Camera::STARTING_YOFFSET - PLAYER_Y_BOTTOM_OFFSET
 	STZ	z:PES::yPos
 	STA	z:PES::yPos + 1
 

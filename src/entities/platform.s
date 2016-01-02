@@ -4,6 +4,7 @@
 .include "common/structure.inc"
 .include "common/registers.inc"
 
+.include "camera.h"
 .include "entity.h"
 .include "random.h"
 .include "entity-physics.h"
@@ -14,13 +15,13 @@
 
 .module PlatformEntity
 
-HUGE_WIDTH	= 48
-LARGE_WIDTH	= 40
-MEDIUM_WIDTH	= 32
-SMALL_WIDTH	= 24
+HUGE_WIDTH	= PlatformEntity::HUGE_WIDTH
+LARGE_WIDTH	= PlatformEntity::LARGE_WIDTH
+MEDIUM_WIDTH	= PlatformEntity::MEDIUM_WIDTH
+SMALL_WIDTH	= PlatformEntity::SMALL_WIDTH
 
-FIRST_START_X	= (256 - HUGE_WIDTH) / 2
-FIRST_START_Y	= 200
+FIRST_START_X	= PlatformEntity::FIRST_START_X
+FIRST_START_Y	= PlatformEntity::FIRST_START_Y
 
 .rodata
 
@@ -61,7 +62,7 @@ FIRST_START_Y	= 200
 	JSR	Random::Rnd_U16A
 
 	CLC
-	ADC	#ENTITY_POS_OFFSET
+	ADC	Camera::xPos
 
 	STZ	z:PES::xPos
 	STA	z:PES::xPos + 1
@@ -88,11 +89,11 @@ FIRST_START_Y	= 200
 .A16
 .I16
 .routine FirstInit
-	LDA	#FIRST_START_X + ENTITY_POS_OFFSET
+	LDA	#FIRST_START_X + Camera::STARTING_XOFFSET
 	STZ	z:PES::xPos
 	STA	z:PES::xPos + 1
 
-	LDA	#FIRST_START_Y + ENTITY_POS_OFFSET
+	LDA	#FIRST_START_Y + Camera::STARTING_YOFFSET
 	STZ	z:PES::yPos
 	STA	z:PES::yPos + 1
 

@@ -27,10 +27,6 @@ CONFIG ENTITY_STRUCT_SIZE, 64
 .endenum
 
 
-;; This is the offset for all x/y entity coordinates
-;; It prevents signed comparisons in collision detection code
-ENTITY_POS_OFFSET = $1000
-
 .macro .entitystruct name
 	.define __ENTITY_STRUCT_NAME_ name
 
@@ -70,6 +66,9 @@ ENTITY_POS_OFFSET = $1000
 
 
 .importmodule Entity
+
+	;; The player entity
+	.importlabel player
 
 	;; The linked list of all active platforms
 	.importlabel platformEntityLList

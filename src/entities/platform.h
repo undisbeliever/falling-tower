@@ -52,6 +52,17 @@
 ;; This one will start the first platform at a constant position
 .import FirstPlatformEntity
 
+
+.importmodule PlatformEntity
+	HUGE_WIDTH	= 48
+	LARGE_WIDTH	= 40
+	MEDIUM_WIDTH	= 32
+	SMALL_WIDTH	= 24
+
+	FIRST_START_X	= (256 - HUGE_WIDTH) / 2
+	FIRST_START_Y	= 200
+.endimportmodule
+
 .endif
 
 ; vim: ft=asm:
