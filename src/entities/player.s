@@ -39,7 +39,6 @@ START_X = 256 / 2
 .A16
 .I16
 .routine Init
-	; ::DEBUG example starting location::
 	LDA	#START_X + Camera::STARTING_XOFFSET
 	STZ	z:PES::xPos
 	STA	z:PES::xPos + 1
@@ -71,6 +70,15 @@ START_X = 256 / 2
 .A16
 .I16
 .routine ProcessFrame
+	LDA	z:PES::yPos + 1
+	SEC
+	SBC	#Camera::WINDOW_HEIGHT
+	CMP	Camera::yPos
+	IF_GE
+		; Player offscreen - now dead
+		CLC
+		RTS
+	ENDIF
 
 	LDA	z:PES::standingOnPlatform
 	IF_NOT_ZERO

@@ -220,6 +220,7 @@ End_xPos:
 End_yPos:
 	ENDIF
 
+	SEC
 	RTS
 .endroutine
 

@@ -118,9 +118,17 @@ FIRST_START_Y	= PlatformEntity::FIRST_START_Y
 .A16
 .I16
 .routine ProcessFrame
-	JSR	EntityPhysics::ProcessEntityPhyicsWithoutGravity
+	LDA	z:PES::yPos + 1
+	SEC
+	SBC	#Camera::WINDOW_HEIGHT
+	CMP	Camera::yPos
+	IF_GE
+		; Player offscreen - kill it
+		CLC
+		RTS
+	ENDIF
 
-	RTS
+	JMP	EntityPhysics::ProcessEntityPhyicsWithoutGravity
 .endroutine
 
 

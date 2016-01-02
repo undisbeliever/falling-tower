@@ -6,6 +6,7 @@
 .include "common/registers.inc"
 
 .include "camera.h"
+.include "gameloop.h"
 .include "entity-collisions.asm"
 
 .include "entities/platform.h"
@@ -36,6 +37,9 @@ CONFIG N_ENTITIES, 12
 	; Used for collision testing code
 	collisionTmp1:		.res	2
 	collisionTmp2:		.res	2
+
+	; Holds address previous entity in the process loop
+	previousEntity:		.res	2
 
 	previousYpos:		.res	2
 
@@ -166,6 +170,8 @@ CONFIG N_ENTITIES, 12
 .routine ProcessFrame
 	; Process platforms first (in case they move)
 
+	STZ	previousEntity
+
 	LDA	platformEntityLList
 	IF_NOT_ZERO
 		REPEAT
@@ -176,6 +182,33 @@ CONFIG N_ENTITIES, 12
 
 			LDX	z:EntityStruct::functionPtr
 			JSR	(EntityFunctions::ProcessFrame, X)
+			IF_C_CLEAR
+				; entity is dead
+				; remove from linked list
+
+				LDA	z:EntityStruct::nextPtr
+				TAY
+
+				LDX	previousEntity
+				IF_ZERO
+					STA	platformEntityLList
+				ELSE
+					STA	a:EntityStruct::nextPtr, X
+				ENDIF
+
+				LDA	firstFreeEntity
+				STA	z:EntityStruct::nextPtr
+				TDC
+				STA	firstFreeEntity
+
+				TYA
+				BNE	CONTINUE_LABEL
+				BRA	BREAK_LABEL
+			ENDIF
+
+			; entity still alive
+			TDC
+			STA	previousEntity
 
 			LDA	z:EntityStruct::nextPtr
 		UNTIL_ZERO
@@ -191,6 +224,12 @@ CONFIG N_ENTITIES, 12
 
 	LDX	z:EntityStruct::functionPtr
 	JSR	(EntityFunctions::ProcessFrame, X)
+
+	IF_C_CLEAR
+		; Player dead, game over
+		LDA	#GameState::GAME_OVER
+		STA	GameLoop::state
+	ENDIF
 
 
 	CheckPlatformCollisions	PlatformEntityFunctions::EntityTouchPlatform, PlatformEntityFunctions::EntityLeavePlatform

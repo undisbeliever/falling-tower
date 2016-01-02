@@ -21,6 +21,8 @@
 	STARTING_XOFFSET = $1000
 	STARTING_YOFFSET = $C000
 
+	;; The height (in px) of the active window
+	WINDOW_HEIGHT = 240
 
 	;; Initialize the camera module
 	;;

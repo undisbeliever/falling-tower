@@ -23,6 +23,7 @@ CONFIG ENTITY_STRUCT_SIZE, 64
 	;;
 	;; REGISTERS: 16 bit A, 16 bit Index, DB = $7E
 	;; INPUT: DP = entity
+	;; OUTPUT: C set if entity is still alive
 	ProcessFrame	= 2
 .endenum
 
