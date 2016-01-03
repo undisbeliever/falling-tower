@@ -36,7 +36,6 @@ CONFIG N_ENTITIES, 20
 
 	; Used for collision testing code
 	collisionTmp1:		.res	2
-	collisionTmp2:		.res	2
 
 	; Holds address previous entity in the process loop
 	previousEntity:		.res	2

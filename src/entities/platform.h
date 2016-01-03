@@ -22,8 +22,8 @@
 	;;
 	;; REGISTERS: 16 bit A, 16 bit Index, DB = $7E
 	;; INPUT: DP = platform
-	;;	   A = entity that touched the platform
-	;;	   Y = tileCollisionHitbox address of the platform
+	;;	   Y = entity that touched the platform
+	;;	   A = tileCollisionHitbox address of the platform
 	;;	   X = platform functionPtr
 	;;	   Entity::tch_ = tile collision hitbox of the entity
 	;;	   Entity::previousYpos = the yPos of the entity before frame processing

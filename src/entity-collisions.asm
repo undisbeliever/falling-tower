@@ -13,9 +13,9 @@
 ;;
 ;;	REGISTERS: 16 bit A, 16 bit Index, DB = $7E
 ;;	DP = platform
-;;	 A = entity that was previously on the platform
-;;	 Y = tileCollisionHitbox address
+;;	 A = tileCollisionHitbox address
 ;;	 X = platform functionPtr
+;;	 Y = entity that was previously on the platform
 ;;	 Entity::tch_ = tile collision hitbox of the entity
 ;;	 Entity::previousYpos = the yPos of the entity before processing
 ;;
@@ -37,11 +37,12 @@
 ;; PARAM: PlatformFunctionToCall - the function to call when the entity touches a platform
 .macro CheckPlatformCollisions StandPlatformFunction, LeavePlatformFunction
 	.local Return, ReturnJump, NoCollision, SkipEntity
-	.local tmp, tmp_standingOnPlatform
+	.local tmp
 
 	tmp = collisionTmp1
-	tmp_standingOnPlatform = collisionTmp2
 
+	; ::SHOULDO preform still on platform test first::
+	; ::: This would be faster, but a uses a lot more code::
 
 	LDX	z:EntityStruct::metasprite + MetaSpriteStruct::currentFrame
 	IF_ZERO
@@ -88,13 +89,13 @@ ReturnJump:
 		AND	#$00FF
 		STA	Entity::tch_height
 
-		LDA	z:EntityStruct::standingOnPlatform
-		STA	tmp_standingOnPlatform
+		; Save current entity in Y
+		TDC
+		TAY
 
 		; Loop through entities
 
-		PHD
-		TYA
+		LDA	Entity::platformEntityLList
 		REPEAT
 			TCD
 
@@ -185,11 +186,13 @@ ReturnJump:
 			ENDIF
 
 			; Collision occurs, call routine
-				LDA	1, s
-				TXY
+				TXA
+				PHY
 
 				LDX	z:EntityStruct::functionPtr
 				JSR	(StandPlatformFunction, X)
+
+				PLY
 
 SkipEntity:
 				LDA	z:EntityStruct::nextPtr
@@ -199,19 +202,18 @@ SkipEntity:
 NoCollision:
 			; No Collision Occurs, check to see if entity was on the platform
 			TDC
-			CMP	tmp_standingOnPlatform
+			CMP	a:EntityStruct::standingOnPlatform, Y
 			IF_EQ
-				LDA	1, s
-				TAY
+				PHY
 
 				LDX	z:EntityStruct::functionPtr
 				JSR	(LeavePlatformFunction, X)
+
+				PLY
 			ENDIF
 
 			LDA	z:EntityStruct::nextPtr
 		UNTIL_ZERO
-
-		PLD
 
 	; end if
 Return:

@@ -134,8 +134,8 @@ FIRST_START_Y	= PlatformEntity::FIRST_START_Y
 
 ; DP = platform
 ; DB = $7E
-;  A = address of entity that touched platform
-;  Y = tileCollisionHitbox address
+;  Y = address of entity that touched platform
+;  A = tileCollisionHitbox address
 .A16
 .I16
 .routine EntityTouchPlatform
@@ -143,8 +143,7 @@ FIRST_START_Y	= PlatformEntity::FIRST_START_Y
 	;	- the tch bottom is above the platform's yPos line
 	;	- the player is falling
 
-	TYX
-	TAY
+	TAX
 
 	LDA	a:EntityStruct::yVecl, Y
 	IF_PLUS
