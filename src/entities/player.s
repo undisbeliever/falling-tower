@@ -6,7 +6,7 @@
 
 .include "entity.h"
 .include "entity-physics.h"
-.include "entities/platform.h"
+.include "entities/platforms.h"
 
 .include "controller.h"
 .include "camera.h"
@@ -45,7 +45,7 @@ START_X = 256 / 2
 	STZ	z:PES::xPos
 	STA	z:PES::xPos + 1
 
-	LDA	#PlatformEntity::FIRST_START_Y + Camera::STARTING_YOFFSET - PLAYER_Y_BOTTOM_OFFSET
+	LDA	#PlatformEntities::FIRST_START_Y + Camera::STARTING_YOFFSET - PLAYER_Y_BOTTOM_OFFSET
 	STZ	z:PES::yPos
 	STA	z:PES::yPos + 1
 

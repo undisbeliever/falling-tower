@@ -9,7 +9,7 @@
 .include "gameloop.h"
 .include "entity-collisions.asm"
 
-.include "entities/platform.h"
+.include "entities/platforms.h"
 .include "resources/metasprites.h"
 
 .setcpu "65816"

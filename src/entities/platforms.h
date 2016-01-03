@@ -1,5 +1,5 @@
-.ifndef ::_ENTITIES__PLATFORM_H_
-::_ENTITIES__PLATFORM_H_ := 1
+.ifndef ::_ENTITIES__PLATFORMS_H_
+::_ENTITIES__PLATFORMS_H_ := 1
 
 .include "common/config.inc"
 .include "common/modules.inc"
@@ -45,15 +45,8 @@
 .entitystruct PlatformEntityStruct
 .endentitystruct
 
-;; This will start a large platform at a random X location
-;; and a given Y position (Init parameter)
-.import PlatformEntity
 
-;; This one will start the first platform at a constant position
-.import FirstPlatformEntity
-
-
-.importmodule PlatformEntity
+.importmodule PlatformEntities
 	HUGE_WIDTH	= 48
 	LARGE_WIDTH	= 40
 	MEDIUM_WIDTH	= 32
@@ -61,6 +54,13 @@
 
 	FIRST_START_X	= (256 - HUGE_WIDTH) / 2
 	FIRST_START_Y	= 200
+
+	;; This will start a huge platform at a random X location
+	;; and a given Y position (Init parameter)
+	.importlabel HugePlatformEntity
+
+	;; This one will start the first platform at a constant position
+	.importlabel FirstPlatformEntity
 .endimportmodule
 
 .endif

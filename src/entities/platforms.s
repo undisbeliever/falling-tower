@@ -1,5 +1,5 @@
 
-.include "platform.h"
+.include "platforms.h"
 .include "common/modules.inc"
 .include "common/structure.inc"
 .include "common/registers.inc"
@@ -13,26 +13,25 @@
 
 .setcpu "65816"
 
-.module PlatformEntity
+.module PlatformEntities
 
-HUGE_WIDTH	= PlatformEntity::HUGE_WIDTH
-LARGE_WIDTH	= PlatformEntity::LARGE_WIDTH
-MEDIUM_WIDTH	= PlatformEntity::MEDIUM_WIDTH
-SMALL_WIDTH	= PlatformEntity::SMALL_WIDTH
+HUGE_WIDTH	= PlatformEntities::HUGE_WIDTH
+LARGE_WIDTH	= PlatformEntities::LARGE_WIDTH
+MEDIUM_WIDTH	= PlatformEntities::MEDIUM_WIDTH
+SMALL_WIDTH	= PlatformEntities::SMALL_WIDTH
 
-FIRST_START_X	= PlatformEntity::FIRST_START_X
-FIRST_START_Y	= PlatformEntity::FIRST_START_Y
+FIRST_START_X	= PlatformEntities::FIRST_START_X
+FIRST_START_Y	= PlatformEntities::FIRST_START_Y
 
 .rodata
 
-.proc PlatformEntity
-	;; INPUT: Y: starting y location
+.proc HugePlatformEntity
 	.addr	Init
 	.addr	ProcessFrame
 	.addr	EntityTouchPlatform
 	.addr	EntityLeavePlatform
 .endproc
-.export PlatformEntity
+.exportlabel HugePlatformEntity
 
 .proc FirstPlatformEntity
 	.addr	FirstInit
@@ -40,7 +39,8 @@ FIRST_START_Y	= PlatformEntity::FIRST_START_Y
 	.addr	EntityTouchPlatform
 	.addr	EntityLeavePlatform
 .endproc
-.export FirstPlatformEntity
+.exportlabel FirstPlatformEntity
+
 
 .define PES PlatformEntityStruct
 

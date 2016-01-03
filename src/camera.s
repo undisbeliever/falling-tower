@@ -8,7 +8,7 @@
 .include "gameloop.h"
 .include "random.h"
 .include "entities/player.h"
-.include "entities/platform.h"
+.include "entities/platforms.h"
 
 .module Camera
 
@@ -48,13 +48,13 @@ CONFIG JUMP_DIFFICULT_THRESHOLD, 200
 	STA	yPos
 
 	; Create the initial platforms
-	LDA	#.loword(FirstPlatformEntity)
+	LDA	#.loword(PlatformEntities::FirstPlatformEntity)
 	JSR	Entity::NewPlatformEntity
 
 	STY	previousPlatform
 
 
-	LDA	#Camera::STARTING_YOFFSET + PlatformEntity::FIRST_START_Y - (MAX_PLATFORM_SPACING / 2)
+	LDA	#Camera::STARTING_YOFFSET + PlatformEntities::FIRST_START_Y - (MAX_PLATFORM_SPACING / 2)
 	STA	nextPlatformSpawnYpos
 
 	RTS
@@ -113,7 +113,7 @@ tmp_prevYpos	= tmp1
 tmp_distance = tmp2
 
 	; ::TODO random platform types::
-	LDA	#.loword(PlatformEntity)
+	LDA	#.loword(PlatformEntities::HugePlatformEntity)
 	LDY	nextPlatformSpawnYpos
 
 	JSR	Entity::NewPlatformEntity
@@ -145,7 +145,7 @@ tmp_distance = tmp2
 		ADC	#MIN_PLATFORM_SPACING - 1
 		TAY
 
-		LDA	#.loword(PlatformEntity)
+		LDA	#.loword(PlatformEntities::HugePlatformEntity)
 
 		JSR	Entity::NewPlatformEntity
 	ENDIF
