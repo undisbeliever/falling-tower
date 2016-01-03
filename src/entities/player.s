@@ -14,6 +14,8 @@
 
 CONFIG	JUMP_VELOCITY,	$0300
 CONFIG	PLAYER_Y_BOTTOM_OFFSET,	15
+CONFIG	WALK_ANIMATION_SHIFT, 2
+CONFIG	N_WALK_ANIMATION_FRAMES, 6
 
 .setcpu "65816"
 
@@ -49,6 +51,10 @@ START_X = 256 / 2
 
 	STZ	z:PES::xVecl
 	STZ	z:PES::yVecl
+
+	; Reset animation state
+	STZ	z:PES::walkAnimationFrame
+	STZ	z:PES::facingLeftOnZero
 
 	; Reset platform state
 	STZ	z:PES::standingOnPlatform
@@ -91,7 +97,76 @@ START_X = 256 / 2
 	ENDIF
 
 	LDA	Controller::current
-	JMP	EntityPhysics::ProcessEntityPhyicsWithMovement
+	JSR	EntityPhysics::ProcessEntityPhyicsWithMovement
+
+
+	; Process animation
+	LDA	Controller::current
+	IF_BIT	#JOY_LEFT | JOY_RIGHT
+		IF_BIT	#JOY_LEFT
+			STZ	z:PES::facingLeftOnZero
+
+		ELSE
+			; facing sight
+			STA	z:PES::facingLeftOnZero
+		ENDIF
+	ENDIF
+
+	LDA	z:PES::standingOnPlatform
+	IF_ZERO
+		; Jumping or falling
+		LDA	z:PES::yVecl
+		IF_MINUS
+			; Jumping
+			LDA	#MetaSprites::Player::Frames::jump_right
+		ELSE
+			; Falling
+			LDA	#MetaSprites::Player::Frames::fall_right
+		ENDIF
+
+	ELSE
+		; On a platform
+
+		LDABS	z:PES::xVecl
+		IF_NOT_ZERO
+
+			; Walking
+
+			CLC
+			ADC	z:PES::walkAnimationFrame
+
+			CMP	#(N_WALK_ANIMATION_FRAMES << 8) << WALK_ANIMATION_SHIFT
+			IF_GE
+				; C set
+				LDA	#0
+			ENDIF
+
+			STA	z:PES::walkAnimationFrame
+
+			.repeat WALK_ANIMATION_SHIFT
+				LSR
+			.endrepeat
+			XBA
+			AND	#$00FF
+			CLC
+			ADC	#MetaSprites::Player::Frames::walk0_right
+		ELSE
+
+			; Standing still
+			LDA	#MetaSprites::Player::Frames::stand_right
+		ENDIF
+	ENDIF
+
+	LDX	z:PES::facingLeftOnZero
+	IF_ZERO
+		CLC
+		ADC	#MetaSprites::Player::leftOffset
+	ENDIF
+
+	JSR	MetaSprite::SetFrame
+
+	SEC
+	RTS
 .endroutine
 
 .endmodule

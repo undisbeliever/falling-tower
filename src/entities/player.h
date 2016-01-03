@@ -11,6 +11,10 @@
 .setcpu "65816"
 
 .entitystruct PlayerEntityStruct
+	walkAnimationFrame	.word
+
+	;; If non-zero then the player is facing left
+	facingLeftOnZero	.word
 .endentitystruct
 
 .import PlayerEntity
