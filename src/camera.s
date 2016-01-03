@@ -18,10 +18,19 @@ CONFIG MAX_PLATFORM_SPACING, 60
 
 CONFIG JUMP_DIFFICULT_THRESHOLD, 200
 
+CONFIG SCROLL_SPEED_START,	$00700
+CONFIG SCROLL_SPEED_DELTA,	$00007
+
 
 .segment "WRAM7E"
 	xPos:			.res 2
 	yPos:			.res 2
+
+	;; Fractional part of yPos
+	yPosFractional:		.res 2
+
+	;; A slowly incrementing velocity of the camera (auto-scroll)
+	yVelocity:		.res 4
 
 	; The next yPos in which a platform spawns
 	nextPlatformSpawnYpos:	.res 2
@@ -46,6 +55,12 @@ CONFIG JUMP_DIFFICULT_THRESHOLD, 200
 
 	LDA	#Camera::STARTING_YOFFSET
 	STA	yPos
+	STZ	yPosFractional
+
+	LDA	#.loword(SCROLL_SPEED_START)
+	STA	yVelocity
+	LDA	#.hiword(SCROLL_SPEED_START)
+	STA	yVelocity + 2
 
 	; Create the initial platforms
 	LDA	#.loword(PlatformEntities::FirstPlatformEntity)
@@ -86,16 +101,39 @@ tmp_prevYpos	= tmp1
 	CMP	yPos
 	IF_LT
 		STA	yPos
+	ELSE
+		; Else, autoscroll
+		;
+		; yVelocity += SCROLL_SPEED_DELTA
+		; yPos:yPosFractional -= yVelocity
 
-		; increase score by how much the frame moved
-		RSB	tmp_prevYpos
-
+		LDA	#.loword(SCROLL_SPEED_DELTA)
 		CLC
-		ADC	GameLoop::score
-		STA	GameLoop::score
+		ADC	yVelocity
+		STA	yVelocity
 		IF_C_SET
-			INC	GameLoop::score + 2
+			INC	yVelocity + 2
 		ENDIF
+
+		SEC
+		LDA	yPosFractional
+		SBC	yVelocity
+		STA	yPosFractional
+
+		LDA	yPos
+		SBC	yVelocity + 2
+		STA	yPos
+	ENDIF
+
+	; increase score by how much the frame moved
+	; A = yPos
+	RSB	tmp_prevYpos
+
+	CLC
+	ADC	GameLoop::score
+	STA	GameLoop::score
+	IF_C_SET
+		INC	GameLoop::score + 2
 	ENDIF
 
 	RTS
