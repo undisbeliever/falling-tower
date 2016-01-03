@@ -6,13 +6,17 @@
 
 .include "entity.h"
 .include "gameloop.h"
+.include "random.h"
 .include "entities/player.h"
 .include "entities/platform.h"
 
 .module Camera
 
 CONFIG CAMERA_TOP_MARGIN, 64
-CONFIG STARTING_PLATFORM_SPACING, 20
+CONFIG MIN_PLATFORM_SPACING, 10
+CONFIG MAX_PLATFORM_SPACING, 60
+
+CONFIG JUMP_DIFFICULT_THRESHOLD, 200
 
 
 .segment "WRAM7E"
@@ -20,9 +24,11 @@ CONFIG STARTING_PLATFORM_SPACING, 20
 	yPos:			.res 2
 
 	; The next yPos in which a platform spawns
-	nextPlatformSpawnYpos:	.res	2
+	nextPlatformSpawnYpos:	.res 2
+	previousPlatform:	.res 2
 
 	tmp1:			.res 2
+	tmp2:			.res 2
 
 
 .exportlabel xPos
@@ -45,7 +51,10 @@ CONFIG STARTING_PLATFORM_SPACING, 20
 	LDA	#.loword(FirstPlatformEntity)
 	JSR	Entity::NewPlatformEntity
 
-	LDA	#Camera::STARTING_YOFFSET + PlatformEntity::FIRST_START_Y - STARTING_PLATFORM_SPACING
+	STY	previousPlatform
+
+
+	LDA	#Camera::STARTING_YOFFSET + PlatformEntity::FIRST_START_Y - (MAX_PLATFORM_SPACING / 2)
 	STA	nextPlatformSpawnYpos
 
 	RTS
@@ -63,7 +72,7 @@ tmp_prevYpos	= tmp1
 	LDA	yPos
 	STA	tmp_prevYpos
 
-	SBC	#STARTING_PLATFORM_SPACING
+	SBC	#MAX_PLATFORM_SPACING
 	CMP	nextPlatformSpawnYpos
 	IF_LT
 		JSR	SpawnNextPlatform
@@ -100,18 +109,58 @@ tmp_prevYpos	= tmp1
 .A16
 .I16
 .routine SpawnNextPlatform
+
+tmp_distance = tmp2
+
 	; ::TODO random platform types::
 	LDA	#.loword(PlatformEntity)
 	LDY	nextPlatformSpawnYpos
 
 	JSR	Entity::NewPlatformEntity
 
-	; Generate next placement
-	; ::TODO randomize::
-	; ::TODO make spacing wider::
-	LDA	nextPlatformSpawnYpos
+
+	; If the Manhattan distance between the two is too far,
+	; spawn another platform on the same y pos
+	LDX	previousPlatform
+	LDA	a:EntityStruct::xPos + 1, X
 	SEC
-	SBC	#STARTING_PLATFORM_SPACING
+	SBC	a:EntityStruct::xPos + 1, Y
+	IF_MINUS
+		NEG
+	ENDIF
+	STA	tmp_distance
+
+	LDA	a:EntityStruct::yPos + 1, X
+	SEC
+	SBC	a:EntityStruct::yPos + 1, Y
+	CLC
+	ADC	tmp_distance
+
+	CMP	#JUMP_DIFFICULT_THRESHOLD
+	IF_GE
+		; Place 'helper' platform just below the one that is too far away
+
+		LDA	nextPlatformSpawnYpos
+		; C set
+		ADC	#MIN_PLATFORM_SPACING - 1
+		TAY
+
+		LDA	#.loword(PlatformEntity)
+
+		JSR	Entity::NewPlatformEntity
+	ENDIF
+	STY	previousPlatform
+
+
+	; Generate next placement
+	; Randomize location
+
+	LDA	#MAX_PLATFORM_SPACING - MIN_PLATFORM_SPACING
+	JSR	Random::Rnd_U16A
+	CLC
+	ADC	#MIN_PLATFORM_SPACING
+
+	RSB	nextPlatformSpawnYpos
 	STA	nextPlatformSpawnYpos
 
 	RTS
