@@ -117,18 +117,18 @@ skip:
 	.local skip
 
 	.ifblank index
-		.if .xmatch({var}, X)
+		.if .xmatch({param}, X)
 			TXA
-		.elseif .xmatch({var}, Y)
+		.elseif .xmatch({param}, Y)
 			TYA
-		.elseif .blank(var) .or .xmatch({var}, A)
+		.elseif .blank(param) .or .xmatch({param}, A)
 			; Sets N flag depending on MSB of A
 			CMP	#0
 		.else
-			LDA	var
+			LDA	param
 		.endif
 	.else
-		LDA	var, index
+		LDA	param, index
 	.endif
 
 	BPL	skip
