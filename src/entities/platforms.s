@@ -26,12 +26,36 @@ FIRST_START_Y	= PlatformEntities::FIRST_START_Y
 .rodata
 
 .proc HugePlatformEntity
-	.addr	Init
+	.addr	Init_Huge
 	.addr	ProcessFrame
 	.addr	EntityTouchPlatform
 	.addr	EntityLeavePlatform
 .endproc
 .exportlabel HugePlatformEntity
+
+.proc LargePlatformEntity
+	.addr	Init_Large
+	.addr	ProcessFrame
+	.addr	EntityTouchPlatform
+	.addr	EntityLeavePlatform
+.endproc
+.exportlabel LargePlatformEntity
+
+.proc MediumPlatformEntity
+	.addr	Init_Medium
+	.addr	ProcessFrame
+	.addr	EntityTouchPlatform
+	.addr	EntityLeavePlatform
+.endproc
+.exportlabel MediumPlatformEntity
+
+.proc SmallPlatformEntity
+	.addr	Init_Small
+	.addr	ProcessFrame
+	.addr	EntityTouchPlatform
+	.addr	EntityLeavePlatform
+.endproc
+.exportlabel SmallPlatformEntity
 
 .proc FirstPlatformEntity
 	.addr	FirstInit
@@ -52,13 +76,67 @@ FIRST_START_Y	= PlatformEntities::FIRST_START_Y
 ; IN: Y = yPos
 .A16
 .I16
-.routine Init
+.routine Init_Huge
+	LDA	#HUGE_WIDTH
+	LDX	#MetaSprites::Platforms::Frames::platform_huge
+
+	BRA	_Init
+.endroutine
+
+; DP = player
+; DB = $7E
+; IN: Y = yPos
+.A16
+.I16
+.routine Init_Large
+	LDA	#LARGE_WIDTH
+	LDX	#MetaSprites::Platforms::Frames::platform_large
+
+	BRA	_Init
+.endroutine
+
+; DP = player
+; DB = $7E
+; IN: Y = yPos
+.A16
+.I16
+.routine Init_Medium
+	LDA	#MEDIUM_WIDTH
+	LDX	#MetaSprites::Platforms::Frames::platform_medium
+
+	BRA	_Init
+.endroutine
+
+; DP = player
+; DB = $7E
+; IN: Y = yPos
+.A16
+.I16
+.routine Init_Small
+	LDA	#SMALL_WIDTH
+	LDX	#MetaSprites::Platforms::Frames::platform_small
+
+	.assert * = _Init, error, "Bad flow"
+.endroutine
+
+
+; DP = player
+; DB = $7E
+; IN: Y = yPos
+; IN: A = platform width
+; IN: X = frame Id
+.A16
+.I16
+.routine _Init
+
+	PHX
+
 	; Given yPos
 	STZ	z:PES::yPos
 	STY	z:PES::yPos + 1
 
 	; Random X pos
-	LDA	#256 - HUGE_WIDTH
+	RSB	#256
 	JSR	Random::Rnd_U16A
 
 	CLC
@@ -77,8 +155,7 @@ FIRST_START_Y	= PlatformEntities::FIRST_START_Y
 	LDY	#0
 	JSR	MetaSprite::Init
 
-	LDA	#MetaSprites::Platforms::Frames::platform_huge
-
+	PLA
 	JSR	MetaSprite::SetFrame
 
 	RTS

@@ -112,10 +112,14 @@ tmp_prevYpos	= tmp1
 
 tmp_distance = tmp2
 
-	; ::TODO random platform types::
-	LDA	#.loword(PlatformEntities::HugePlatformEntity)
-	LDY	nextPlatformSpawnYpos
+	; Select and spawn random platform
+	LDA	#PlatformSelectionTable_count
+	JSR	Random::Rnd_U16A
+	ASL
+	TAX
 
+	LDA	f:PlatformSelectionTable, X
+	LDY	nextPlatformSpawnYpos
 	JSR	Entity::NewPlatformEntity
 
 
@@ -145,7 +149,7 @@ tmp_distance = tmp2
 		ADC	#MIN_PLATFORM_SPACING - 1
 		TAY
 
-		LDA	#.loword(PlatformEntities::HugePlatformEntity)
+		LDA	#.loword(PlatformEntities::SmallPlatformEntity)
 
 		JSR	Entity::NewPlatformEntity
 	ENDIF
@@ -165,6 +169,17 @@ tmp_distance = tmp2
 
 	RTS
 .endroutine
+
+
+.segment "BANK1"
+
+PlatformSelectionTable:
+	.addr	PlatformEntities::HugePlatformEntity
+	.addr	PlatformEntities::LargePlatformEntity
+	.addr	PlatformEntities::MediumPlatformEntity
+	.addr	PlatformEntities::SmallPlatformEntity
+
+PlatformSelectionTable_count = (* - PlatformSelectionTable) / 2
 
 .endmodule
 

@@ -55,9 +55,10 @@
 	FIRST_START_X	= (256 - HUGE_WIDTH) / 2
 	FIRST_START_Y	= 200
 
-	;; This will start a huge platform at a random X location
-	;; and a given Y position (Init parameter)
 	.importlabel HugePlatformEntity
+	.importlabel LargePlatformEntity
+	.importlabel MediumPlatformEntity
+	.importlabel SmallPlatformEntity
 
 	;; This one will start the first platform at a constant position
 	.importlabel FirstPlatformEntity
