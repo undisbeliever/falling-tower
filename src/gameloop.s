@@ -18,9 +18,14 @@
 .include "resources/font.h"
 
 
+; Use a slightly duller background colour
+BACKGROUND_COLOR = (29 << 10) + (29 << 5) + (29 << 0)
+
+
 .setcpu "65816"
 
 .module GameLoop
+
 
 .segment "SHADOW"
 	state:		.res 2
@@ -89,6 +94,13 @@
 	LDA	#MDMAEN_DMA0
 	STA	MDMAEN
 
+
+	STZ	CGADD
+
+	LDA	#.lobyte(BACKGROUND_COLOR)
+	STA	CGDATA
+	LDA	#.hibyte(BACKGROUND_COLOR)
+	STA	CGDATA
 
 	LDA	#TM_BG3 | TM_OBJ
 	STA	TM
