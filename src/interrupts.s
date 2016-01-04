@@ -8,8 +8,14 @@
 .include "metasprite/metasprite.h"
 
 .include "vram.h"
+.include "gameloop.h"
 
 .setcpu "65816"
+
+.segment "SHADOW"
+	frameCounter:	.res 2
+
+.export frameCounter
 
 .code
 
@@ -62,6 +68,8 @@
 
 	JSR	MetaSprite::VBlank
 
+
+	INC	frameCounter
 
 	; Ensure Joypad can be read
 	LDA	#HVJOY_AUTOJOY

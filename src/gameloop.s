@@ -136,7 +136,8 @@
 Continue:
 	STZ	state
 		REPEAT
-			JSR	Controller::Update
+			JSR	WaitFrame
+
 			JSR	Random::AddJoypadEntropy
 
 			; Print score
@@ -167,7 +168,6 @@ Continue:
 				STX	state
 			ENDIF
 
-			WAI
 			LDX	state
 			.assert GameState::PLAYING = 0, error, "Bad Code"
 		UNTIL_NOT_ZERO
@@ -210,9 +210,7 @@ End:
 
 	; Loop until start pressed
 	REPEAT
-		WAI
-
-		JSR	Controller::Update
+		JSR	WaitFrame
 
 		LDA	Controller::pressed
 		AND	#JOY_START
@@ -238,15 +236,29 @@ End:
 
 	; Loop until start pressed
 	REPEAT
-		WAI
-
-		JSR	Controller::Update
+		JSR	WaitFrame
 
 		LDA	Controller::pressed
 		AND	#JOY_START
 	UNTIL_NOT_ZERO
 
 	JMP	PlayGame::End
+.endroutine
+
+
+.A16
+.I16
+.routine WaitFrame
+	; Some game copiers inject IRQ, so I have to test if it was a VBlank interrupt
+
+.import frameCounter
+	LDA	frameCounter
+	REPEAT
+		WAI
+		CMP	frameCounter
+	UNTIL_NE
+
+	JMP	Controller::Update
 .endroutine
 
 .endmodule
