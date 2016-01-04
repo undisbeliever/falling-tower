@@ -22,6 +22,10 @@ CONFIG SCROLL_SPEED_START,	$00700
 CONFIG SCROLL_SPEED_DELTA,	$00007
 
 
+WRAP_DROP_HEIGHT = $1000
+WRAP_Y_POSITION  = Camera::STARTING_YOFFSET - WRAP_DROP_HEIGHT
+
+
 .segment "WRAM7E"
 	xPos:			.res 2
 	yPos:			.res 2
@@ -82,6 +86,13 @@ CONFIG SCROLL_SPEED_DELTA,	$00007
 .routine ProcessFrame
 
 tmp_prevYpos	= tmp1
+
+	; Wrap camera (and all entities) if necessary
+	LDA	yPos
+	CMP	#WRAP_Y_POSITION
+	IF_LT
+		JSR	WrapCamera
+	ENDIF
 
 	; Check to see if another platform needs spawning in the spawn window
 	LDA	yPos
@@ -204,6 +215,44 @@ tmp_distance = tmp2
 
 	RSB	nextPlatformSpawnYpos
 	STA	nextPlatformSpawnYpos
+
+	RTS
+.endroutine
+
+
+; Moves all of the entities down WRAP_DROP_HEIGHT pixels
+; Prevents overflow bug
+.A16
+.I16
+.routine WrapCamera
+	LDA	Entity::player + EntityStruct::yPos + 1
+	CLC
+	ADC	#WRAP_DROP_HEIGHT
+	STA	Entity::player + EntityStruct::yPos + 1
+
+	LDA	Entity::platformEntityLList
+	IF_NOT_ZERO
+		REPEAT
+			TCD
+
+			LDA	z:EntityStruct::yPos + 1
+			CLC
+			ADC	#WRAP_DROP_HEIGHT
+			STA	z:EntityStruct::yPos + 1
+
+			LDA	z:EntityStruct::nextPtr
+		UNTIL_ZERO
+	ENDIF
+
+	LDA	nextPlatformSpawnYpos
+	CLC
+	ADC	#WRAP_DROP_HEIGHT
+	STA	nextPlatformSpawnYpos
+
+	LDA	yPos
+	CLC
+	ADC	#WRAP_DROP_HEIGHT
+	STA	yPos
 
 	RTS
 .endroutine
