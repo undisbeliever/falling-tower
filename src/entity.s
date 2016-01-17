@@ -183,6 +183,8 @@ CONFIG N_ENTITIES, 20
 			JSR	(EntityFunctions::ProcessFrame, X)
 			IF_C_CLEAR
 				; entity is dead
+				JSR	MetaSprite::Deactivate
+
 				; remove from linked list
 
 				LDA	z:EntityStruct::nextPtr
