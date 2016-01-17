@@ -80,15 +80,25 @@
 
 .segment "WRAM7E"
 	.scope slotList
-		;; Index of the first used tile slot
+		;; One Tiles fixed tileset vram slot list index
 		;; $80 if list is empty
 		;; (byte index)
-		fixedTiles:	.res 1
+		oneFixedTileList:	.res 1
 
-		;; Index of the first used tile slot
+		;; Two Tiles fixed tileset vram slot list index
 		;; $80 if list is empty
 		;; (byte index)
-		fixedRows:	.res 1
+		twoFixedTilesList:	.res 1
+
+		;; One Rows fixed tileset vram slot list index
+		;; $80 if list is empty
+		;; (byte index)
+		oneFixedRowList:	.res 1
+
+		;; Two Rows fixed tileset vram slot list index
+		;; $80 if list is empty
+		;; (byte index)
+		twoFixedRowsList:	.res 1
 
 		;; Index of the unallocated tile slot
 		;; $80 if list is empty
@@ -165,8 +175,10 @@ TileSlots_ROM_DATA:
 	STA	vramSlots::next + vramSlots::SectionSize - 4
 
 	; Reset the slot lists
-	STA	slotList::fixedTiles
-	STA	slotList::fixedRows
+	STA	slotList::oneFixedTileList
+	STA	slotList::twoFixedTilesList
+	STA	slotList::oneFixedRowList
+	STA	slotList::twoFixedRowsList
 
 
 	STZ	slotList::freeTiles
@@ -237,9 +249,15 @@ XIndex:
 		; if current->prev is NULL:
 		;	if current->next:
 		;		if current is row slot:
-		;			fixedRows.first = current
+		;			if current = slotList.twoFixedRowsList.first
+		;				slotList.twoFixedRowsList.first = current->next
+		;			else
+		;				slotList.oneFixedRowList.first = current->next
 		;		else:
-		;			fixedTiles.first = current
+		;			if current = slotList.oneFixedTileList.first
+		;				slotList.oneFixedTileList.first = current->next
+		;			else
+		;				slotList.twoFixedTilesList.first = current->next
 		; else:
 		;	current->prev->next = current->next
 		;
@@ -254,10 +272,22 @@ XIndex:
 				CPX	#vramSlots::RowSlotIndexGE
 				IF_GE
 					; row slot
-					STA	slotList::fixedRows
+					; determine which list it goes into
+					CPX	slotList::twoFixedRowsList
+					IF_EQ
+						STA	slotList::twoFixedRowsList
+					ELSE
+						STA	slotList::oneFixedRowList
+					ENDIF
 				ELSE
 					; tile slot
-					STA	slotList::fixedTiles
+					; determine which list it goes into
+					CPX	slotList::oneFixedTileList
+					IF_EQ
+						STA	slotList::oneFixedTileList
+					ELSE
+						STA	slotList::twoFixedTilesList
+					ENDIF
 				ENDIF
 			ENDIF
 		ELSE
@@ -507,7 +537,7 @@ SetTilesetTypeTable:
 .A16
 .I16
 .proc Process_OneTile
-	_Process_One fixedTiles, freeTiles
+	_Process_One oneFixedTileList, freeTiles
 .endproc
 
 
@@ -573,7 +603,7 @@ SetTilesetTypeTable:
 .A16
 .I16
 .proc Process_OneRow
-	_Process_One fixedRows, freeRows
+	_Process_One oneFixedRowList, freeRows
 .endproc
 
 
@@ -737,7 +767,7 @@ SetTilesetTypeTable:
 .A16
 .I16
 .proc Process_TwoTiles
-	_Process_Two fixedTiles, freeTiles
+	_Process_Two twoFixedTilesList, freeTiles
 .endproc
 
 
@@ -816,7 +846,7 @@ SetTilesetTypeTable:
 .A16
 .I16
 .proc Process_TwoRows
-	_Process_Two fixedRows, freeRows
+	_Process_Two twoFixedRowsList, freeRows
 .endproc
 
 
