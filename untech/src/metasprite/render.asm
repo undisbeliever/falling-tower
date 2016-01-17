@@ -43,8 +43,9 @@ FRAME_CHARATTR_MASK	= $F01F
 	;; Buffer the oam's x8/size bits
 	;; bits 11-15 of each 4 byte block MUST BE CLEAR
 	xposBuffer:		.res 128 * 4
+	xposBuffer_End:
 
-	; Only hald of xPosBuffer is acutally used, save the bytes for variables
+	; Only half of xPosBuffer is actually used, save the bytes for variables
 
 	bufferPos		:= xposBuffer + 0*4 + 2
 	previousBufferPos	:= xposBuffer + 1*4 + 2
@@ -57,6 +58,10 @@ FRAME_CHARATTR_MASK	= $F01F
 	tmp3			:= xposBuffer + 6*4 + 2
 	tmp4			:= xposBuffer + 7*4 + 2
 	tmp5			:= xposBuffer + 8*4 + 2
+
+	; The tileset allocation data uses the rest of the xposBuffer free space
+	_VramSlotsBlock		:= xposBuffer + 9*4 + 2
+
 .code
 
 
@@ -64,14 +69,11 @@ FRAME_CHARATTR_MASK	= $F01F
 .A16
 .I16
 .macro Reset__Render
-	SEP	#$20
-.A8
 	; Reset the xPosBuffer - prevent possible bugs
+
 	LDX	#127 * 4
 	REPEAT
-		STZ	xposBuffer + OamFormat::xPos + 1, X
-		DEX
-		DEX
+		STZ	xposBuffer - 2, X
 		DEX
 		DEX
 	UNTIL_MINUS
@@ -83,7 +85,6 @@ FRAME_CHARATTR_MASK	= $F01F
 	STA	updateOamBufferOnZero
 
 	REP	#$20
-.A16
 .endmacro
 
 
