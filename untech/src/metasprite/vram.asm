@@ -25,13 +25,14 @@
 	;;	1) A single linked list holding the free slots
 	;;	2) Not part of a linked list (used in dynamic tilesets)
 	;;	3) A double linked list for fixed tilesets (it makes removing easier)
-	;;	4) Not part of a linked list (second half of a dual slot)
+	;;	4) Second half of a dual tileset. (not part of a linked list, linked by `vramSlots::pair`)
 	;;
 	;; This data is interlaced within the unused words of the `xposBuffer` in order to save space.
 	;;
 	;; To save RAM the index of the slot used is encoded in the MetaSprite status byte.
 	;; As the slots are separated by 4 bytes, the formula to convert them is:
-	;;	status to index: status & METASPRITE_VRAM_TILE_SLOTS << 1
+	;;
+	;;	slot index = status & METASPRITE_VRAM_TILE_SLOTS << 1
 	;;
 	.scope vramSlots
 		SectionSize = (METASPRITE_VRAM_TILE_SLOTS + METASPRITE_VRAM_ROW_SLOTS) * 2 * 2
@@ -398,21 +399,26 @@ tmp_secondSlot	:= tmp3
 ::UploadFixedTileset:
 	STA	tmp_tileset
 
-	SEP	#$30
-.A8
-.I8
+	.assert METASPRITE_STATUS_VRAM_SET_FLAG = 1, error, "Bad code"
 	LDA	z:MSDP::status
-	IF_BIT	#METASPRITE_STATUS_VRAM_SET_FLAG
+	LSR
+	IF_C_SET
+		ASL
 
 		; metasprite already has a slot allocated
 		; check if tileset has changed
+		SEP	#$30
+.A8
+.I8
 		AND	#METASPRITE_STATUS_VRAM_INDEX_MASK
 		ASL
 		TAX
 
+		REP	#$20
+.A16
 		LDA	vramSlots::tileset, X
 		CMP	tmp_tileset
-		IF_ZERO
+		IF_EQ
 			; Return true
 			SEC
 			REP	#$30
@@ -420,12 +426,12 @@ tmp_secondSlot	:= tmp3
 		ENDIF
 
 		; tileset has changed, remove reference
-
+		SEP	#$20
+.A8
 		JSR	_RemoveSlot::XIndex
 
+		REP	#$30
 	ENDIF
-
-	REP	#$30
 .A16
 .I16
 
