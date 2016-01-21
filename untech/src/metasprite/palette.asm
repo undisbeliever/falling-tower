@@ -19,16 +19,49 @@
 	updatePaletteBufferOnZero: .res 1
 
 .segment "WRAM7E"
-	;; Table that conatains the address/refence count of each palette
-	;; used by the MetaSprite engine
-	;; Array of structures
+	;; Table that contains the address/reference count of each palette
+	;; used by the MetaSprite engine.
+	;;
+	;; Converting from slot index to useful values:
+	;;
+	;;  OAM Palette ID = slot index / 2
+	;;  Palette Buffer Offset = slot index * 16
+	;;
+	;; Double Linked List Array of structures
 	.proc paletteSlots
-		ptr:		.res N_PALETTE_SLOTS * 2
+		;; the number of bytes between slot(n+1) & slot(n)
+		SlotMemoryIncreament = 2
+
+		;; next item in the list
+		;; (byte index, >= $80 is null)
+		next:		.res N_PALETTE_SLOTS * 2
+
+		;; previous item in the list.
+		;; NOT set when in free list
+		;; (byte index, >= $80 is NULL)
+		prev = next - 1
+
+		;; address of the palette in `METASPRITE_PALETTE_DATA_BLOCK` 
+		;; (word address)
+		paletteAddress:	.res N_PALETTE_SLOTS * 2
+
+		;; Number of times the palette is used
+		;; (byte)
 		count:		.res N_PALETTE_SLOTS * 2
 	.endproc
 
+	.scope paletteSlotList
+		;; The first slot in the used list
+		;; (byte index, >= $80 is NULL)
+		first:		.res 1
+
+		;; The next free slot in the list
+		;; (byte index, >= $80 is NULL)
+		free:		.res 1
+	.endscope
+
 	;; The sprite palette buffer
-	; ::TODO should move to different class;
+	; ::TODO should move to different module:
 	paletteBuffer:		.res N_PALETTE_SLOTS * 32
 
 
@@ -39,16 +72,39 @@
 .A16
 .I16
 .macro Reset__Palette
-	LDX	#(N_PALETTE_SLOTS - 1) * 2
-	REPEAT
-		STZ	paletteSlots::ptr, X
-		STZ	paletteSlots::count, X
-		DEX
-		DEX
-	UNTIL_MINUS
+	.assert .asize = 16, error, "Bad asize"
+	.assert .isize = 16, error, "Bad isize"
 
-	LDA	#1
-	TSB	updatePaletteBufferOnZero
+	SEP	#$30
+.A8
+.I8
+	LDA	#paletteSlots::SlotMemoryIncreament
+	LDX	#0
+
+	CLC
+	REPEAT
+		STA	paletteSlots::next, X
+		TAX
+
+		; Carry clear from branch
+		ADC	#paletteSlots::SlotMemoryIncreament
+		CMP	#N_PALETTE_SLOTS * paletteSlots::SlotMemoryIncreament
+	UNTIL_GE
+
+	; Terminate end of list
+	LDA	#$80
+	STA	paletteSlots::next + paletteSlots::SlotMemoryIncreament * (N_PALETTE_SLOTS - 1)
+
+	; Reset slot lists
+	STA	paletteSlotList::first
+	STZ	paletteSlotList::free
+
+	; A = nonzero
+	STA	updatePaletteBufferOnZero
+
+	REP	#$30
+.A16
+.I16
 .endmacro
 
 
@@ -60,25 +116,79 @@
 .macro RemovePalette
 	; Decrement counter
 
-	BIT	z:MSDP::status - 1
+	SEP	#$30
+.A8
+.I8
+	BIT	z:MSDP::status
 	.assert METASPRITE_STATUS_PALETTE_SET_FLAG = $80, error, "BIT optimisation"
 	IF_N_SET
-		; luckally palette bits match the palette slot index
+		; luckily palette bits match the palette slot index
 		LDA	z:MSDP::blockOneCharAttrOffset + 1
 		AND	#OAM_ATTR_PALETTE_MASK
 		TAX
 
-		LDA	paletteSlots::count, X
-		DEC
-		IF_MINUS
-			LDA	#0
+		DEC	paletteSlots::count, X
+		IF_ZERO
+			JSR	__RemovePaletteSlot
 		ENDIF
-		STA	paletteSlots::count, X
 
 		LDA	#METASPRITE_STATUS_PALETTE_SET_FLAG
 		TRB	z:MSDP::status
 	ENDIF
+
+	REP	#$30
+.A16
+.I16
 .endmacro
+
+
+;; moves palette slot from used list and into free list
+;; IN: X = slot index
+.A8
+.I8
+.proc __RemovePaletteSlot
+	; remove from used list
+	;
+	; if current.prev is NULL:
+	;	list.first = current.next
+	; else:
+	;	current.prev.next = current.next
+	;
+	; if current.next:
+	;	current.next.prev = current.next
+
+	LDY	paletteSlots::prev, X
+	IF_MINUS
+		; first item in list
+		LDA	paletteSlots::next, X
+		STA	paletteSlotList::first, Y
+	ELSE
+		; in middle of list
+		; Y = current.prev
+		LDA	paletteSlots::next, X
+		STA	paletteSlots::next, Y
+	ENDIF
+
+	; A = current.next
+	TAY
+	IF_PLUS
+		LDA	paletteSlots::prev, X
+		STA	paletteSlots::prev, Y
+	ENDIF
+
+	; Add to current free list
+	;
+	; tmp = list.free
+	; list.free = current
+	; current.next = tmp
+
+	LDA	paletteSlotList::free
+	STX	paletteSlotList::free
+
+	STA	paletteSlots::next, X
+
+	RTS
+.endproc
 
 
 
@@ -114,6 +224,7 @@ SetPalette_Failure:
 .endroutine
 
 
+
 ; A: Palette address
 ; DP: MetaSpriteStruct address - MetaSpriteDpOffset
 ; OUT: carry set if succeeded
@@ -122,15 +233,18 @@ SetPalette_Failure:
 .I16
 .routine SetPaletteAddress
 
-tmp_palettePtr	:= tmp1
-tmp_slotIndex	:= tmp2
-firstFreeSlot	:= tmp3
+tmp_slotIndex	:= tmp1
 
-	BIT	z:MSDP::status - 1
-	.assert METASPRITE_STATUS_PALETTE_SET_FLAG = $80, error, "BIT optimisation"
+	STA	z:MSDP::palette
+	CMP	#0
+	BEQ	ReturnFalse
+
+	SEP	#$10
+.I8
+
+	LDY	z:MSDP::status
+	.assert METASPRITE_STATUS_PALETTE_SET_FLAG = $80, error, "Bad code"
 	IF_N_SET
-		TAY
-
 		; MS already has a palette
 		; Check if the palette has changed
 		; If address has changed, decrement reference count
@@ -141,67 +255,100 @@ firstFreeSlot	:= tmp3
 		AND	#OAM_ATTR_PALETTE_MASK
 		TAX
 
-		TYA
-		CMP	paletteSlots::ptr, X
-		BRA	Return		; C set
+		STA	z:MSDP::palette
+		CMP	paletteSlots::paletteAddress, X
+		IF_EQ
+			; Return true
+			REP	#$30
+			; C set by CMP
+			RTS
+		ENDIF
 
 		; Palette has changed, decrement counter
-		LDA	paletteSlots::count, X
-		DEC
+		DEC	paletteSlots::count, X
 		IF_MINUS
-			LDA	#0
-		ENDIF
-		STA	paletteSlots::count, X
+			SEP	#$20
+.A8
+			JSR __RemovePaletteSlot
 
-		TYA
+			REP	#$20
+.A16
+		ENDIF
+
+		LDA	z:MSDP::palette
 	ENDIF
 
-	STA	z:MSDP::palette
-
-	CMP	#0
-	BEQ	ReturnFalse
 
 	; Search for an duplicate/free palette slot
-	LDX	#$8000
-	STX	firstFreeSlot
+	; A = palette address
 
-	LDX	#(N_PALETTE_SLOTS - 1) * 2
-	REPEAT
-		CMP	paletteSlots::ptr, X
-		IF_EQ
-			INC	paletteSlots::count, X
-			STX	tmp_slotIndex
-			BRA	DuplicateSlotFound	; C is set
-		ENDIF
+	LDX	paletteSlotList::first
+	IF_PLUS
+		REPEAT
+			CMP	paletteSlots::paletteAddress, X
+			BEQ	Found_X
 
-		LDY	paletteSlots::count, X
-		IF_ZERO
-			STX	firstFreeSlot
-		ENDIF
+			LDY	paletteSlots::next, X
+			BMI	BREAK_LABEL
 
-		DEX
-		DEX
-	UNTIL_MINUS
+			CMP	paletteSlots::paletteAddress, Y
+			BEQ	Found_Y
 
-	LDX	firstFreeSlot
+			LDX	paletteSlots::next, Y
+		UNTIL_MINUS
+	ENDIF
+
+	; No duplicates found
+
+	LDX	paletteSlotList::free
 	IF_MINUS
-		; Could not find slot
 ReturnFalse:
-		CLC
-Return:
+		REP	#$31
+		; 16 bit A, 16 bit Index, Carry clear
 		RTS
 	ENDIF
 
-	; First time palette is used in slot
+
+	; New slot
+	; Remove from free list, insert into used list
+
+	STX	tmp_slotIndex
+
+	; current->address = metasprite->palette
+	; current->count = 1
+	;
+	; current->prev = NULL
+	; current->next = paletteList.first
+	; current->next->prev = current
+	; paletteList.first = current
+
+	; A = palette address
+	STA	paletteSlots::paletteAddress, X
 
 	LDA	#1
 	STA	paletteSlots::count, X
-	LDA	z:MSDP::palette
-	STA	paletteSlots::ptr, X
 
+	SEP	#$20
+.A8
 
+	LDA	#$80
+	STA	paletteSlots::prev, X
+
+	LDY	paletteSlots::next, X
+	STY	paletteSlotList::free
+
+	LDA	paletteSlotList::first
+	STA	paletteSlots::next, X
+
+	TAY
+	TXA
+	STA	paletteSlots::prev, Y
+	STA	paletteSlotList::first
+
+	REP	#$30
+.A16
+.I16
 CopyPalette:
-	; tmp_palettePtr = palette address
 	; X = slot table index
 
 	STX	tmp_slotIndex
@@ -213,8 +360,9 @@ CopyPalette:
 	ADC	#.loword(paletteBuffer + 2)
 	TAY
 
-	LDX	z:MSDP::palette
+	; ::SHOULDO replace with DMA::
 
+	LDX	z:MSDP::palette
 	LDA	#15 * 2 - 1
 	MVN	$7E, paletteDataBank		; ca65 uses dest,src
 
@@ -224,33 +372,46 @@ CopyPalette:
 .A8
 	STZ	updatePaletteBufferOnZero
 
-DuplicateSlotFound:
-	SEP	#$21
+
+SetMetaSpriteState:
+	; A slot is found with the correct palette
+	; Update metasprite state
+
+	SEP	#$31
 .A8
+.I8
 	; Carry Set
-	; (c never changed by AND or ORA)
+	; (c never changed by AND or ORA or TSB)
 
 	; Set palette bits in offsets
 	; luckally palette bits match the palette slot index
-	; tmp_slotIndex always <= 7 * 2
+	; slotIndex always <= 7 * 2
 
 	LDA	z:MSDP::blockOneCharAttrOffset + 1
-	AND	#.lobyte(~OAM_ATTR_PALETTE_MASK)
+	AND	#.hibyte(~OAM_ATTR_PALETTE_MASK)
 	ORA	tmp_slotIndex
 	STA	z:MSDP::blockOneCharAttrOffset + 1
 
 	LDA	z:MSDP::blockTwoCharAttrOffset + 1
-	AND	#.lobyte(~OAM_ATTR_PALETTE_MASK)
+	AND	#.hibyte(~OAM_ATTR_PALETTE_MASK)
 	ORA	tmp_slotIndex
 	STA	z:MSDP::blockTwoCharAttrOffset + 1
 
 	LDA	#METASPRITE_STATUS_PALETTE_SET_FLAG
 	TSB	z:MSDP::status
 
-	REP	#$20
+	REP	#$30
 .A16
+.I16
 	; C Set
 	RTS
+
+
+Found_Y:
+	TYX
+Found_X:
+	STX	tmp_slotIndex
+	BRA	SetMetaSpriteState
 .endroutine
 
 
@@ -269,7 +430,7 @@ bufferAddress	:= tmp2
 	REPEAT
 		LDA	paletteSlots::count, X
 		BEQ	Skip
-		LDA	paletteSlots::ptr, X
+		LDA	paletteSlots::paletteAddress, X
 		BEQ	Skip
 
 			STX	slotIndex
