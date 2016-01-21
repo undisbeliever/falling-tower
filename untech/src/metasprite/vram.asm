@@ -80,7 +80,7 @@
 
 
 .segment "WRAM7E"
-	.scope slotList
+	.scope vramSlotList
 		;; One Tiles fixed tileset vram slot list index
 		;; $80 if list is empty
 		;; (byte index)
@@ -176,15 +176,15 @@ TileSlots_ROM_DATA:
 	STA	vramSlots::next + vramSlots::SectionSize - 4
 
 	; Reset the slot lists
-	STA	slotList::oneFixedTileList
-	STA	slotList::twoFixedTilesList
-	STA	slotList::oneFixedRowList
-	STA	slotList::twoFixedRowsList
+	STA	vramSlotList::oneFixedTileList
+	STA	vramSlotList::twoFixedTilesList
+	STA	vramSlotList::oneFixedRowList
+	STA	vramSlotList::twoFixedRowsList
 
 
-	STZ	slotList::freeTiles
+	STZ	vramSlotList::freeTiles
 	LDA	#vramSlots::RowSlotIndexGE
-	STA	slotList::freeRows
+	STA	vramSlotList::freeRows
 
 	REP	#$30
 .A16
@@ -212,7 +212,7 @@ TileSlots_ROM_DATA:
 		SEP	#$30
 .A8
 .I8
-		JSR	_RemoveSlot
+		JSR	_RemoveVramSlot
 
 		REP	#$30
 .I16
@@ -231,7 +231,7 @@ TileSlots_ROM_DATA:
 ;;	DP: MetaSpriteStruct address - MetaSpriteDpOffset
 .A8
 .I8
-.routine _RemoveSlot
+.routine _RemoveVramSlot
 	; metasprite already has a slot allocated
 	; check if tileset has changed
 	AND	#METASPRITE_STATUS_VRAM_INDEX_MASK
@@ -250,15 +250,15 @@ XIndex:
 		; if current->prev is NULL:
 		;	if current->next:
 		;		if current is row slot:
-		;			if current = slotList.twoFixedRowsList.first
-		;				slotList.twoFixedRowsList.first = current->next
+		;			if current = vramSlotList.twoFixedRowsList.first
+		;				vramSlotList.twoFixedRowsList.first = current->next
 		;			else
-		;				slotList.oneFixedRowList.first = current->next
+		;				vramSlotList.oneFixedRowList.first = current->next
 		;		else:
-		;			if current = slotList.oneFixedTileList.first
-		;				slotList.oneFixedTileList.first = current->next
+		;			if current = vramSlotList.oneFixedTileList.first
+		;				vramSlotList.oneFixedTileList.first = current->next
 		;			else
-		;				slotList.twoFixedTilesList.first = current->next
+		;				vramSlotList.twoFixedTilesList.first = current->next
 		; else:
 		;	current->prev->next = current->next
 		;
@@ -274,20 +274,20 @@ XIndex:
 				IF_GE
 					; row slot
 					; determine which list it goes into
-					CPX	slotList::twoFixedRowsList
+					CPX	vramSlotList::twoFixedRowsList
 					IF_EQ
-						STA	slotList::twoFixedRowsList
+						STA	vramSlotList::twoFixedRowsList
 					ELSE
-						STA	slotList::oneFixedRowList
+						STA	vramSlotList::oneFixedRowList
 					ENDIF
 				ELSE
 					; tile slot
 					; determine which list it goes into
-					CPX	slotList::oneFixedTileList
+					CPX	vramSlotList::oneFixedTileList
 					IF_EQ
-						STA	slotList::oneFixedTileList
+						STA	vramSlotList::oneFixedTileList
 					ELSE
-						STA	slotList::twoFixedTilesList
+						STA	vramSlotList::twoFixedTilesList
 					ENDIF
 				ENDIF
 			ENDIF
@@ -320,12 +320,12 @@ XIndex:
 		CPX	#vramSlots::RowSlotIndexGE
 		IF_GE
 			; row slot
-			LDA	slotList::freeRows
-			STX	slotList::freeRows
+			LDA	vramSlotList::freeRows
+			STX	vramSlotList::freeRows
 		ELSE
 			; tile slot
-			LDA	slotList::freeTiles
-			STX	slotList::freeTiles
+			LDA	vramSlotList::freeTiles
+			STX	vramSlotList::freeTiles
 		ENDIF
 
 		STA	vramSlots::next, X
@@ -338,12 +338,12 @@ XIndex:
 			CPY	#vramSlots::RowSlotIndexGE
 			IF_GE
 				; row slot
-				LDA	slotList::freeRows
-				STY	slotList::freeRows
+				LDA	vramSlotList::freeRows
+				STY	vramSlotList::freeRows
 			ELSE
 				; tile slot
-				LDA	slotList::freeTiles
-				STY	slotList::freeTiles
+				LDA	vramSlotList::freeTiles
+				STY	vramSlotList::freeTiles
 			ENDIF
 
 			STA	vramSlots::next, Y
@@ -428,7 +428,7 @@ tmp_secondSlot	:= tmp3
 		; tileset has changed, remove reference
 		SEP	#$20
 .A8
-		JSR	_RemoveSlot::XIndex
+		JSR	_RemoveVramSlot::XIndex
 
 		REP	#$30
 	ENDIF
@@ -470,7 +470,7 @@ SetTilesetTypeTable:
 	SEP	#$10
 .I8
 	; Search for duplicate tilesets
-	LDX	slotList::tilesetList
+	LDX	vramSlotList::tilesetList
 	IF_PLUS
 		REPEAT
 			CMP	vramSlots::tileset, X
@@ -487,7 +487,7 @@ SetTilesetTypeTable:
 
 	ENDIF
 
-	LDX	slotList::freeList
+	LDX	vramSlotList::freeList
 	BMI	Process_One__NoSlotsFound
 
 
@@ -521,17 +521,16 @@ SetTilesetTypeTable:
 	STA	vramSlots::pair, X
 
 	LDY	vramSlots::next, X
-	STY	slotList::freeList
+	STY	vramSlotList::freeList
 
-	LDA	slotList::tilesetList
+	LDA	vramSlotList::tilesetList
 	STA	vramSlots::next, X
 
 	TAY
 	TXA
-	LDX	vramSlots::next, Y
 
 	STA	vramSlots::prev, Y
-	STA	slotList::tilesetList
+	STA	vramSlotList::tilesetList
 
 	PLX
 
@@ -693,7 +692,7 @@ SetTilesetTypeTable:
 	SEP	#$10
 .I8
 	; Search for duplicate tilesets
-	LDX	slotList::tilesetList
+	LDX	vramSlotList::tilesetList
 	IF_PLUS
 		REPEAT
 			CMP	vramSlots::tileset, X
@@ -710,7 +709,7 @@ SetTilesetTypeTable:
 
 	ENDIF
 
-	LDX	slotList::freeList
+	LDX	vramSlotList::freeList
 	BMI	Process_Two__NoSlotsFound
 	LDY	vramSlots::next, X
 	BMI	Process_Two__NoSlotsFound
@@ -748,7 +747,7 @@ SetTilesetTypeTable:
 	; Y = second
 
 	LDA	vramSlots::next, Y
-	STA	slotList::freeList
+	STA	vramSlotList::freeList
 
 	TYA
 	STA	vramSlots::pair, X
@@ -756,14 +755,14 @@ SetTilesetTypeTable:
 	LDA	#$80
 	STA	vramSlots::prev, X
 
-	LDA	slotList::tilesetList
+	LDA	vramSlotList::tilesetList
 	STA	vramSlots::next, X
 
 	TAY
 	TXA
 	STA	vramSlots::prev, Y
 
-	STA	slotList::tilesetList
+	STA	vramSlotList::tilesetList
 
 	JMP	Process_Two__DmaTable
 .endmacro
