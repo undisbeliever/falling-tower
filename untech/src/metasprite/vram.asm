@@ -439,8 +439,7 @@ tmp_secondSlot	:= tmp3
 	; searches.
 	LDX	tmp_tileset
 	LDA	f:tilesetBankOffset + MetaSprite__Tileset::type, X
-	AND	#3
-	ASL
+	AND	#3 << 1
 	TAX
 	JMP	(.loword(SetTilesetTypeTable), X)
 
@@ -452,7 +451,7 @@ Return:
 
 .rodata
 SetTilesetTypeTable:
-	.assert MetaSprite__Tileset_Type::TWO_VRAM_ROWS = 3, error, "Bad Table"
+	.assert MetaSprite__Tileset_Type::TWO_VRAM_ROWS = 6, error, "Bad Table"
 
 	; Must match MetaSprite__Tileset_Type
 	.addr	Process_OneTile

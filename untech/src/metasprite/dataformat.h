@@ -172,16 +172,16 @@
 
 .enum MetaSprite__Tileset_Type
 	;; The tileset uses a single 16x16 tile
-        ONE_16_TILE
+        ONE_16_TILE	= 0
 
 	;; The tileset uses two 16x16 tiles
-        TWO_16_TILES
+        TWO_16_TILES	= 2
 
 	;; The tileset uses a single VRAM row of 8 16x16 tiles
-	ONE_VRAM_ROW
+	ONE_VRAM_ROW	= 4
 
 	;; The tileset uses two VRAM rows of 8 16x16 tiles.
-        TWO_VRAM_ROWS
+        TWO_VRAM_ROWS	= 6
 .endenum
 
 ;; The tileset that is used by the frame (or frames).
