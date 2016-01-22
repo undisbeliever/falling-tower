@@ -18,13 +18,9 @@
 	; ::TODO implement::
 	DYNAMIC		= 2
 
-	;; The entity has a dynamic tilset, with some fixed components
-	;; The last X tiles of the frameSet are fixed.
-	;; The first (size - X) tiles are dynamic and change every msFrame.
-	; ::TODO implement::
-	DYNAMIC_FIXED	= 4
-
-	; ::TODO add tileset size for dynamic tilesets::
+	; ::MAYDO DYNAMIC_FIXED tileset lifestyle::
+	; ::: This would consist of a fixed section that doesn't update ::
+	; ::: (right-to-left), and the first few tiles are updated per frame::
 .endenum
 
 

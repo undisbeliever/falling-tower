@@ -85,7 +85,7 @@
 ::_Activate_AfterPalette:
 	LDX	z:MSDP::frameSet
 	LDA	f:frameSetOffset + MetaSprite__FrameSet::tilesetLifestyle, X
-	AND	#%110
+	AND	#%10
 	TAX
 	JMP	(.loword(FunctionTable), X)
 
@@ -93,12 +93,9 @@
 FunctionTable:
 	.addr	Activate_FixedTileset
 	.addr	Activate_Dynamic
-	.addr	Activate_DynamicFixed
-	.addr	Activate_Dynamic
 .code
 
 Activate_Dynamic:
-Activate_DynamicFixed:
 	; ::TODO implement::
 	RTS
 .endroutine
