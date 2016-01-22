@@ -85,7 +85,7 @@
 	;; `METASPRITE_TILESET_BLOCK` bank.
 	;;
 	;; Only read if the frameSet uses a dynamic tileset.
-	tilesetTable		.addr
+	tileset			.addr
 .endstruct
 
 

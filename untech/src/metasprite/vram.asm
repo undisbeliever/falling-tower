@@ -7,8 +7,6 @@
 
 .setcpu "65816"
 
-; ::TODO dynamic tilesets::
-
 .assert METASPRITE_VRAM_TILE_SLOTS .mod 8 = 0, error, "METASPRITE_VRAM_TILE_SLOTS must be divisible by 8"
 .assert METASPRITE_VRAM_TILE_SLOTS / 8 + METASPRITE_VRAM_ROW_SLOTS <= 16, error, "Only 16 VRAM rows can be allocated to MetaSprite Module"
 
@@ -190,6 +188,7 @@ TileSlots_ROM_DATA:
 .I16
 	STZ	dmaTableIndex
 .endmacro
+
 
 
 ;; Removes the tileset from the slots
@@ -866,11 +865,333 @@ SetTilesetTypeTable:
 
 
 	; X = VRAM slot index
+	JMP	SetupDmaForTwoTilesetBlocks
+.endproc
+
+.delmacro _Process_One
+.delmacro _Process_Two
+.endroutine
+
+
+
+
+
+;; Allocates the appropriate amount of VRAM to the metasprite
+;; and upload the given tileset.
+;;
+;; This routine should only be called by Activate
+;;
+;; REQUIRES: 16 bit A, 16 bit Index, DB = $7E
+;;
+;; INPUT:
+;;	DP: MetaSpriteStruct address - MetaSpriteDpOffset
+;;
+;; OUTPUT:
+;;	C set if succeesful
+.A16
+.I16
+.routine Activate_DynamicTileset
+	LDX	z:MSDP::currentFrame
+	LDA	f:frameDataOffset + MetaSprite__Frame::tileset, X
+	BEQ	Failure
+
+	STA	tmp_tileset
+	TAX
+
+	.assert METASPRITE_STATUS_VRAM_SET_FLAG = 1, error, "Bad code"
+	LDA	z:MSDP::status
+	LSR
+	IF_C_SET
+		; Tiles allocated, just update them if necessary
+		TXA
+		JMP	SetFrame_DynamicTileset_A
+	ENDIF
+
+	; As there are 4 different tileset types, we need 4 different
+	; searches.
+	LDA	f:tilesetBankOffset + MetaSprite__Tileset::type, X
+	AND	#3 << 1
+	TAX
+	JMP	(.loword(SetTilesetTypeTable), X)
+
+Failure:
+	CLC
+	RTS
+
+.rodata
+SetTilesetTypeTable:
+	.assert MetaSprite__Tileset_Type::TWO_VRAM_ROWS = 6, error, "Bad Table"
+
+	; Must match MetaSprite__Tileset_Type
+	.addr	Process_OneTile
+	.addr	Process_TwoTiles
+	.addr	Process_OneRow
+	.addr	Process_TwoRows
+
+.code
+
+
+.macro _Process_One freeList
+	SEP	#$30
+.A8
+.I8
+	LDX	vramSlotList::freeList
+	BMI	NoSlotsFound
+
+	LDA	vramSlots::next, X
+	STA	vramSlotList::freeList
+
+	BRA	_ProcessOne_SlotFound
+.endmacro
+
+
+.macro _Process_Two freeList
+	SEP	#$30
+.A8
+.I8
+	LDX	vramSlotList::freeList
+	BMI	NoSlotsFound
+	LDY	vramSlots::next, X
+	BMI	NoSlotsFound
+
+	LDA	vramSlots::next, Y
+	STA	vramSlotList::freeList
+
+	BRA	_ProcessTwo_SlotsFound
+.endmacro
+
+.A16
+.I16
+.proc Process_OneTile
+	_Process_One freeTiles
+.endproc
+
+.A16
+.I16
+.proc Process_OneRow
+	_Process_One freeRows
+.endproc
+
+.A16
+.I16
+.proc Process_TwoTiles
+	_Process_Two freeTiles
+.endproc
+
+.A16
+.I16
+.proc Process_TwoRows
+	_Process_Two freeRows
+.endproc
+
+
+
+NoSlotsFound:
+	REP	#$31
+	; 16 A, 16 Index, C clear
+	RTS
+
+
+
+;; IN: X = slot
+;; IN: tmp_tileset = tileset
+;; REQUIRES slot removed from free list
+;; OUT: calls SetupDmaForOneTilesetBlock
+.A8
+.I8
+.proc _ProcessOne_SlotFound
+	LDY	dmaTableIndex
+	CPY	#METASPRITE_DMA_TABLE_COUNT * 2
+	BGE	NoSlotsFound
+
+	; ::SHOULDO add vblank overflow check::
+
+
+	; Set slot as a single dynamic tileset
+
+	LDA	#1
+	STA	vramSlots::count, X
+
+	LDA	#$80
+	STA	vramSlots::next, X
+	STA	vramSlots::prev, X
+	STA	vramSlots::pair, X
+
+
+	; update status
+	LDA	z:MSDP::status
+	.assert METASPRITE_STATUS_PALETTE_SET_FLAG = $80, error, "Bad assumption"
+	ASL
+	IF_C_SET
+		TXA
+		LSR
+		ORA	#METASPRITE_STATUS_PALETTE_SET_FLAG | METASPRITE_STATUS_VRAM_SET_FLAG | METASPRITE_STATUS_DYNAMIC_TILESET_FLAG
+	ELSE
+		TXA
+		LSR
+		ORA	#METASPRITE_STATUS_VRAM_SET_FLAG | METASPRITE_STATUS_DYNAMIC_TILESET_FLAG
+	ENDIF
+
+	STA	z:MSDP::status
+
+
+	REP	#$20
+.A16
+	; Calculate new offset
+	LDA	z:MSDP::blockOneCharAttrOffset
+	AND	#.loword(~OAM_CHARATTR_CHAR_MASK)
+	ORA	f:vramSlots::CharAttrOffset, X
+	STA	z:MSDP::blockOneCharAttrOffset
+
+	BRA	SetupDmaForOneTilesetBlock
+.endproc
+
+
+
+;; IN: X = slot1, Y = slot2
+;; IN: tmp_tileset = tileset
+;; REQUIRES: both slots removed from free list
+;; OUT: calls SetupDmaForOneTilesetBlock
+.A8
+.I8
+.proc _ProcessTwo_SlotsFound
+	LDA	dmaTableIndex
+	CMP	#METASPRITE_DMA_TABLE_COUNT * 2
+	BGE	NoSlotsFound
+
+	; ::SHOULDO add vblank overflow check::
+
+	; Set slot as a dual dynamic tileset
+	; X = first
+	; Y = second
+	TYA
+	STA	vramSlots::pair, X
+
+	LDA	#1
+	STA	vramSlots::count, X
+
+	LDA	#$80
+	STA	vramSlots::next, X
+	STA	vramSlots::prev, X
+
+	; update status
+	LDA	z:MSDP::status
+	.assert METASPRITE_STATUS_PALETTE_SET_FLAG = $80, error, "Bad assumption"
+	ASL
+	IF_C_SET
+		TXA
+		LSR
+		ORA	#METASPRITE_STATUS_PALETTE_SET_FLAG | METASPRITE_STATUS_VRAM_SET_FLAG | METASPRITE_STATUS_DYNAMIC_TILESET_FLAG
+	ELSE
+		TXA
+		LSR
+		ORA	#METASPRITE_STATUS_VRAM_SET_FLAG | METASPRITE_STATUS_DYNAMIC_TILESET_FLAG
+	ENDIF
+
+	STA	z:MSDP::status
+
+
+	REP	#$20
+.A16
+	PHX
+
+	; Calculate new charattr offsets
+	LDA	z:MSDP::blockOneCharAttrOffset
+	AND	#.loword(~OAM_CHARATTR_CHAR_MASK)
+	ORA	f:vramSlots::CharAttrOffset, X
+	STA	z:MSDP::blockOneCharAttrOffset
+
+	TYX
+	LDA	z:MSDP::blockTwoCharAttrOffset
+	AND	#.loword(~OAM_CHARATTR_CHAR_MASK)
+	ORA	f:vramSlots::CharAttrOffset, X
+	STA	z:MSDP::blockTwoCharAttrOffset
+
+	PLX
+
 	BRA	SetupDmaForTwoTilesetBlocks
 .endproc
 
+
+.delmacro _Process_One
+.delmacro _Process_Two
 .endroutine
 
+
+
+;; Updates the frame of a MetaSprite with a dynamic tileset
+;;
+;; This macro will only set `MSDP::currentFrame` only if there
+;; is space in VBlank to upload the tile.
+;; ::TODO think about this behaviour::
+;;
+;; SHOULD only be used by `metasprite.s`
+;;
+;; REQUIRES: 16 bit A, 16 bit Index, DB = $7E
+;; ASSUMES: METASPRITE_STATUS_DYNAMIC_TILESET_FLAG is set
+;;
+;; INPUT:
+;;	A: frame
+;;	DP: MetaSpriteStruct address - MetaSpriteDpOffset
+;;
+;; OUTPUT: Branch to Success/Failure or RTS with C set
+.A16
+.I16
+.macro SetFrame_DynamicTileset
+	.assert .asize = 16, error, "Bad asize"
+	.assert .isize = 16, error, "Bad isize"
+
+	; Check if the tileset is the same as the previous one
+
+	TAX
+	LDA	f:frameDataOffset + MetaSprite__Frame::tileset, X
+	BEQ	Failure
+
+::SetFrame_DynamicTileset_A:
+	STA	tmp_tileset
+
+	LDA	z:MSDP::status
+	AND	#METASPRITE_STATUS_VRAM_INDEX_MASK
+	ASL
+	TAY
+
+	LDA	tmp_tileset
+	CMP	vramSlots::tileset, Y
+	BEQ	Success
+
+
+	; Check if there is space in DMA Table
+	; ::SHOULDO add vblank timing check::
+
+	; MUST NOT USE X or Y
+
+	LDA	dmaTableIndex
+	CMP	#METASPRITE_DMA_TABLE_COUNT * 2
+	BGE	Failure
+
+
+	; Can upload frame to VRAM.
+	; Save current frame in MSDP
+
+	STX	z:MSDP::currentFrame
+
+
+	; Setup DMA table
+	LDA	f:tilesetBankOffset + MetaSprite__Tileset::type, X
+
+	TYX
+	SEP	#$10
+.I8
+	; X = slot
+	IF_BIT	#MetaSprite__Tileset_Type::ONE_VRAM_ROW | MetaSprite__Tileset_Type::ONE_16_TILE
+		JMP	SetupDmaForOneTilesetBlock
+	ENDIF
+
+	JMP	SetupDmaForTwoTilesetBlocks
+
+
+	.assert MetaSprite__Tileset_Type::TWO_VRAM_ROWS | MetaSprite__Tileset_Type::TWO_16_TILES <> MetaSprite__Tileset_Type::ONE_VRAM_ROW | MetaSprite__Tileset_Type::ONE_16_TILE, error, "Bad assumption"
+.endmacro
 
 
 ;; Sets up the DMA Table for VBlank transfer of a single tileset block

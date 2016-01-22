@@ -92,12 +92,8 @@
 .rodata
 FunctionTable:
 	.addr	Activate_FixedTileset
-	.addr	Activate_Dynamic
+	.addr	Activate_DynamicTileset
 .code
-
-Activate_Dynamic:
-	; ::TODO implement::
-	RTS
 .endroutine
 
 
@@ -134,20 +130,22 @@ Activate_Dynamic:
 	TAX
 	LDA	f:frameListOffset, X
 
-	STA	z:MSDP::currentFrame
+	CMP	z:MSDP::currentFrame
 	BEQ	Success
 
 	.assert METASPRITE_STATUS_DYNAMIC_TILESET_FLAG = $40, error, "bad code"
 	BIT	z:MSDP::status - 1
 	IF_V_SET
-		; ::TODO handle dynamic tilesets::
-		STP
+		SetFrame_DynamicTileset
+		; no execution here, macro will branch to Success/Failure
 	ENDIF
 
 	; If Dynamic Tileset flag is not set then
 	;	1) The metasprite is unallocated
 	; or	2) The metasprite uses a fixed tileset
 	; either way no uploads are needed
+
+	STA	z:MSDP::currentFrame
 
 Success:
 	SEC
