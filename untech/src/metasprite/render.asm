@@ -59,8 +59,11 @@ FRAME_CHARATTR_MASK	= $F01F
 	tmp4			:= xposBuffer + 7*4 + 2
 	tmp5			:= xposBuffer + 8*4 + 2
 
+	;; temporary place-holder for the tileset address in vram.asm
+	tmp_tileset		:= xposBuffer + 9*4 + 2
+
 	; The tileset allocation data uses the rest of the xposBuffer free space
-	_VramSlotsBlock		:= xposBuffer + 9*4 + 2
+	_VramSlotsBlock		:= xposBuffer +10*4 + 2
 
 .code
 

@@ -8,7 +8,6 @@
 .setcpu "65816"
 
 ; ::TODO dynamic tilesets::
-; ::TODO dynamic-fixed tilesets::
 
 .assert METASPRITE_VRAM_TILE_SLOTS .mod 8 = 0, error, "METASPRITE_VRAM_TILE_SLOTS must be divisible by 8"
 .assert METASPRITE_VRAM_TILE_SLOTS / 8 + METASPRITE_VRAM_ROW_SLOTS <= 16, error, "Only 16 VRAM rows can be allocated to MetaSprite Module"
@@ -389,9 +388,8 @@ XIndex:
 .A16
 .I16
 .routine Activate_FixedTileset
-tmp_tileset	:= tmp1
-tmp_firstSlot	:= tmp2
-tmp_secondSlot	:= tmp3
+tmp_firstSlot	:= tmp1
+tmp_secondSlot	:= tmp2
 
 	LDX	z:MSDP::frameSet
 	LDA	f:frameSetOffset + MetaSprite__FrameSet::tileset, X
@@ -639,48 +637,14 @@ SetTilesetTypeTable:
 
 	REP	#$20
 .A16
-	; Add vram address to DMA table
-	LDY	dmaTableIndex
-	LDA	f:vramSlots::VramAddresses, X
-	STA	dmaTable::vramAddress, Y
-
-
-	; Calculate new offset
+	; Calculate new charattr offset
 	LDA	z:MSDP::blockOneCharAttrOffset
 	AND	#.loword(~OAM_CHARATTR_CHAR_MASK)
 	ORA	f:vramSlots::CharAttrOffset, X
 	STA	z:MSDP::blockOneCharAttrOffset
 
-
-	; Store tileset for future checking
-	LDA	tmp_tileset
-	STA	vramSlots::tileset, X
-
-
-	; Add to tileset DMA table
-	; ::SHOULDO better DMA table format::
-
-	LDY	dmaTableIndex
-
-	REP	#$30
-.A16
-.I16
-
-	LDX	tmp_tileset
-	LDA	f:tilesetBankOffset + MetaSprite__Tileset::dmaTable0, X
-	STA	dmaTable::tablePtr, Y
-
-	INY
-	INY
-	STY	dmaTableIndex
-
-	SEC
-	RTS
+	JMP	SetupDmaForOneTilesetBlock
 .endproc
-
-
-
-
 
 
 .macro _Process_Two tilesetList, freeList
@@ -854,6 +818,7 @@ SetTilesetTypeTable:
 .endproc
 
 
+
 ; Creates the DMA table for the given slots
 ; IN: tmp_tileset = tileset address
 ; IN: tmp_firstSlot = address of first slot
@@ -885,47 +850,60 @@ SetTilesetTypeTable:
 
 	REP	#$20
 .A16
-	LDY	dmaTableIndex
-
-	; Store tileset for future checking
-	LDA	tmp_tileset
-	STA	vramSlots::tileset, X
-
-	; Add vram addresses to DMA tables
-	LDY	dmaTableIndex
-	LDA	f:vramSlots::VramAddresses, X
-	STA	dmaTable::vramAddress, Y
-
-	; Calculate new offset for second table
-	LDA	z:MSDP::blockOneCharAttrOffset
-	AND	#.loword(~OAM_CHARATTR_CHAR_MASK)
-	ORA	f:vramSlots::CharAttrOffset, X
-	STA	z:MSDP::blockOneCharAttrOffset
-
-
-	; Store second slot data
+	; Calculate new charAttr Offsets
 	LDX	tmp_secondSlot
-	LDA	f:vramSlots::VramAddresses, X
-	STA	dmaTable::vramAddress + 2, Y
-
 	LDA	z:MSDP::blockTwoCharAttrOffset
 	AND	#.loword(~OAM_CHARATTR_CHAR_MASK)
 	ORA	f:vramSlots::CharAttrOffset, X
 	STA	z:MSDP::blockTwoCharAttrOffset
 
 
+	LDX	tmp_firstSlot
+	LDA	z:MSDP::blockOneCharAttrOffset
+	AND	#.loword(~OAM_CHARATTR_CHAR_MASK)
+	ORA	f:vramSlots::CharAttrOffset, X
+	STA	z:MSDP::blockOneCharAttrOffset
+
+
+	; X = VRAM slot index
+	BRA	SetupDmaForTwoTilesetBlocks
+.endproc
+
+.endroutine
+
+
+
+;; Sets up the DMA Table for VBlank transfer of a single tileset block
+;;
+;; Also sets the tileset address to the vram slot tileset value
+;;
+;; Does not check DMA Table position, that is handled by caller function
+;;
+;; INPUT: tmp_tileset = tileset to process
+;; INPUT: X = vramSlot slot to process to
+;; OUTPUT: C set, 16 bit A, 16 bit Index
+.A16
+.I8
+.routine SetupDmaForOneTilesetBlock
+	LDY	dmaTableIndex
+
+	; Add slot vram address to DMA table
+	LDA	f:vramSlots::VramAddresses, X
+	STA	dmaTable::vramAddress, Y
+
+	; Store tileset address in slot
+	LDA	tmp_tileset
+	STA	vramSlots::tileset, X
+
+
+	; Add to tileset data to DMA table
+	; ::SHOULDO better tileset data format::
+
 	REP	#$30
 .A16
 .I16
-
 	LDX	tmp_tileset
 	LDA	f:tilesetBankOffset + MetaSprite__Tileset::dmaTable0, X
-	STA	dmaTable::tablePtr, Y
-
-	INY
-	INY
-
-	LDA	f:tilesetBankOffset + MetaSprite__Tileset::dmaTable1, X
 	STA	dmaTable::tablePtr, Y
 
 	INY
@@ -934,7 +912,58 @@ SetTilesetTypeTable:
 
 	SEC
 	RTS
-.endproc
+.endroutine
 
+
+
+;; Sets up the DMA Table for VBlank transfer for a dual block tileset.
+;;
+;; Also sets the tileset address to the vram slot tileset value
+;;
+;; Does not check DMA Table position, that is handled by caller function
+;;
+;; INPUT: tmp_tileset = tileset
+;; INPUT: X = vramSlot
+;; OUTPUT: C set, 16 bit A, 16 bit Index
+.A16
+.I8
+.routine SetupDmaForTwoTilesetBlocks
+	LDY	dmaTableIndex
+
+	; Add slot vram addresses for DMA table
+	LDA	f:vramSlots::VramAddresses, X
+	STA	dmaTable::vramAddress, Y
+
+	; Store tileset address in slot
+	LDA	tmp_tileset
+	STA	vramSlots::tileset, X
+
+	; Get second slot address
+	LDA	vramSlots::pair, X
+	TAX
+	LDA	f:vramSlots::VramAddresses, X
+	STA	dmaTable::vramAddress + 2, Y
+
+
+	; Add tileset data to DMA table
+	; ::SHOULDO better tileset data format::
+
+	REP	#$30
+.A16
+.I16
+	LDX	tmp_tileset
+	LDA	f:tilesetBankOffset + MetaSprite__Tileset::dmaTable0, X
+	STA	dmaTable::tablePtr, Y
+
+	LDA	f:tilesetBankOffset + MetaSprite__Tileset::dmaTable1, X
+	STA	dmaTable::tablePtr + 2, Y
+
+	TYA
+	CLC
+	ADC	#4
+	STA	dmaTableIndex
+
+	SEC
+	RTS
 .endroutine
 
