@@ -6,7 +6,7 @@
 .export MetaSpriteFrameSetTable_end: far
 MetaSpriteFrameSetTable:
 .addr MetaSprite__FrameSet_Data + 0
-.addr MetaSprite__FrameSet_Data + 12
+.addr MetaSprite__FrameSet_Data + 10
 MetaSpriteFrameSetTable_end:
 
 
@@ -14,18 +14,16 @@ MetaSpriteFrameSetTable_end:
 .assert .loword(*) <> 0, error, "Cannot start data with addr=0"
 .exportzp MetaSprite__FrameSet_Bank = .bankbyte(*)
 MetaSprite__FrameSet_Data:
-.addr MetaSprite__Tileset_Data + 0
-.byte 0
 .addr MetaSprite__Palette_List + 0
 .byte 1
+.byte 6
 .addr MetaSprite__Frame_List + 0
 .byte 22
 .addr 0
 .byte 0
-.addr MetaSprite__Tileset_Data + 6
-.byte 0
 .addr MetaSprite__Palette_List + 2
 .byte 1
+.byte 2
 .addr MetaSprite__Frame_List + 44
 .byte 4
 .addr 0
@@ -150,22 +148,22 @@ MetaSprite__Frame_Data:
 .addr 0
 .addr MetaSprite__TileCollisionHitbox_Data + 40
 .addr 0
-.addr MetaSprite__Tileset_Data + 6
+.addr MetaSprite__Tileset_Data + 5
 .addr MetaSprite__FrameObjectsList_Data + 303
 .addr 0
 .addr MetaSprite__TileCollisionHitbox_Data + 44
 .addr 0
-.addr MetaSprite__Tileset_Data + 6
+.addr MetaSprite__Tileset_Data + 5
 .addr MetaSprite__FrameObjectsList_Data + 320
 .addr 0
 .addr MetaSprite__TileCollisionHitbox_Data + 48
 .addr 0
-.addr MetaSprite__Tileset_Data + 6
+.addr MetaSprite__Tileset_Data + 5
 .addr MetaSprite__FrameObjectsList_Data + 333
 .addr 0
 .addr MetaSprite__TileCollisionHitbox_Data + 52
 .addr 0
-.addr MetaSprite__Tileset_Data + 6
+.addr MetaSprite__Tileset_Data + 5
 
 
 .segment METASPRITE_FRAME_LIST_BLOCK
@@ -198,10 +196,10 @@ MetaSprite__FrameObjectsList_Data:
 .assert .loword(*) <> 0, error, "Cannot start data with addr=0"
 .exportzp MetaSprite__Tileset_Bank = .bankbyte(*)
 MetaSprite__Tileset_Data:
-.byte 6, 14
+.byte 14
 .addr MetaSprite__DmaTable_Data + 0
 .addr MetaSprite__DmaTable_Data + 25
-.byte 2, 2
+.byte 2
 .addr MetaSprite__DmaTable_Data + 44
 .addr MetaSprite__DmaTable_Data + 48
 
