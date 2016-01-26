@@ -357,16 +357,6 @@ XIndex:
 .endroutine
 
 
-;; A hook for unit testing Init Fixed Tileset
-;;
-;; IN:
-;;	DP: MetaSpriteStruct address - MetaSpriteDpOffset
-;;	A: tileset address
-;;
-;; OUTPUT:
-;;	C set if succeesful
-.exportlabel UploadFixedTileset
-
 
 ;; Uploads (if necessary) a fixed metasprite tileset into VRAM.
 ;;
@@ -381,7 +371,6 @@ XIndex:
 ;;
 ;; INPUT:
 ;;	DP: MetaSpriteStruct address - MetaSpriteDpOffset
-;;	 X: frameSet address
 ;;
 ;; OUTPUT:
 ;;	C set if succeesful
@@ -391,9 +380,10 @@ XIndex:
 tmp_firstSlot	:= tmp1
 tmp_secondSlot	:= tmp2
 
-	LDA	f:frameSetOffset + MetaSprite__FrameSet::tileset, X
+	LDX	z:MSDP::currentFrame
+	BEQ	ReturnFalse
 
-::UploadFixedTileset:
+	LDA	f:frameDataOffset + MetaSprite__Frame::tileset, X
 	STA	tmp_tileset
 
 	.assert METASPRITE_STATUS_VRAM_SET_FLAG = 1, error, "Bad code"

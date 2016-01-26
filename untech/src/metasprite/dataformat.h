@@ -37,18 +37,6 @@
 
 ;; Frame Sets are stored sequentially in order
 .struct MetaSprite__FrameSet
-	;; Address of the fixed tileset used by the FrameSet (if fixed)
-	;;
-	;; The tilset must be in the `METASPRITE_TILESET_BLOCK` bank.
-	;;
-	;; If this value is NULL (0) then no tileset is loaded.
-	tileset                 .addr
-
-	;; The tileset size and lifestyle of the FrameSet used by the system
-	;; This is a logical OR of `MetaSprite__FrameSet_TilesetLifecycle` and
-	;; `MetaSprite__FrameSet_TilesetFormat`
-	tilesetType	.byte
-
 	;; Address of the palette table in the `METASPRITE_PALETTE_LIST_BLOCK` bank.
 	;;
 	;; The table is a list of `.addr`s that point to the palette data
@@ -56,6 +44,11 @@
 	paletteList		.addr
 	;; Number of palettes in the palette table
 	nPalettes		.byte
+
+	;; The tileset size and lifestyle of the FrameSet used by the system
+	;; This is a logical OR of `MetaSprite__FrameSet_TilesetLifecycle` and
+	;; `MetaSprite__FrameSet_TilesetFormat`
+	tilesetType	.byte
 
 	;; Address of the frame table in `METASPRITE_FRAME_LIST_BLOCK` bank
 	;;
