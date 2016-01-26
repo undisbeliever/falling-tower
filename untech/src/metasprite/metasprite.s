@@ -82,18 +82,15 @@
 	LDA	z:MSDP::palette
 	JSR	SetPaletteAddress
 
-::_Activate_AfterPalette:
 	LDX	z:MSDP::frameSet
-	LDA	f:frameSetOffset + MetaSprite__FrameSet::tilesetLifestyle, X
-	AND	#%10
-	TAX
-	JMP	(.loword(FunctionTable), X)
 
-.rodata
-FunctionTable:
-	.addr	Activate_FixedTileset
-	.addr	Activate_DynamicTileset
-.code
+	.assert MetaSprite__FrameSet_TilesetLifecycle::DYNAMIC = $80, error, "Bad Value"
+	LDA	f:frameSetOffset + MetaSprite__FrameSet::tilesetType - 1, X
+	IF_MINUS
+		JMP	Activate_DynamicTileset
+	ENDIF
+
+	JMP	Activate_FixedTileset
 .endroutine
 
 

@@ -3,24 +3,35 @@
 .ifndef ::_METASPRITE_DATAFORMAT_H_
 ::_METASPRITE_DATAFORMAT_H_ = 1
 
-; ::TODO metasprite frameSet::
-; ::: include wether fixed or dynamic metasprites::
-
 ; ::TODO animation format::
 
 .enum MetaSprite__FrameSet_TilesetLifecycle
-	;; The entity's tileset doesn't change.
-	;; It is loaded into VRAM once and shared amonst entities
-	FIXED		= 0
+	;; The frameset has the same tileset for all of its frames
+	;; It is loaded into VRAM once and shared amongst entities
+	FIXED		= $00
 
 	;; The entity has a dynamic tileset
 	;; It is loaded into VRAM every metasprite frame change
-	; ::TODO implement::
-	DYNAMIC		= 2
+	DYNAMIC		= $80
 
 	; ::MAYDO DYNAMIC_FIXED tileset lifestyle::
 	; ::: This would consist of a fixed section that doesn't update ::
 	; ::: (right-to-left), and the first few tiles are updated per frame::
+.endenum
+
+
+.enum MetaSprite__FrameSet_TilesetSize
+	;; The tileset uses a single 16x16 tile
+        ONE_16_TILE	= 0
+
+	;; The tileset uses two 16x16 tiles
+        TWO_16_TILES	= 2
+
+	;; The tileset uses a single VRAM row of 8 16x16 tiles
+	ONE_VRAM_ROW	= 4
+
+	;; The tileset uses two VRAM rows of 8 16x16 tiles.
+        TWO_VRAM_ROWS	= 6
 .endenum
 
 
@@ -31,10 +42,12 @@
 	;; The tilset must be in the `METASPRITE_TILESET_BLOCK` bank.
 	;;
 	;; If this value is NULL (0) then no tileset is loaded.
-	tileset			.addr
+	tileset                 .addr
 
-	;; The tileset lifestyle of the FrameSet used by the system
-	tilesetLifestyle	.byte
+	;; The tileset size and lifestyle of the FrameSet used by the system
+	;; This is a logical OR of `MetaSprite__FrameSet_TilesetLifecycle` and
+	;; `MetaSprite__FrameSet_TilesetFormat`
+	tilesetType	.byte
 
 	;; Address of the palette table in the `METASPRITE_PALETTE_LIST_BLOCK` bank.
 	;;
@@ -166,26 +179,8 @@
 .endstruct
 
 
-.enum MetaSprite__Tileset_Type
-	;; The tileset uses a single 16x16 tile
-        ONE_16_TILE	= 0
-
-	;; The tileset uses two 16x16 tiles
-        TWO_16_TILES	= 2
-
-	;; The tileset uses a single VRAM row of 8 16x16 tiles
-	ONE_VRAM_ROW	= 4
-
-	;; The tileset uses two VRAM rows of 8 16x16 tiles.
-        TWO_VRAM_ROWS	= 6
-.endenum
-
 ;; The tileset that is used by the frame (or frames).
 .struct MetaSprite__Tileset
-	;; The type of tile
-	;; Matches `MetaSprite__Tileset_Type`
-	type		.byte
-
 	;; Number of tiles in tileset
 	count		.byte
 
@@ -193,9 +188,10 @@
 	dmaTable0	.addr
 
 	;; The MetaSprite__DmaTable of the second block
-	;; Only used if the tileset type uses two blocks
+	;; MUST BE NULL for single block tilesets
 	dmaTable1	.addr
 .endstruct
+
 
 ;; The DMA table that is processed during VBlank
 .struct MetaSprite__DmaTable

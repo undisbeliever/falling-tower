@@ -381,6 +381,7 @@ XIndex:
 ;;
 ;; INPUT:
 ;;	DP: MetaSpriteStruct address - MetaSpriteDpOffset
+;;	 X: frameSet address
 ;;
 ;; OUTPUT:
 ;;	C set if succeesful
@@ -390,7 +391,6 @@ XIndex:
 tmp_firstSlot	:= tmp1
 tmp_secondSlot	:= tmp2
 
-	LDX	z:MSDP::frameSet
 	LDA	f:frameSetOffset + MetaSprite__FrameSet::tileset, X
 
 ::UploadFixedTileset:
@@ -434,11 +434,11 @@ tmp_secondSlot	:= tmp2
 
 	; As there are 4 different tileset types, we need 4 different
 	; searches.
-	LDX	tmp_tileset
-	LDA	f:tilesetBankOffset + MetaSprite__Tileset::type, X
+	LDX	z:MSDP::frameSet
+	LDA	f:frameSetOffset + MetaSprite__FrameSet::tilesetType, X
 	AND	#3 << 1
 	TAX
-	JMP	(.loword(SetTilesetTypeTable), X)
+	JMP	(.loword(TilesetSizeTable), X)
 
 ReturnFalse:
 	CLC
@@ -447,10 +447,10 @@ Return:
 
 
 .rodata
-SetTilesetTypeTable:
-	.assert MetaSprite__Tileset_Type::TWO_VRAM_ROWS = 6, error, "Bad Table"
+TilesetSizeTable:
+	.assert MetaSprite__FrameSet_TilesetSize::TWO_VRAM_ROWS = 6, error, "Bad Table"
 
-	; Must match MetaSprite__Tileset_Type
+	; Must match MetaSprite__FrameSet_TilesetSize
 	.addr	Process_OneTile
 	.addr	Process_TwoTiles
 	.addr	Process_OneRow
@@ -909,20 +909,21 @@ SetTilesetTypeTable:
 
 	; As there are 4 different tileset types, we need 4 different
 	; searches.
-	LDA	f:tilesetBankOffset + MetaSprite__Tileset::type, X
+	LDX	z:MSDP::frameSet
+	LDA	f:frameSetOffset + MetaSprite__FrameSet::tilesetType, X
 	AND	#3 << 1
 	TAX
-	JMP	(.loword(SetTilesetTypeTable), X)
+	JMP	(.loword(TilesetTypeTable), X)
 
 Failure:
 	CLC
 	RTS
 
 .rodata
-SetTilesetTypeTable:
-	.assert MetaSprite__Tileset_Type::TWO_VRAM_ROWS = 6, error, "Bad Table"
+TilesetTypeTable:
+	.assert MetaSprite__FrameSet_TilesetSize::TWO_VRAM_ROWS = 6, error, "Bad Table"
 
-	; Must match MetaSprite__Tileset_Type
+	; Must match MetaSprite__FrameSet_TilesetSize
 	.addr	Process_OneTile
 	.addr	Process_TwoTiles
 	.addr	Process_OneRow
@@ -1171,7 +1172,7 @@ NoSlotsFound:
 	; MUST NOT USE X or Y
 
 	LDA	dmaTableIndex
-	CMP	#METASPRITE_DMA_TABLE_COUNT * 2
+	CMP	#(METASPRITE_DMA_TABLE_COUNT - 1) * 2
 	BGE	Failure
 
 
@@ -1182,20 +1183,21 @@ NoSlotsFound:
 
 
 	; Setup DMA table
-	LDA	f:tilesetBankOffset + MetaSprite__Tileset::type, X
+	LDX	z:MSDP::frameSet
+	LDA	f:frameSetOffset + MetaSprite__FrameSet::tilesetType, X
 
 	TYX
 	SEP	#$10
 .I8
 	; X = slot
-	IF_BIT	#MetaSprite__Tileset_Type::ONE_VRAM_ROW | MetaSprite__Tileset_Type::ONE_16_TILE
+	IF_BIT	#MetaSprite__FrameSet_TilesetSize::ONE_VRAM_ROW | MetaSprite__FrameSet_TilesetSize::ONE_16_TILE
 		JMP	SetupDmaForOneTilesetBlock
 	ENDIF
 
 	JMP	SetupDmaForTwoTilesetBlocks
 
 
-	.assert MetaSprite__Tileset_Type::TWO_VRAM_ROWS | MetaSprite__Tileset_Type::TWO_16_TILES <> MetaSprite__Tileset_Type::ONE_VRAM_ROW | MetaSprite__Tileset_Type::ONE_16_TILE, error, "Bad assumption"
+	.assert MetaSprite__FrameSet_TilesetSize::TWO_VRAM_ROWS | MetaSprite__FrameSet_TilesetSize::TWO_16_TILES <> MetaSprite__FrameSet_TilesetSize::ONE_VRAM_ROW | MetaSprite__FrameSet_TilesetSize::ONE_16_TILE, error, "Bad assumption"
 .endmacro
 
 
@@ -1225,6 +1227,7 @@ NoSlotsFound:
 	; Add to tileset data to DMA table
 	; ::SHOULDO better tileset data format::
 
+AddDmaTable:
 	REP	#$30
 .A16
 .I16
@@ -1264,8 +1267,12 @@ NoSlotsFound:
 	LDA	tmp_tileset
 	STA	vramSlots::tileset, X
 
+
 	; Get second slot address
 	LDA	vramSlots::pair, X
+	; Catch possible bug - storing two block in a one block allocation
+	BMI	SetupDmaForOneTilesetBlock::AddDmaTable
+
 	TAX
 	LDA	f:vramSlots::VramAddresses, X
 	STA	dmaTable::vramAddress + 2, Y
@@ -1281,13 +1288,17 @@ NoSlotsFound:
 	LDA	f:tilesetBankOffset + MetaSprite__Tileset::dmaTable0, X
 	STA	dmaTable::tablePtr, Y
 
-	LDA	f:tilesetBankOffset + MetaSprite__Tileset::dmaTable1, X
-	STA	dmaTable::tablePtr + 2, Y
+	INY
+	INY
 
-	TYA
-	CLC
-	ADC	#4
-	STA	dmaTableIndex
+	LDA	f:tilesetBankOffset + MetaSprite__Tileset::dmaTable1, X
+	IF_NOT_ZERO
+		STA	dmaTable::tablePtr, Y
+		INY
+		INY
+	ENDIF
+
+	STY	dmaTableIndex
 
 	SEC
 	RTS

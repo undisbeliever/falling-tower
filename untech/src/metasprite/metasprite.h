@@ -167,6 +167,9 @@ METASPRITE_STATUS_VRAM_SET_FLAG		= %00000001
 
 	;;; Sets the current frame of a metasprite.
 	;;;
+	;;; The frame tileset data will only be uploaded if the
+	;;; metasprite is activated.
+	;;;
 	;;; REQUIRES: 16 bit A, 16 bit Index, DB = $7E
 	;;;
 	;;; INPUT:
