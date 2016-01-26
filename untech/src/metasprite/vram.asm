@@ -1157,7 +1157,12 @@ NoSlotsFound:
 
 	LDA	tmp_tileset
 	CMP	vramSlots::tileset, Y
-	BEQ	Success
+	IF_EQ
+		; Don't need to upload tileset, return true
+		STX	z:MSDP::currentFrame
+		SEC
+		RTS
+	ENDIF
 
 
 	; Check if there is space in DMA Table
