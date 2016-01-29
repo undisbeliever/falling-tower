@@ -1180,14 +1180,15 @@ NoSlotsFound:
 	SEP	#$10
 .I8
 	; X = slot
-	IF_BIT	#MetaSprite__FrameSet_TilesetSize::ONE_VRAM_ROW | MetaSprite__FrameSet_TilesetSize::ONE_16_TILE
-		JMP	SetupDmaForOneTilesetBlock
+	IF_BIT	#2
+		JMP	SetupDmaForTwoTilesetBlocks
 	ENDIF
 
-	JMP	SetupDmaForTwoTilesetBlocks
+	JMP	SetupDmaForOneTilesetBlock
 
-
-	.assert MetaSprite__FrameSet_TilesetSize::TWO_VRAM_ROWS | MetaSprite__FrameSet_TilesetSize::TWO_16_TILES <> MetaSprite__FrameSet_TilesetSize::ONE_VRAM_ROW | MetaSprite__FrameSet_TilesetSize::ONE_16_TILE, error, "Bad assumption"
+	.assert (MetaSprite__FrameSet_TilesetSize::TWO_VRAM_ROWS & 2) = (MetaSprite__FrameSet_TilesetSize::TWO_16_TILES & 2) <> 0, error, "Bad Value"
+	.assert (MetaSprite__FrameSet_TilesetSize::TWO_VRAM_ROWS & 2) <> (MetaSprite__FrameSet_TilesetSize::ONE_16_TILE & 2), error, "Bad Value"
+	.assert (MetaSprite__FrameSet_TilesetSize::ONE_VRAM_ROW & 2) <> (MetaSprite__FrameSet_TilesetSize::TWO_16_TILES & 2), error, "Bad Value"
 .endmacro
 
 
