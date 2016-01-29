@@ -53,13 +53,6 @@ entities_size = entities_end - entities
 	JMP	MetaSprite::Reset
 .endroutine
 
-; ::DEBUG fix import error::
-.segment "BANK1"
-.export MetaSpriteFrameSetTable: far
-.export MetaSpriteFrameSetTable_end: far
-MetaSpriteFrameSetTable:
-MetaSpriteFrameSetTable_end:
-
 .endmodule
 
 ; vim: set ft=asm:

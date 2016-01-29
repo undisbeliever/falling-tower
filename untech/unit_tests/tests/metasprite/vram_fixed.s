@@ -7,13 +7,11 @@
 .include "metasprite/metasprite.h"
 
 .include "tests/tests.h"
-.include "tests/static-random.inc"
 .include "tests/metasprite/metasprite.h"
+.include "tests/metasprite/_test_data.h"
 
 .setcpu "65816"
 
-MetaSprite__RemoveTileset := MetaSprite::Deactivate
-.import MetaSprite__UploadFixedTileset
 .import MetaSprite__dmaTableIndex
 .import MetaSprite__dmaTable_vramAddress
 .import MetaSprite__dmaTable_tablePtr
@@ -42,6 +40,8 @@ MetaSprite__RemoveTileset := MetaSprite::Deactivate
 
 .code
 
+.define Data UnitTest_MetaSprite_Data
+
 
 .A8
 .I16
@@ -51,8 +51,8 @@ MetaSprite__RemoveTileset := MetaSprite::Deactivate
 .I16
 	LDA	#UnitTest_MetaSprite::entities
 	TCD
-	LDA	#.loword(Tileset_OneTile_0)
-	LDX	#.loword(DmaTable_OneTile_0)
+	LDA	#Data::FrameSets::Fixed_OneTile_0
+	LDX	#.loword(Data::Tileset_Fixed_OneTile_0_DMA0)
 	JSR	_UploadUniqueSingleAndTest
 
 	RTS
@@ -67,9 +67,9 @@ MetaSprite__RemoveTileset := MetaSprite::Deactivate
 .I16
 	LDA	#UnitTest_MetaSprite::entities
 	TCD
-	LDA	#.loword(Tileset_TwoTiles_0)
-	LDX	#.loword(DmaTable_TwoTiles_Block0_0)
-	LDY	#.loword(DmaTable_TwoTiles_Block1_0)
+	LDA	#Data::FrameSets::Fixed_TwoTiles_0
+	LDX	#.loword(Data::Tileset_Fixed_TwoTiles_0_DMA0)
+	LDY	#.loword(Data::Tileset_Fixed_TwoTiles_0_DMA1)
 	JSR	_UploadUniqueDualAndTest
 
 	RTS
@@ -84,8 +84,8 @@ MetaSprite__RemoveTileset := MetaSprite::Deactivate
 .I16
 	LDA	#UnitTest_MetaSprite::entities
 	TCD
-	LDA	#.loword(Tileset_OneRow_0)
-	LDX	#.loword(DmaTable_OneRow_0)
+	LDA	#Data::FrameSets::Fixed_OneRow_0
+	LDX	#.loword(Data::Tileset_Fixed_OneRow_0_DMA0)
 	JSR	_UploadUniqueSingleAndTest
 
 	RTS
@@ -100,9 +100,9 @@ MetaSprite__RemoveTileset := MetaSprite::Deactivate
 .I16
 	LDA	#UnitTest_MetaSprite::entities
 	TCD
-	LDA	#.loword(Tileset_TwoRows_0)
-	LDX	#.loword(DmaTable_TwoRows_Block0_0)
-	LDY	#.loword(DmaTable_TwoRows_Block1_0)
+	LDA	#Data::FrameSets::Fixed_TwoRows_0
+	LDX	#.loword(Data::Tileset_Fixed_TwoRows_0_DMA0)
+	LDY	#.loword(Data::Tileset_Fixed_TwoRows_0_DMA1)
 	JSR	_UploadUniqueDualAndTest
 
 	RTS
@@ -122,8 +122,8 @@ MetaSprite__RemoveTileset := MetaSprite::Deactivate
 
 	LDA	#entity_Overflow
 	TCD
-	LDA	#.loword(Tileset_OneTile_Overflow)
-	JSR	MetaSprite__UploadFixedTileset
+	LDA	#Data::FrameSets::Fixed_OneTile_Overflow
+	JSR	_UploadFixed
 	BCS	Failure		; This should return false
 
 	; Test vram set flag clear
@@ -134,8 +134,8 @@ MetaSprite__RemoveTileset := MetaSprite::Deactivate
 
 	LDA	#entity_Overflow2
 	TCD
-	LDA	#.loword(Tileset_TwoTiles_Overflow)
-	JSR	MetaSprite__UploadFixedTileset
+	LDA	#Data::FrameSets::Fixed_TwoTiles_Overflow
+	JSR	_UploadFixed
 	BCS	Failure		; This should return false
 
 	; Test vram set flag clear
@@ -165,8 +165,8 @@ Failure:
 
 	LDA	#entity_Overflow
 	TCD
-	LDA	#.loword(Tileset_OneRow_Overflow)
-	JSR	MetaSprite__UploadFixedTileset
+	LDA	#Data::FrameSets::Fixed_OneRow_Overflow
+	JSR	_UploadFixed
 	BCS	Failure		; This should return false
 
 	; Test vram set flag clear
@@ -177,8 +177,8 @@ Failure:
 
 	LDA	#entity_Overflow2
 	TCD
-	LDA	#.loword(Tileset_TwoRows_Overflow)
-	JSR	MetaSprite__UploadFixedTileset
+	LDA	#Data::FrameSets::Fixed_TwoRows_Overflow
+	JSR	_UploadFixed
 	BCS	Failure		; This should return false
 
 	; Test vram set flag clear
@@ -194,7 +194,7 @@ Failure:
 	RTS
 .endproc
 
-;; Test that the rows and tiles are seperate
+;; Test that the rows and tiles are separate
 .A8
 .I16
 .proc	Upload_RowsTilesSeperate1
@@ -206,9 +206,9 @@ Failure:
 
 	LDA	#entity_Overflow
 	TCD
-	LDA	#.loword(Tileset_TwoRows_Overflow)
-	LDX	#.loword(DmaTable_TwoRows_Block0_Overflow)
-	LDY	#.loword(DmaTable_TwoRows_Block1_Overflow)
+	LDA	#Data::FrameSets::Fixed_TwoRows_Overflow
+	LDX	#.loword(Data::Tileset_Fixed_TwoRows_Overflow_DMA0)
+	LDY	#.loword(Data::Tileset_Fixed_TwoRows_Overflow_DMA1)
 	JSR	_UploadUniqueDualAndTest
 
 	; pass through
@@ -231,9 +231,9 @@ Failure:
 	; Try and fail to load tiles
 	LDA	#entity_Overflow
 	TCD
-	LDA	#.loword(Tileset_TwoTiles_Overflow)
-	LDX	#.loword(DmaTable_TwoTiles_Block0_Overflow)
-	LDY	#.loword(DmaTable_TwoTiles_Block1_Overflow)
+	LDA	#Data::FrameSets::Fixed_TwoTiles_Overflow
+	LDX	#.loword(Data::Tileset_Fixed_TwoTiles_Overflow_DMA0)
+	LDY	#.loword(Data::Tileset_Fixed_TwoTiles_Overflow_DMA1)
 	JSR	_UploadUniqueDualAndTest
 
 	; pass through
@@ -254,8 +254,8 @@ tmp_index := tmp1
 .I16
 	LDA	#_ENTITY_(0)
 	TCD
-	LDA	#.loword(Tileset_OneTile_1)
-	JSR	MetaSprite__UploadFixedTileset
+	LDA	#Data::FrameSets::Fixed_OneTile_1
+	JSR	_UploadFixed
 	IF_C_CLEAR
 		RTS
 	ENDIF
@@ -263,20 +263,20 @@ tmp_index := tmp1
 
 	LDA	#_ENTITY_(2)
 	TCD
-	LDA	#.loword(Tileset_TwoTiles_4)
-	JSR	MetaSprite__UploadFixedTileset
+	LDA	#Data::FrameSets::Fixed_TwoTiles_4
+	JSR	_UploadFixed
 	BCC	Failure
 
 	LDA	#_ENTITY_(4)
 	TCD
-	LDA	#.loword(Tileset_OneRow_2)
-	JSR	MetaSprite__UploadFixedTileset
+	LDA	#Data::FrameSets::Fixed_OneRow_2
+	JSR	_UploadFixed
 	BCC	Failure
 
 	LDA	#_ENTITY_(6)
 	TCD
-	LDA	#.loword(Tileset_TwoRows_3)
-	JSR	MetaSprite__UploadFixedTileset
+	LDA	#Data::FrameSets::Fixed_TwoRows_3
+	JSR	_UploadFixed
 	BCC	Failure
 
 
@@ -287,26 +287,26 @@ tmp_index := tmp1
 
 	LDA	#_ENTITY_(1)
 	TCD
-	LDA	#.loword(Tileset_OneTile_1)
-	JSR	MetaSprite__UploadFixedTileset
+	LDA	#Data::FrameSets::Fixed_OneTile_1
+	JSR	_UploadFixed
 	BCC	Failure
 
 	LDA	#_ENTITY_(3)
 	TCD
-	LDA	#.loword(Tileset_TwoTiles_4)
-	JSR	MetaSprite__UploadFixedTileset
+	LDA	#Data::FrameSets::Fixed_TwoTiles_4
+	JSR	_UploadFixed
 	BCC	Failure
 
 	LDA	#_ENTITY_(5)
 	TCD
-	LDA	#.loword(Tileset_OneRow_2)
-	JSR	MetaSprite__UploadFixedTileset
+	LDA	#Data::FrameSets::Fixed_OneRow_2
+	JSR	_UploadFixed
 	BCC	Failure
 
 	LDA	#_ENTITY_(7)
 	TCD
-	LDA	#.loword(Tileset_TwoRows_3)
-	JSR	MetaSprite__UploadFixedTileset
+	LDA	#Data::FrameSets::Fixed_TwoRows_3
+	JSR	_UploadFixed
 	BCC	Failure
 
 
@@ -355,15 +355,15 @@ Failure:
 
 	LDA	#entity_Overflow
 	TCD
-	LDA	#.loword(Tileset_OneTile_Overflow)
-	JSR	MetaSprite__UploadFixedTileset
+	LDA	#Data::FrameSets::Fixed_OneTile_Overflow
+	JSR	_UploadFixed
 	BCS	Failure			; This should fail
 
 
 	; Remove a single tile
 	LDA	#entity_OneTile
 	TCD
-	JSR	MetaSprite__RemoveTileset
+	JSR	MetaSprite::Deactivate
 
 	; test vram status flags are clear
 	LDA	#METASPRITE_STATUS_VRAM_SET_FLAG | METASPRITE_STATUS_DYNAMIC_TILESET_FLAG
@@ -374,15 +374,15 @@ Failure:
 	; Trying to create a double tile should fail
 	LDA	#entity_Overflow
 	TCD
-	LDA	#.loword(Tileset_TwoTiles_Overflow)
-	JSR	MetaSprite__UploadFixedTileset
+	LDA	#Data::FrameSets::Fixed_TwoTiles_Overflow
+	JSR	_UploadFixed
 	BCS	Failure			; This should fail
 
 
 	; Remove a second single tile
 	LDA	#entity_OneTile + .sizeof(ExampleEntity)
 	TCD
-	JSR	MetaSprite__RemoveTileset
+	JSR	MetaSprite::Deactivate
 
 	; test vram status flags are clear
 	LDA	#METASPRITE_STATUS_VRAM_SET_FLAG | METASPRITE_STATUS_DYNAMIC_TILESET_FLAG
@@ -392,9 +392,9 @@ Failure:
 	; Trying to create a double tile will now succeed
 	LDA	#entity_Overflow
 	TCD
-	LDA	#.loword(Tileset_TwoTiles_Overflow)
-	LDX	#.loword(DmaTable_TwoTiles_Block0_Overflow)
-	LDY	#.loword(DmaTable_TwoTiles_Block1_Overflow)
+	LDA	#Data::FrameSets::Fixed_TwoTiles_Overflow
+	LDX	#.loword(Data::Tileset_Fixed_TwoTiles_Overflow_DMA0)
+	LDY	#.loword(Data::Tileset_Fixed_TwoTiles_Overflow_DMA1)
 	JSR	_UploadUniqueDualAndTest
 	BCC	Failure
 
@@ -418,15 +418,15 @@ Failure:
 
 	LDA	#entity_Overflow
 	TCD
-	LDA	#.loword(Tileset_OneTile_Overflow)
-	JSR	MetaSprite__UploadFixedTileset
+	LDA	#Data::FrameSets::Fixed_OneTile_Overflow
+	JSR	_UploadFixed
 	BCS	Failure			; This should fail
 
 
 	; Remove a double tile
 	LDA	#entity_TwoTiles
 	TCD
-	JSR	MetaSprite__RemoveTileset
+	JSR	MetaSprite::Deactivate
 
 	; test vram status flags are clear
 	LDA	#METASPRITE_STATUS_VRAM_SET_FLAG | METASPRITE_STATUS_DYNAMIC_TILESET_FLAG
@@ -437,15 +437,15 @@ Failure:
 
 	LDA	#entity_Overflow
 	TCD
-	LDA	#.loword(Tileset_OneTile_Overflow)
-	LDX	#.loword(DmaTable_OneTile_Overflow)
+	LDA	#Data::FrameSets::Fixed_OneTile_Overflow
+	LDX	#.loword(Data::Tileset_Fixed_OneTile_Overflow_DMA0)
 	JSR	_UploadUniqueSingleAndTest
 	BCC	Failure
 
 	LDA	#entity_Overflow2
 	TCD
-	LDA	#.loword(Tileset_OneTile_Overflow2)
-	LDX	#.loword(DmaTable_OneTile_Overflow2)
+	LDA	#Data::FrameSets::Fixed_OneTile_Overflow2
+	LDX	#.loword(Data::Tileset_Fixed_OneTile_Overflow2_DMA0)
 	JSR	_UploadUniqueSingleAndTest
 	BCC	Failure
 
@@ -469,15 +469,15 @@ Failure:
 
 	LDA	#entity_Overflow
 	TCD
-	LDA	#.loword(Tileset_OneRow_Overflow)
-	JSR	MetaSprite__UploadFixedTileset
+	LDA	#Data::FrameSets::Fixed_OneRow_Overflow
+	JSR	_UploadFixed
 	BCS	Failure			; This should fail
 
 
 	; Remove a single tile
 	LDA	#entity_OneRow
 	TCD
-	JSR	MetaSprite__RemoveTileset
+	JSR	MetaSprite::Deactivate
 
 	; test vram status flags are clear
 	LDA	#METASPRITE_STATUS_VRAM_SET_FLAG | METASPRITE_STATUS_DYNAMIC_TILESET_FLAG
@@ -488,15 +488,15 @@ Failure:
 	; Trying to create a double tile should fail
 	LDA	#entity_Overflow
 	TCD
-	LDA	#.loword(Tileset_TwoRows_Overflow)
-	JSR	MetaSprite__UploadFixedTileset
+	LDA	#Data::FrameSets::Fixed_TwoRows_Overflow
+	JSR	_UploadFixed
 	BCS	Failure			; This should fail
 
 
 	; Remove a second single tile
 	LDA	#entity_OneRow + .sizeof(ExampleEntity)
 	TCD
-	JSR	MetaSprite__RemoveTileset
+	JSR	MetaSprite::Deactivate
 
 	; test vram status flags are clear
 	LDA	#METASPRITE_STATUS_VRAM_SET_FLAG | METASPRITE_STATUS_DYNAMIC_TILESET_FLAG
@@ -506,9 +506,9 @@ Failure:
 	; Trying to create a double tile will now succeed
 	LDA	#entity_Overflow
 	TCD
-	LDA	#.loword(Tileset_TwoRows_Overflow)
-	LDX	#.loword(DmaTable_TwoRows_Block0_Overflow)
-	LDY	#.loword(DmaTable_TwoRows_Block1_Overflow)
+	LDA	#Data::FrameSets::Fixed_TwoRows_Overflow
+	LDX	#.loword(Data::Tileset_Fixed_TwoRows_Overflow_DMA0)
+	LDY	#.loword(Data::Tileset_Fixed_TwoRows_Overflow_DMA1)
 	JSR	_UploadUniqueDualAndTest
 	BCC	Failure
 
@@ -532,15 +532,15 @@ Failure:
 
 	LDA	#entity_Overflow
 	TCD
-	LDA	#.loword(Tileset_OneRow_Overflow)
-	JSR	MetaSprite__UploadFixedTileset
+	LDA	#Data::FrameSets::Fixed_OneRow_Overflow
+	JSR	_UploadFixed
 	BCS	Failure			; This should fail
 
 
 	; Remove a two-row entity
 	LDA	#entity_TwoRows
 	TCD
-	JSR	MetaSprite__RemoveTileset
+	JSR	MetaSprite::Deactivate
 
 	; test vram status flags are clear
 	LDA	#METASPRITE_STATUS_VRAM_SET_FLAG | METASPRITE_STATUS_DYNAMIC_TILESET_FLAG
@@ -551,15 +551,15 @@ Failure:
 
 	LDA	#entity_Overflow
 	TCD
-	LDA	#.loword(Tileset_OneRow_Overflow)
-	LDX	#.loword(DmaTable_OneRow_Overflow)
+	LDA	#Data::FrameSets::Fixed_OneRow_Overflow
+	LDX	#.loword(Data::Tileset_Fixed_OneRow_Overflow_DMA0)
 	JSR	_UploadUniqueSingleAndTest
 	BCC	Failure
 
 	LDA	#entity_Overflow2
 	TCD
-	LDA	#.loword(Tileset_OneRow_Overflow2)
-	LDX	#.loword(DmaTable_OneRow_Overflow2)
+	LDA	#Data::FrameSets::Fixed_OneRow_Overflow2
+	LDX	#.loword(Data::Tileset_Fixed_OneRow_Overflow2_DMA0)
 	JSR	_UploadUniqueSingleAndTest
 	BCC	Failure
 
@@ -584,7 +584,7 @@ Failure:
 	; Remove a single tile
 	LDA	#entity_OneTile
 	TCD
-	JSR	MetaSprite__RemoveTileset
+	JSR	MetaSprite::Deactivate
 
 	; test vram status flags are clear
 	LDA	#METASPRITE_STATUS_VRAM_SET_FLAG
@@ -593,22 +593,22 @@ Failure:
 
 
 	; Double free
-	JSR	MetaSprite__RemoveTileset
+	JSR	MetaSprite::Deactivate
 
 
 	; Make sure we can only upload one tile
 	LDA	#entity_Overflow
 	TCD
-	LDA	#.loword(Tileset_OneTile_Overflow)
-	LDX	#.loword(DmaTable_OneTile_Overflow)
+	LDA	#Data::FrameSets::Fixed_OneTile_Overflow
+	LDX	#.loword(Data::Tileset_Fixed_OneTile_Overflow_DMA0)
 	JSR	_UploadUniqueSingleAndTest
 	BCC	Failure
 
 
 	LDA	#entity_Overflow2
 	TCD
-	LDA	#.loword(Tileset_OneTile_Overflow2)
-	LDX	#.loword(DmaTable_OneTile_Overflow2)
+	LDA	#Data::FrameSets::Fixed_OneTile_Overflow2
+	LDX	#.loword(Data::Tileset_Fixed_OneTile_Overflow2_DMA0)
 	JSR	_UploadUniqueSingleAndTest
 	BCS	Failure		; This should return false
 
@@ -620,10 +620,24 @@ Failure:
 	RTS
 .endproc
 
+; IN
+;  A - frameset
+; DP - the entity
+; OUT:
+;  c set if MetaSprite__Activate returns true
+.A16
+.I16
+.proc _UploadFixed
+	LDY	#0
+	JSR	MetaSprite::Init
+	LDA	#0
+	JSR	MetaSprite::SetFrame
+	JMP	MetaSprite::Activate
+.endproc
 
 
 ; IN:
-;  A - tileset
+;  A - frameset
 ;  X - dmaTable1
 ;  DP- the entity
 ; OUT:
@@ -641,7 +655,7 @@ tmp_table0	:= tmp6
 
 
 	; IN : A, DP
-	JSR	MetaSprite__UploadFixedTileset
+	JSR	_UploadFixed
 	BCC	Failure
 
 
@@ -685,6 +699,13 @@ Failure:
 .endproc
 
 
+; IN:
+;  A - frameset
+;  X - dmaTable1
+;  Y - dmaTable2
+;  DP- the entity
+; OUT:
+;  c set if successful and table matches
 .proc _UploadUniqueDualAndTest
 tmp_index	:= tmp4
 tmp_table0	:= tmp5
@@ -698,7 +719,7 @@ tmp_table1	:= tmp6
 
 
 	; IN : A, DP
-	JSR	MetaSprite__UploadFixedTileset
+	JSR	_UploadFixed
 	BCC	Failure
 
 	LDA	z:ExampleEntity::metasprite + MetaSpriteStruct::status
@@ -775,16 +796,16 @@ Failure:
 .proc _FillTileSlots
 	LDA	#entity_OneTile
 	TCD
-	LDA	#.loword(Tileset_OneTile_0)
-	LDX	#.loword(DmaTable_OneTile_0)
+	LDA	#Data::FrameSets::Fixed_OneTile_0
+	LDX	#.loword(Data::Tileset_Fixed_OneTile_0_DMA0)
 	LDY	#0
 	JSR	_UploadUniqueSingleAndTest
 	BCC	Failure
 
 	LDA	#entity_OneTile + .sizeof(ExampleEntity)
 	TCD
-	LDA	#.loword(Tileset_OneTile_1)
-	LDX	#.loword(DmaTable_OneTile_1)
+	LDA	#Data::FrameSets::Fixed_OneTile_1
+	LDX	#.loword(Data::Tileset_Fixed_OneTile_1_DMA0)
 	LDY	#0
 	JSR	_UploadUniqueSingleAndTest
 	IF_C_CLEAR
@@ -796,9 +817,9 @@ Failure:
 	.repeat	7, i
 		LDA	#entity_TwoTiles + .sizeof(ExampleEntity) * i
 		TCD
-		LDA	#.loword(.ident(.sprintf("Tileset_TwoTiles_%i", i)))
-		LDX	#.loword(.ident(.sprintf("DmaTable_TwoTiles_Block0_%i", i)))
-		LDY	#.loword(.ident(.sprintf("DmaTable_TwoTiles_Block1_%i", i)))
+		LDA	#Data::FrameSets::.ident(.sprintf("Fixed_TwoTiles_%i", i))
+		LDX	#.loword(Data::.ident(.sprintf("Tileset_Fixed_TwoTiles_%i_DMA0", i)))
+		LDY	#.loword(Data::.ident(.sprintf("Tileset_Fixed_TwoTiles_%i_DMA1", i)))
 		JSR	_UploadUniqueDualAndTest
 		BCC	Failure
 	.endrepeat
@@ -822,15 +843,15 @@ Return:
 .proc _FillRowSlots
 	LDA	#entity_OneRow
 	TCD
-	LDA	#.loword(Tileset_OneRow_0)
-	LDX	#.loword(DmaTable_OneRow_0)
+	LDA	#Data::FrameSets::Fixed_OneRow_0
+	LDX	#.loword(Data::Tileset_Fixed_OneRow_0_DMA0)
 	JSR	_UploadUniqueSingleAndTest
 	BCC	Failure
 
 	LDA	#entity_OneRow + .sizeof(ExampleEntity)
 	TCD
-	LDA	#.loword(Tileset_OneRow_1)
-	LDX	#.loword(DmaTable_OneRow_1)
+	LDA	#Data::FrameSets::Fixed_OneRow_1
+	LDX	#.loword(Data::Tileset_Fixed_OneRow_1_DMA0)
 	JSR	_UploadUniqueSingleAndTest
 	IF_C_CLEAR
 Failure:
@@ -841,9 +862,9 @@ Failure:
 	.repeat	6, i
 		LDA	#entity_TwoRows + .sizeof(ExampleEntity) * i
 		TCD
-		LDA	#.loword(.ident(.sprintf("Tileset_TwoRows_%i", i)))
-		LDX	#.loword(.ident(.sprintf("DmaTable_TwoRows_Block0_%i", i)))
-		LDY	#.loword(.ident(.sprintf("DmaTable_TwoRows_Block1_%i", i)))
+		LDA	#Data::FrameSets::.ident(.sprintf("Fixed_TwoRows_%i", i))
+		LDX	#.loword(Data::.ident(.sprintf("Tileset_Fixed_TwoRows_%i_DMA0", i)))
+		LDY	#.loword(Data::.ident(.sprintf("Tileset_Fixed_TwoRows_%i_DMA1", i)))
 		JSR	_UploadUniqueDualAndTest
 		BCC	Failure
 	.endrepeat
@@ -852,122 +873,12 @@ Failure:
 	RTS
 .endproc
 
-
-
-.assert METASPRITE_VRAM_TILE_SLOTS = 16, error, "Bad config"
-.assert METASPRITE_VRAM_ROW_SLOTS = 14, error, "Bad config"
-
-N_TS_ONE_16_TILE  = 2 + 2
-N_TS_TWO_16_TILES = 7 + 1
-N_TS_ONE_VRAM_ROW = 2 + 2
-N_TS_TWO_VRAM_ROWS= 6 + 1
-
 entity_OneTile = UnitTest_MetaSprite::entities
 entity_TwoTiles = UnitTest_MetaSprite::entities + .sizeof(ExampleEntity) * 2
 entity_OneRow = UnitTest_MetaSprite::entities + .sizeof(ExampleEntity) * 9
 entity_TwoRows = UnitTest_MetaSprite::entities + .sizeof(ExampleEntity) * 12
 entity_Overflow = UnitTest_MetaSprite::entities + .sizeof(ExampleEntity) * 18
 entity_Overflow2 = UnitTest_MetaSprite::entities + .sizeof(ExampleEntity) * 19
-
-
-Tileset_OneTile_Overflow = Tileset_OneTile_2
-DmaTable_OneTile_Overflow = DmaTable_OneTile_2
-Tileset_OneTile_Overflow2 = Tileset_OneTile_3
-DmaTable_OneTile_Overflow2 = DmaTable_OneTile_3
-
-Tileset_TwoTiles_Overflow = Tileset_TwoTiles_7
-DmaTable_TwoTiles_Block0_Overflow = DmaTable_TwoTiles_Block0_7
-DmaTable_TwoTiles_Block1_Overflow = DmaTable_TwoTiles_Block1_7
-
-Tileset_OneRow_Overflow = Tileset_OneRow_2
-DmaTable_OneRow_Overflow = DmaTable_OneRow_2
-Tileset_OneRow_Overflow2 = Tileset_OneRow_3
-DmaTable_OneRow_Overflow2 = DmaTable_OneRow_3
-
-Tileset_TwoRows_Overflow = Tileset_TwoRows_6
-DmaTable_TwoRows_Block0_Overflow = DmaTable_TwoRows_Block0_6
-DmaTable_TwoRows_Block1_Overflow = DmaTable_TwoRows_Block1_6
-
-
-
-; Tilesets
-; ========
-.segment METASPRITE_TILESET_BLOCK
-	.assert .loword(*) <> 0, lderror, "Bad align"
-
-.repeat N_TS_ONE_16_TILE, i
-	.proc .ident(.sprintf("Tileset_OneTile_%i", i))
-		; MetaSprite__Tileset
-		.byte	MetaSprite__Tileset_Type::ONE_16_TILE
-		.byte	1
-		.addr	.ident(.sprintf("DmaTable_OneTile_%i", i))
-	.endproc
-.endrepeat
-
-.repeat N_TS_TWO_16_TILES, i
-	.proc .ident(.sprintf("Tileset_TwoTiles_%i", i))
-		; MetaSprite__Tileset
-		.byte	MetaSprite__Tileset_Type::TWO_16_TILES
-		.byte	2
-		.addr	.ident(.sprintf("DmaTable_TwoTiles_Block0_%i", i))
-		.addr	.ident(.sprintf("DmaTable_TwoTiles_Block1_%i", i))
-	.endproc
-.endrepeat
-
-.repeat N_TS_ONE_VRAM_ROW, i
-	.proc .ident(.sprintf("Tileset_OneRow_%i", i))
-		; MetaSprite__Rowset
-		.byte	MetaSprite__Tileset_Type::ONE_VRAM_ROW
-		.byte	1
-		.addr	.ident(.sprintf("DmaTable_OneRow_%i", i))
-	.endproc
-.endrepeat
-
-.repeat N_TS_TWO_VRAM_ROWS, i
-	.proc .ident(.sprintf("Tileset_TwoRows_%i", i))
-		; MetaSprite__Rowset
-		.byte	MetaSprite__Tileset_Type::TWO_VRAM_ROWS
-		.byte	9 + i
-		.addr	.ident(.sprintf("DmaTable_TwoRows_Block0_%i", i))
-		.addr	.ident(.sprintf("DmaTable_TwoRows_Block1_%i", i))
-	.endproc
-.endrepeat
-
-
-; Dma Tables
-; ==========
-; Data is not actually used, just setup unique pointer
-
-.segment METASPRITE_DMA_TABLE_BLOCK
-	.assert .loword(*) <> 0, lderror, "Bad align"
-
-.repeat N_TS_ONE_16_TILE, i
-.ident(.sprintf("DmaTable_OneTile_%i", i)):
-	.word	$FFFF
-.endrepeat
-
-
-.repeat N_TS_TWO_16_TILES, i
-.ident(.sprintf("DmaTable_TwoTiles_Block0_%i", i)):
-	.word	$FFFF
-
-.ident(.sprintf("DmaTable_TwoTiles_Block1_%i", i)):
-	.word	$FFFF
-.endrepeat
-
-
-.repeat N_TS_ONE_VRAM_ROW, i
-.ident(.sprintf("DmaTable_OneRow_%i", i)):
-	.word	$FFFF
-.endrepeat
-
-.repeat N_TS_TWO_VRAM_ROWS, i
-.ident(.sprintf("DmaTable_TwoRows_Block0_%i", i)):
-	.word	$FFFF
-
-.ident(.sprintf("DmaTable_TwoRows_Block1_%i", i)):
-	.word	$FFFF
-.endrepeat
 
 .endmodule
 
