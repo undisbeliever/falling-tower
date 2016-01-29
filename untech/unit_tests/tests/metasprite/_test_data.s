@@ -34,7 +34,6 @@
 .macro _List name, item1, item2, item3, item4
 	.proc name
 		.if .not .blank(item4)
-			count = 4
 			.addr	item1
 			.addr	item2
 			.addr	item3
@@ -143,6 +142,10 @@ MetaSpriteFrameSetTable:
 	.addr .ident(.sprintf("FrameSet_Fixed_TwoRows_%i", i))
 .endrepeat
 
+	.addr FrameSet_Dynamic_OneTile
+	.addr FrameSet_Dynamic_TwoTiles
+	.addr FrameSet_Dynamic_OneRow
+	.addr FrameSet_Dynamic_TwoRows
 MetaSpriteFrameSetTable_end:
 
 
@@ -174,6 +177,27 @@ MetaSpriteFrameSetTable_end:
 	FrameList	.ident(.sprintf("FrameList_Fixed_TwoRows_%i", i)), .ident(.sprintf("Frame_Fixed_TwoRows_%i", i))
 	FrameSet	.ident(.sprintf("FrameSet_Fixed_TwoRows_%i", i)), FIXED, TWO_VRAM_ROWS, ExamplePaletteList, .ident(.sprintf("FrameList_Fixed_TwoRows_%i", i))
 .endrepeat
+
+;; Dynamic tilesets have two frames, which have the following.
+;; Frames 0 & 2 have the same tileset
+;; Frame 2 has a different tileset
+.macro DynamicFrameSet name, size, tile_count, nBlocks
+	Tileset		.ident(.sprintf("Tileset_Dynamic_%s_0", .string(name))), tile_count, nBlocks
+	Tileset		.ident(.sprintf("Tileset_Dynamic_%s_1", .string(name))), tile_count, nBlocks
+
+	Frame		.ident(.sprintf("Frame_Dynamic_%s_0", .string(name))), .ident(.sprintf("Tileset_Dynamic_%s_0", .string(name)))
+	Frame		.ident(.sprintf("Frame_Dynamic_%s_1", .string(name))), .ident(.sprintf("Tileset_Dynamic_%s_1", .string(name)))
+	Frame		.ident(.sprintf("Frame_Dynamic_%s_2", .string(name))), .ident(.sprintf("Tileset_Dynamic_%s_0", .string(name)))
+
+	FrameList	.ident(.sprintf("FrameList_Dynamic_%s", .string(name))), .ident(.sprintf("Frame_Dynamic_%s_0", .string(name))), .ident(.sprintf("Frame_Dynamic_%s_1", .string(name))), .ident(.sprintf("Frame_Dynamic_%s_2", .string(name)))
+
+	FrameSet	.ident(.sprintf("FrameSet_Dynamic_%s", .string(name))),	DYNAMIC, size, ExamplePaletteList, .ident(.sprintf("FrameList_Dynamic_%s", .string(name)))
+.endmacro
+
+DynamicFrameSet OneTile, ONE_16_TILE, 1, 1
+DynamicFrameSet TwoTiles, TWO_16_TILES, 2, 2
+DynamicFrameSet OneRow, ONE_VRAM_ROW, 8, 1
+DynamicFrameSet TwoRows, TWO_VRAM_ROWS, 16, 2
 
 .endmodule
 

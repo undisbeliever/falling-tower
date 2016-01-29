@@ -45,6 +45,14 @@ N_FIXED_TWO_ROWS	= 7
 		.endrepeat
 		count .set count + ::N_FIXED_TWO_ROWS
 
+		Dynamic_OneTile = count + 0
+		Dynamic_TwoTiles = count + 1
+		Dynamic_OneRow = count + 2
+		Dynamic_TwoRows = count + 3
+
+		count .set count + 4
+
+
 		Fixed_OneTile_Overflow  = Fixed_OneTile_2
 		Fixed_OneTile_Overflow2 = Fixed_OneTile_3
 		Fixed_TwoTiles_Overflow  = Fixed_TwoTiles_7
@@ -72,6 +80,19 @@ N_FIXED_TWO_ROWS	= 7
 		.importlabel .ident(.sprintf("Tileset_Fixed_TwoRows_%i_DMA0", i))
 		.importlabel .ident(.sprintf("Tileset_Fixed_TwoRows_%i_DMA1", i))
 	.endrepeat
+
+	.importlabel Tileset_Dynamic_OneTile_0_DMA0
+	.importlabel Tileset_Dynamic_OneTile_1_DMA0
+	.importlabel Tileset_Dynamic_TwoTiles_0_DMA0
+	.importlabel Tileset_Dynamic_TwoTiles_0_DMA1
+	.importlabel Tileset_Dynamic_TwoTiles_1_DMA0
+	.importlabel Tileset_Dynamic_TwoTiles_1_DMA1
+	.importlabel Tileset_Dynamic_OneRow_0_DMA0
+	.importlabel Tileset_Dynamic_OneRow_1_DMA0
+	.importlabel Tileset_Dynamic_TwoRows_0_DMA0
+	.importlabel Tileset_Dynamic_TwoRows_0_DMA1
+	.importlabel Tileset_Dynamic_TwoRows_1_DMA0
+	.importlabel Tileset_Dynamic_TwoRows_1_DMA1
 
 	Tileset_Fixed_OneTile_Overflow_DMA0 = Tileset_Fixed_OneTile_2_DMA0
 	Tileset_Fixed_OneTile_Overflow2_DMA0 = Tileset_Fixed_OneTile_3_DMA0
