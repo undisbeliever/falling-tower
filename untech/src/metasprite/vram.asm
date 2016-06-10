@@ -250,12 +250,12 @@ XIndex:
 		;		if current is row slot:
 		;			if current = vramSlotList.twoFixedRowsList.first
 		;				vramSlotList.twoFixedRowsList.first = current->next
-		;			else
+		;			else if current = vramSlotList.oneFixedRowsList.first
 		;				vramSlotList.oneFixedRowList.first = current->next
 		;		else:
 		;			if current = vramSlotList.oneFixedTileList.first
 		;				vramSlotList.oneFixedTileList.first = current->next
-		;			else
+		;			else if current = vramSlotList.twoFixedTilesList.first
 		;				vramSlotList.twoFixedTilesList.first = current->next
 		; else:
 		;	current->prev->next = current->next
@@ -263,36 +263,41 @@ XIndex:
 		; if current->next:
 		;	current->next->prev = current->prev
 
+		LDA	vramSlots::next, X
 		LDY	vramSlots::prev, X
 		IF_MINUS
-			LDA	vramSlots::next, X
-			IF_PLUS
-				; has a next node, but no previous node
-				CPX	#vramSlots::RowSlotIndexGE
-				IF_GE
-					; row slot
-					; determine which list it goes into
-					CPX	vramSlotList::twoFixedRowsList
-					IF_EQ
-						STA	vramSlotList::twoFixedRowsList
-					ELSE
-						STA	vramSlotList::oneFixedRowList
-					ENDIF
-				ELSE
-					; tile slot
-					; determine which list it goes into
-					CPX	vramSlotList::oneFixedTileList
-					IF_EQ
-						STA	vramSlotList::oneFixedTileList
-					ELSE
-						STA	vramSlotList::twoFixedTilesList
-					ENDIF
-				ENDIF
-			ENDIF
+            ; has no previous node
+            ; determine where it came from
+            CPX	#vramSlots::RowSlotIndexGE
+            IF_GE
+                ; row slot
+                ; determine which list it goes into
+                CPX	vramSlotList::twoFixedRowsList
+                IF_EQ
+                    STA	vramSlotList::twoFixedRowsList
+                ELSE
+                    CPX	vramSlotList::oneFixedRowList
+                    IF_EQ
+                        STA	vramSlotList::oneFixedRowList
+                    ENDIF
+                ENDIF
+            ELSE
+                ; tile slot
+                ; determine which list it goes into
+                CPX	vramSlotList::oneFixedTileList
+                IF_EQ
+                    STA	vramSlotList::oneFixedTileList
+                ELSE
+                    CPX	vramSlotList::twoFixedTilesList
+                    IF_EQ
+                        STA	vramSlotList::twoFixedTilesList
+                    ENDIF
+                ENDIF
+            ENDIF
 		ELSE
 			; has a previous node
 			; Y = current->prev
-			LDA	vramSlots::next, X
+		    ; A = current.next
 			STA	vramSlots::next, Y
 		ENDIF
 
