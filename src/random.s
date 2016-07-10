@@ -8,11 +8,6 @@
 
 .module Random
 
-; These numbers were selected at random, following the rules
-; listed above, I'm not 100% sure about them.
-MTH_A =	59069
-MTH_C =	739967
-
 .segment "SHADOW"
 	seed:			.res 4
 	prevJoypadState:	.res 2
@@ -39,26 +34,37 @@ MTH_C =	739967
 .A16
 .I16
 .routine Rnd
-	; seed = seed * MTH_A + MTH_C
+    ; LCPR parameters are the same as cc65 (MIT license)
+    ;
+	; seed = seed * 0x01010101 + 0x31415927
 
-	LDXY	seed
-	STXY	Math::factor32
-	LDY	#MTH_A
-	JSR	Math::Multiply_U32_U16Y_U32XY
-
+    SEP #$20
+.A8
 	CLC
-	TYA
-	ADC	#.loword(MTH_C)
-	STA	seed
-	TXA
-	ADC	#.hiword(MTH_C)
+	LDA	seed + 0
+	ADC	seed + 1
+	STA	seed + 1
+	ADC	seed + 2
+	STA	seed + 2
+	ADC	seed + 3
+	STA	seed + 3
+
+	REP	#$31
+.A16
+	; carry clear
+	LDA	seed + 0
+	ADC	#$5927
+	STA	seed + 0
+
+	LDA	seed + 2
+	ADC	#$3141
 	STA	seed + 2
 
 	RTS
 .endroutine
 
 
-; A = max
+; Y = number of probabilities
 .A8
 .I16
 .routine Rnd_U16A
