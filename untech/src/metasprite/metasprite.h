@@ -123,6 +123,9 @@ METASPRITE_STATUS_VRAM_SET_FLAG		= %00000001
 
 	;; Transfers data to PPU during VBlank
 	;;
+	;; NOTE: This routine may go over VBlank time.
+	;; It is recommend that you force blank inside the NMI Handler.
+	;;
 	;; REQUIRES: 16 bit A, 8 bit Index, DB = $80, DP = $4300, VBlank or Force Blank
 	.importroutine VBlank
 

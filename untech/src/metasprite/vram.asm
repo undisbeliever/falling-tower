@@ -372,6 +372,8 @@ XIndex:
 ;;
 ;; This routine should only be called by Activate.
 ;;
+;; NOTE: Does not preform a proper VBlank overflow check
+;;
 ;; REQUIRES: 16 bit A, 16 bit Index, DB = $7E
 ;;
 ;; INPUT:
@@ -485,8 +487,6 @@ TilesetSizeTable:
 .I8
 .A16
 	; Tileset not found, but a free slot exists
-
-	; ::SHOULDO add vblank timing check::
 
 	; Check if table has overflowed
 	LDY	dmaTableIndex
@@ -678,8 +678,6 @@ TilesetSizeTable:
 	STY	tmp_secondSlot
 
 	; Tileset not found, but two free slots exist
-
-	; ::SHOULDO add vblank timing check::
 
 	; Check if table has overflowed
 	LDA	dmaTableIndex
@@ -876,6 +874,8 @@ TilesetSizeTable:
 ;;
 ;; This routine should only be called by Activate
 ;;
+;; NOTE: Does not preform a proper VBlank overflow check
+;;
 ;; REQUIRES: 16 bit A, 16 bit Index, DB = $7E
 ;;
 ;; INPUT:
@@ -1000,9 +1000,6 @@ NoSlotsFound:
 	CPY	#METASPRITE_DMA_TABLE_COUNT * 2
 	BGE	NoSlotsFound
 
-	; ::SHOULDO add vblank overflow check::
-
-
 	; Set slot as a single dynamic tileset
 
 	LDA	#1
@@ -1054,8 +1051,6 @@ NoSlotsFound:
 	LDA	dmaTableIndex
 	CMP	#METASPRITE_DMA_TABLE_COUNT * 2
 	BGE	NoSlotsFound
-
-	; ::SHOULDO add vblank overflow check::
 
 	; Set slot as a dual dynamic tileset
 	; X = first
@@ -1162,7 +1157,6 @@ NoSlotsFound:
 
 
 	; Check if there is space in DMA Table
-	; ::SHOULDO add vblank timing check::
 
 	; MUST NOT USE X or Y
 
@@ -1219,10 +1213,6 @@ NoSlotsFound:
 	LDA	tmp_tileset
 	STA	vramSlots::tileset, X
 
-
-	; Add to tileset data to DMA table
-	; ::SHOULDO better tileset data format::
-
 AddDmaTable:
 	REP	#$30
 .A16
@@ -1273,9 +1263,6 @@ AddDmaTable:
 	LDA	f:vramSlots::VramAddresses, X
 	STA	dmaTable::vramAddress + 2, Y
 
-
-	; Add tileset data to DMA table
-	; ::SHOULDO better tileset data format::
 
 	REP	#$30
 .A16

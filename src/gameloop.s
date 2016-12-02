@@ -17,6 +17,8 @@
 
 .include "resources/font.h"
 
+.import screenBrightness
+
 
 ; Use a slightly duller background colour
 BACKGROUND_COLOR = (29 << 10) + (29 << 5) + (29 << 0)
@@ -109,7 +111,7 @@ BACKGROUND_COLOR = (29 << 10) + (29 << 5) + (29 << 0)
 	STA	NMITIMEN
 
 	LDA	#$0F
-	STA	INIDISP
+	STA	screenBrightness
 .endmacro
 
 
