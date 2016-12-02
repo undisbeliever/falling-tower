@@ -1114,7 +1114,6 @@ NoSlotsFound:
 ;;
 ;; This macro will only set `MSDP::currentFrame` only if there
 ;; is space in VBlank to upload the tile.
-;; ::TODO think about this behaviour::
 ;;
 ;; SHOULD only be used by `metasprite.s`
 ;;

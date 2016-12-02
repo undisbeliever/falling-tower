@@ -28,7 +28,6 @@
 ; 65816 processor
 .setcpu "65816"
 
-; ::SHOULDO More regions::
 .if .xmatch(REGION, NTSC)
 	__ROMHEADER_DESTINATION = $01 ; USA
 .elseif .xmatch(REGION, PAL)

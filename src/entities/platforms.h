@@ -11,7 +11,6 @@
 .setcpu "65816"
 
 .enum	PlatformEntityFunctions
-	; ::SHOULDO clean up::
 	Init			= 0
 	ProcessFrame		= 2
 

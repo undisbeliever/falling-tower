@@ -3,8 +3,6 @@
 .ifndef ::_METASPRITE_DATAFORMAT_H_
 ::_METASPRITE_DATAFORMAT_H_ = 1
 
-; ::TODO animation format::
-
 .enum MetaSprite__FrameSet_TilesetLifecycle
 	;; The frameset has the same tileset for all of its frames
 	;; It is loaded into VRAM once and shared amongst entities
@@ -13,10 +11,6 @@
 	;; The entity has a dynamic tileset
 	;; It is loaded into VRAM every metasprite frame change
 	DYNAMIC		= $80
-
-	; ::MAYDO DYNAMIC_FIXED tileset lifestyle::
-	; ::: This would consist of a fixed section that doesn't update ::
-	; ::: (right-to-left), and the first few tiles are updated per frame::
 .endenum
 
 
@@ -304,8 +298,6 @@
 ;; with the meta-tilemap.
 ;;
 ;; For the moment the engine only supports a single AABB hitbox.
-
-; ::SHOULDO handle a more complex hitboxes::
 
 .struct MetaSprite__TileCollisionHitbox
 	;; xOffset of the hitbox, relative to `origin.x - 128`

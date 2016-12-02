@@ -11,8 +11,6 @@
 
 ; Note: I have to use `RDDIV_DP` / `RDMPY_DP` in order to
 ; prevent a Suspicious address expression error in ca65.
-;
-; ::SHOULDO fix when the issue (https://github.com/cc65/cc65/issues/194) is fixed)::
 RDMPY_DP := .lobyte(RDMPY)
 RDDIV_DP := .lobyte(RDDIV)
 

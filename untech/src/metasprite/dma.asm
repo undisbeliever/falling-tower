@@ -46,8 +46,6 @@
 .I8
 .routine VBlank
 
-; ::MAYDO make macro::
-
 	LDX	MetaSprite::updateOamBufferOnZero
 	IF_ZERO
 		STZ	OAMADD

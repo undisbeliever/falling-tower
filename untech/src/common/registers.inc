@@ -131,8 +131,6 @@ OBSEL := $2101
 ;;;; Undocumented
 .define OBSEL_SIZE_16X32_32X32 %11100000
 
-;;; ::TODO OBSEL_NAME::
-
 ;;; Object Tile Address segments sizes.
 ;;; The VRAM address used is 16384 * `bbb`
 .define OBSEL_BASE_WALIGN  8192

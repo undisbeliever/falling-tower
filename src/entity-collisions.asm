@@ -41,9 +41,6 @@
 
 	tmp = collisionTmp1
 
-	; ::SHOULDO preform still on platform test first::
-	; ::: This would be faster, but a uses a lot more code::
-
 	LDX	z:EntityStruct::metasprite + MetaSpriteStruct::currentFrame
 	IF_ZERO
 ReturnJump:

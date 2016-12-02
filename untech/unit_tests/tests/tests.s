@@ -131,7 +131,6 @@ TestModuleTable := __TEST_MODULE_TABLE_LOAD__
 				LDX	functionStringPtr
 				JSR	Console::PrintString
 
-				; ::TODO print address of routine for debugging purposes::
 				REPEAT
 				FOREVER
 			ELSE

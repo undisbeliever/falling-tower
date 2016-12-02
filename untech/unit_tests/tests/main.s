@@ -42,7 +42,6 @@
 	SetVramBaseAndSize VRAM
 
 	; Load tiles and palettes
-	; ::TODO move to resources
 
 	LDX	#VRAM::BG1_TILES
 	STX	VMADD
@@ -64,7 +63,6 @@
 
 
 	; Load palette
-	; ::TODO move to resources::
 	STZ	CGADD
 
 	LDX	#DMAP_DIRECTION_TO_PPU | DMAP_TRANSFER_WRITE_TWICE | (.lobyte(CGDATA) << 8)
@@ -117,7 +115,6 @@
 	LDY	RDNMI
 
 	; Copy console buffer to BG
-	; ::MAYDO move to macro::
 
 	.assert VRAM::BG1_MAP = 0, error, "Bad Code"
 	STZ	VMADD
@@ -171,8 +168,6 @@
 
 	REPEAT
 		JSR	RunTests
-
-		; ::TODO WaitFrame::
 
 		; Wait 1 second
 		LDA	#FPS

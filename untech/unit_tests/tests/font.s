@@ -4,8 +4,6 @@
 
 .setcpu "65816"
 
-;; ::TODO build resources system::
-
 .module Font
 	.exportlabel Tiles, far
 	.exportlabel Tiles_size

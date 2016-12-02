@@ -45,8 +45,6 @@ METASPRITE_STATUS_VRAM_SET_FLAG		= %00000001
 ;;
 ;; Should be the location of the `MetaSprite__State` struct
 ;; with the entity struct.
-;;
-;; ::TODO make it entity::metaSpriteState in the future::
 .global MetaSpriteDpOffset: zeropage
 
 ;; The FrameSet table
@@ -227,8 +225,6 @@ METASPRITE_STATUS_VRAM_SET_FLAG		= %00000001
 	.importroutine ReloadPalettes
 
 
-
-	;; ::TODO handle rest of metasprite modules, tiles, etc::
 
 
 	;; Render Loop

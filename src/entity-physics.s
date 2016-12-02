@@ -144,9 +144,6 @@ CONFIG	FRICTION,	$0028
 	; ::KUDOS Khaz for the uint24 += sint16::
 	; ::: http://forums.nesdev.com/viewtopic.php?f=12&t=12459&p=142645#p142674 ::
 
-	; ::TODO make dynamic clamping (depending on type)::
-	; ::: ie, add PhysicsConstants to ES, have set/clear when standing on platform::
-
 	LDA	z:ES::xVecl
 	IF_MINUS
 		CMP	#.loword(-(MAX_XVECL + 1))

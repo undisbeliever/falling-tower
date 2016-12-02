@@ -86,8 +86,6 @@ Failure:
 	LDA	#1
 	TSB	MetaSprite::updatePaletteBufferOnZero
 
-	; ::SHOULDO checksum paletteBuffer::
-
 	; Load an existing palette (Palette 3) into a new entity
 
 	LDA	#entity9
@@ -121,8 +119,6 @@ Failure:
 	LDX	#.loword(Palette4)
 	JSR	_CheckPalette
 	BCC	Failure
-
-	; ::SHOULDO verify checksum of paletteBuffer::
 
 	SEC
 	RTS

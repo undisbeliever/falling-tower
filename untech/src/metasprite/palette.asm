@@ -15,7 +15,6 @@
 
 .segment "SHADOW"
 	;; The palette buffer needs to be copied to VRAM if this is 0
-	; ::TODO should move to different class;
 	updatePaletteBufferOnZero: .res 1
 
 .segment "WRAM7E"
@@ -61,7 +60,6 @@
 	.endscope
 
 	;; The sprite palette buffer
-	; ::TODO should move to different module:
 	paletteBuffer:		.res N_PALETTE_SLOTS * 32
 
 
@@ -359,8 +357,6 @@ CopyPalette:
 	ASL
 	ADC	#.loword(paletteBuffer + 2)
 	TAY
-
-	; ::SHOULDO replace with DMA::
 
 	LDX	z:MSDP::palette
 	LDA	#15 * 2 - 1

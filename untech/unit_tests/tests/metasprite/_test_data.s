@@ -25,8 +25,6 @@
 
 			.addr	frameList
 			.byte	frameList::count
-
-			; ::TODO animations::
 		.endproc
 	.popseg
 .endmacro

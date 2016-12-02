@@ -32,8 +32,7 @@
 
 	len .set .strlen(.sprintf("%i", v))
 
-	; ::TODO write a strcmp function::
-        .repeat len, i
+	.repeat len, i
 		LDA	a:i, X
 		CMP	#.strat(.sprintf("%i", v), i)
 		BNE	Wrong
