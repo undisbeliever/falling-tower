@@ -40,7 +40,7 @@
 		;; (byte index, >= $80 is NULL)
 		prev = next - 1
 
-		;; address of the palette in `METASPRITE_PALETTE_DATA_BLOCK` 
+		;; address of the palette in `METASPRITE_PALETTE_DATA_BLOCK`
 		;; (word address)
 		paletteAddress:	.res N_PALETTE_SLOTS * 2
 

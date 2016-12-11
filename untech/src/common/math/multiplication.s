@@ -268,7 +268,7 @@ tmpX = tmp2
 
 	LDA	tmpY + 1
 	STA	z:<WRMPYB
-	
+
 	; Wait 8 cycles
 	REP	#$31		; 3
 .A16	; c clear
@@ -635,7 +635,7 @@ tmpX = tmp2
 
 
 	LDXY	product32
-	PLD		
+	PLD
 	RTS
 .endroutine
 

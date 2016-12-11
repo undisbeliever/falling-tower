@@ -45,7 +45,7 @@
 
 Failure:
 	CLC
-	RTS	
+	RTS
 .endroutine
 
 
@@ -64,7 +64,7 @@ Failure:
 
 Failure:
 	CLC
-	RTS	
+	RTS
 .endroutine
 
 
@@ -196,7 +196,7 @@ Failure:
 	LDA	#99
 	INCSAT	#100
 	CMP	#100
-	BNE	Failure	
+	BNE	Failure
 
 	INCSAT	#100
 	CMP	#100
@@ -259,7 +259,7 @@ Failure:
 	LDA	#101
 	DECSAT	#100
 	CMP	#100
-	BNE	Failure	
+	BNE	Failure
 
 	DECSAT	#100
 	CMP	#100
