@@ -70,7 +70,7 @@
 		;; (word - ROM)
 		CharAttrOffset = TileSlots_ROM_DATA
 
-		;; The vram address of the slot
+		;; The VRAM address of the slot
 		;; (word - ROM)
 		VramAddresses = TileSlots_ROM_DATA + 2
 	.endscope
@@ -78,22 +78,22 @@
 
 .segment "WRAM7E"
 	.scope vramSlotList
-		;; One Tiles fixed tileset vram slot list index
+		;; One Tiles fixed tileset VRAM slot list index
 		;; $80 if list is empty
 		;; (byte index)
 		oneFixedTileList:	.res 1
 
-		;; Two Tiles fixed tileset vram slot list index
+		;; Two Tiles fixed tileset VRAM slot list index
 		;; $80 if list is empty
 		;; (byte index)
 		twoFixedTilesList:	.res 1
 
-		;; One Rows fixed tileset vram slot list index
+		;; One Rows fixed tileset VRAM slot list index
 		;; $80 if list is empty
 		;; (byte index)
 		oneFixedRowList:	.res 1
 
-		;; Two Rows fixed tileset vram slot list index
+		;; Two Rows fixed tileset VRAM slot list index
 		;; $80 if list is empty
 		;; (byte index)
 		twoFixedRowsList:	.res 1
@@ -366,7 +366,7 @@ XIndex:
 ;; Uploads (if necessary) a fixed metasprite tileset into VRAM.
 ;;
 ;; A fixed tileset is one that does not change throughout the
-;; life of the frameSet that the metasprite belongs to. Because
+;; life of the FrameSet that the metasprite belongs to. Because
 ;; of this we can scan though all the slots in order to detect
 ;; duplicates.
 ;;
@@ -380,7 +380,7 @@ XIndex:
 ;;	DP: MetaSpriteStruct address - MetaSpriteDpOffset
 ;;
 ;; OUTPUT:
-;;	C set if succeesful
+;;	C set if successful
 .A16
 .I16
 .routine Activate_FixedTileset
@@ -631,7 +631,7 @@ TilesetSizeTable:
 
 	REP	#$20
 .A16
-	; Calculate new charattr offset
+	; Calculate new character offset
 	LDA	z:MSDP::blockOneCharAttrOffset
 	AND	#.loword(~OAM_CHARATTR_CHAR_MASK)
 	ORA	f:vramSlots::CharAttrOffset, X
@@ -882,7 +882,7 @@ TilesetSizeTable:
 ;;	DP: MetaSpriteStruct address - MetaSpriteDpOffset
 ;;
 ;; OUTPUT:
-;;	C set if succeesful
+;;	C set if successful
 .A16
 .I16
 .routine Activate_DynamicTileset

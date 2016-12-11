@@ -321,7 +321,7 @@ Failure:
 
 ; IN: Y address of entity
 ; IN: X address of buffer
-; OUT: c set if palette exits in palete buffer in given location
+; OUT: c set if palette exits in palette buffer in given location
 .A16
 .I16
 .routine _CheckPalette

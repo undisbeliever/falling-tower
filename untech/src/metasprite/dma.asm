@@ -146,7 +146,7 @@ ReturnFromTranfer:
 
 
 
-; Copies the nTiles of data from MetaSprite__DmaTable into DMA registers and activates them
+; Copies `nTiles` of data from MetaSprite__DmaTable into DMA registers and activates them
 ; DB = dmaTableBank
 ; DP = $4300
 ; Y = address of MetaSprite__DmaTable

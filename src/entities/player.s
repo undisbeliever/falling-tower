@@ -81,7 +81,7 @@ START_X = 256 / 2
 	SBC	#Camera::WINDOW_HEIGHT
 	CMP	Camera::yPos
 	IF_GE
-		; Player offscreen - now dead
+		; Player off-screen - now dead
 		CLC
 		RTS
 	ENDIF

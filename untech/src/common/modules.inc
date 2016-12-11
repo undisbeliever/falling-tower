@@ -1,6 +1,6 @@
 ;; modules.inc
 ;;
-;; Macros to handle module seperation.
+;; Macros to handle module separation.
 ;;
 ;; Inspired by:
 ;;	* http://forums.nesdev.com/viewtopic.php?p=49694#p49694

@@ -39,7 +39,7 @@
 
 	;; location of the cursor in bytes
 	;; Should not edit this directly, instead can be saved/loaded
-	;; to create stack functionity
+	;; to create stack functionary
 	;; (word)
 	.importlabel cursor
 

@@ -18,7 +18,7 @@
 
 	;; Multiplication
 
-	;;; Mutliply an 8 bit unsigned integer by an 8 bit unsigned integer
+	;;; Multiply an 8 bit unsigned integer by an 8 bit unsigned integer
 	;;;
 	;;; REQUIRES: nothing
 	;;;
@@ -31,7 +31,7 @@
 	.importroutine Multiply_U8Y_U8X_UY
 
 
-	;;; Mutliply a 16 bit integer by an 8 bit unsigned integer
+	;;; Multiply a 16 bit integer by an 8 bit unsigned integer
 	;;;
 	;;; REQUIRES: 8 bit A, 16 bit Index
 	;;;
@@ -45,7 +45,7 @@
 	Multiply_S16Y_U8A_S16Y := Multiply_U16Y_U8A_U16Y
 
 
-	;;; Mutliply a 16 bit unsigned integer by an 8 bit unsigned integer, resulting in a 32 bit unsigned integer
+	;;; Multiply a 16 bit unsigned integer by an 8 bit unsigned integer, resulting in a 32 bit unsigned integer
 	;;;
 	;;; REQUIRES: 8 bit A, 16 bit Index, DB access shadow
 	;;;
@@ -62,9 +62,9 @@
 
 	;;; Multiply two 16 bit integers.
 	;;;
-	;;; The signs of the inputs and ouputs are in the parameters.
+	;;; The signs of the inputs and outputs are in the parameters.
 	;;;
-	;;; REQUIRES: nothing, reccomend 16 bit Index, DB access shadow
+	;;; REQUIRES: nothing, recommend 16 bit Index, DB access shadow
 	;;;
 	;;; INPUT:
 	;;;	Y: 16 bit factor
@@ -80,7 +80,7 @@
 
 	;;; Multiply two 16 bit integers resulting in a 32 integer.
 	;;;
-	;;; The signs of the inputs and ouputs are in the parameters.
+	;;; The signs of the inputs and outputs are in the parameters.
 	;;;
 	;;; REQUIRES: 16 bit Index, DB access shadow
 	;;;
@@ -101,7 +101,7 @@
 
 	;;; Multiply a 32 bit integer by a 16 bit integer
 	;;;
-	;;; The signs of the inputs and ouputs are in the parameters.
+	;;; The signs of the inputs and outputs are in the parameters.
 	;;;
 	;;; REQUIRES: 16 bit Index, DB access shadow
 	;;;
@@ -143,7 +143,7 @@
 	Multiply_S32_S32XY_S32 := Multiply_U32_U32XY_U32XY
 
 
-	;;; Mutliply a 32 bit integer by an 8 bit unsigned integer
+	;;; Multiply a 32 bit integer by an 8 bit unsigned integer
 	;;;
 	;;; REQUIRES: 16 bit Index, DB access shadow
 	;;;
@@ -201,7 +201,7 @@
 	;;;
 	;;; OUTPUT:
 	;;;	Y: sint16 result
-	;;;	X: uint16 remainder (Always positive, Euclidian division)
+	;;;	X: uint16 remainder (Always positive, Euclidean division)
 	.importroutine Divide_S16Y_U16X
 
 
@@ -215,7 +215,7 @@
 	;;;
 	;;; OUTPUT:
 	;;;	Y: sint16 result
-	;;;	X: uint16 remainder (Always positive, Euclidian division)
+	;;;	X: uint16 remainder (Always positive, Euclidean division)
 	.importroutine Divide_U16Y_S16X
 
 
@@ -229,7 +229,7 @@
 	;;;
 	;;; OUTPUT:
 	;;;	Y: sint16 result
-	;;;	X: uint16 remainder (Always positive, Euclidian division)
+	;;;	X: uint16 remainder (Always positive, Euclidean division)
 	.importroutine Divide_S16Y_S16X
 
 
@@ -260,7 +260,7 @@
 	;;;
 	;;; OUTPUT:
 	;;;	result32: sint32 result
-	;;;	remainder32: uint32 remainder (Always positive, Euclidian division)
+	;;;	remainder32: uint32 remainder (Always positive, Euclidean division)
 	;;;
 	;;; NOTES:
 	;;;	`result32` and `dividend32` share the same memory location

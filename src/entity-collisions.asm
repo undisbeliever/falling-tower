@@ -121,7 +121,7 @@ ReturnJump:
 			; Check Y collision first, more likely to miss
 			;
 			; The Y axis is offsetted by 1 pixel in order to ensure that the collision
-			; is successful when the entity is pushed ontop of the platform.
+			; is successful when the entity is pushed on top of the platform.
 
 			LDA	f:tileCollisionDataOffset + MetaSprite__TileCollisionHitbox::yOffset, X
 			AND	#$00FF

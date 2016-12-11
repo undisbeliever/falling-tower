@@ -91,7 +91,7 @@
 ;; f---bbbb
 ;;
 ;; f    = Force Blank
-;; bbbb = Screen Brightnes, 0 = Dull, 16 = max
+;; bbbb = Screen Brightness, 0 = Dull, 16 = max
 INIDISP := $2100
 
 ;;; Flags and Masks
@@ -385,7 +385,7 @@ VMAIN := $2115
 
 ;;; Increment after writing $2118 or reading $2139
 .define VMAIN_INCREMENT_LOW  %00000000
-;;; Increment after writing $2119 or reading $213A (reccomended)
+;;; Increment after writing $2119 or reading $213A (recommended)
 .define VMAIN_INCREMENT_HIGH %10000000
 
 ;;; Increment Amount
@@ -858,7 +858,7 @@ OPVCT := $213D
 
 
 
-;; PPU 5c77 Staus Flag and Version
+;; PPU 5c77 Status Flag and Version
 ;; (read, any)
 ;;
 ;; trm-vvvv
@@ -878,12 +878,12 @@ STAT77 := $213E
 
 
 
-;; PPU 5c88 Staus Flag and Version
+;; PPU 5c88 Status Flag and Version
 ;; (read, any)
 ;;
 ;; fl-pvvvv
 ;;
-;; f    = Interlace flag (toffled every v-blank)
+;; f    = Interlace flag (toggled every v-blank)
 ;; l    = External Latch Flag (set when PPU counters latched)
 ;; p    = NTSC/PAL mode (1 = PAL, 0 = NTSC)
 ;; vvvv = 5c78 chip number.
@@ -1118,7 +1118,7 @@ MEMSEL := $420D
 ;;
 ;; n---vvvv
 ;;
-;; n    = MNI Flag. Set on start of V-Blank, cleaered on read
+;; n    = MNI Flag. Set on start of V-Blank, cleared on read
 ;;        or at end of V-Blank.
 ;; vvvv = 5A22 Chip version number
 ;;

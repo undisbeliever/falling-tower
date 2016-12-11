@@ -113,7 +113,7 @@ tmp_prevYpos	= tmp1
 	IF_LT
 		STA	yPos
 	ELSE
-		; Else, autoscroll
+		; Else, auto scroll
 		;
 		; yVelocity += SCROLL_SPEED_DELTA
 		; yPos:yPosFractional -= yVelocity

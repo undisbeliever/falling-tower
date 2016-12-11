@@ -16,14 +16,14 @@ METASPRITE_STATUS_VRAM_INDEX_MASK	= %00111110
 METASPRITE_STATUS_VRAM_SET_FLAG		= %00000001
 
 .struct MetaSpriteStruct
-	;; The frameSet that the metasprite belongs to
+	;; The FrameSet that the metasprite belongs to
 	frameSet		.addr
 
-	;; The state of the metasprite's VRAM/Palette allocations
+	;; The state of the MetaSprite's VRAM/Palette allocations
 	;; 	%pdiiiiiv
 	;;
 	;; p: palette set
-	;; d: dynamic tileset active (MUST NOT be set if vram is clear)
+	;; d: dynamic tileset active (MUST NOT be set if `v` is clear)
 	;; iiiii: vram slot table number (index / 2)
 	;; v: vram set
 	status			.byte
@@ -41,7 +41,7 @@ METASPRITE_STATUS_VRAM_SET_FLAG		= %00000001
 .endstruct
 
 ;; The dp offset between the DP passed to the functions
-;; and the the address of `MetaSprite__State`.
+;; and the address of `MetaSprite__State`.
 ;;
 ;; Should be the location of the `MetaSprite__State` struct
 ;; with the entity struct.
@@ -141,17 +141,17 @@ METASPRITE_STATUS_VRAM_SET_FLAG		= %00000001
 	;;;	Y: paletteId within the FrameSet
 	.importroutine Init
 
-	;;; Activates a MetaSprite, allocating and uploading vram/palette
+	;;; Activates a MetaSprite, allocating and uploading VRAM/palette
 	;;;
 	;;; REQUIRES: 16 bit A, 16 bit Index, DB = $7E
 	;;;
 	;;; IN:
 	;;;	DP: MetaSpriteStruct address - MetaSpriteDpOffset
 	;;;
-	;;; OUT: C set if vram tiles allocated
+	;;; OUT: C set if VRAM tiles allocated
 	.importroutine Activate
 
-	;;; Deactivates a MetaSprite, releasing vram and palettes resources
+	;;; Deactivates a MetaSprite, releasing VRAM and palettes resources
 	;;;
 	;;; After calling Deactivate, you can reuse the memory contained
 	;;; in DP (equivalent to free).
@@ -175,7 +175,7 @@ METASPRITE_STATUS_VRAM_SET_FLAG		= %00000001
 	;;;
 	;;; INPUT:
 	;;;	DP: MetaSpriteStruct address - MetaSpriteDpOffset
-	;;;	A: frame id of the frameSet
+	;;;	A: frame id of the FrameSet
 	;;;
 	;;; OUTPUT: C set if succeeded
 	.importroutine SetFrame
@@ -195,7 +195,7 @@ METASPRITE_STATUS_VRAM_SET_FLAG		= %00000001
 	;;;
 	;;; INPUT:
 	;;;	DP: MetaSpriteStruct address - MetaSpriteDpOffset
-	;;;	A: palette id of the frameSet
+	;;;	A: palette id of the FrameSet
 	;;;
 	;;; OUTPUT: C set if succeeded
 	.importroutine SetPalette

@@ -38,7 +38,7 @@
 .endmacro
 
 
-;; Reverse Subract
+;; Reverse Subtract
 ;;
 ;; A = memory - A
 ;;
@@ -107,7 +107,7 @@ skip:
 ;; Parameter can be X, Y, blank (A), or a variable.
 ;;
 ;; Please note that doing a `IF_MINUS : NEG : ENDIF` would be faster
-;; than `LDABS A` if you know the the N flag matches the accumulator's
+;; than `LDABS A` if you know the N flag matches the accumulator's
 ;; MSB.
 ;;
 ;; REQUIRES: 8 bit A

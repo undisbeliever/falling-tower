@@ -1,4 +1,4 @@
-;; Macros for incrementing/decremening values
+;; Macros for incrementing/decrementing values
 
 .ifndef ::_COMMON__INCDEC_INC_
 ::_COMMON__INCDEC_INC_ = 1
@@ -139,7 +139,7 @@ skip:
 ;;
 ;; max is the maximum value for the accumulator:
 ;;	max can be a memory address or an immediate with #<int>
-;;	if blank then the maximum acculator value is chosen
+;;	if blank then the maximum accumulator value is chosen
 .macro INCSAT max
 	.ifblank max
 		INCSAT #(1 << .asize) - 1
@@ -179,7 +179,7 @@ increment:
 ;;
 ;; min is the minimum value for the accumulator:
 ;;	min can be a memory address or an immediate with #<int>
-;;	if blank then the maximum acculator value is chosen
+;;	if blank then the maximum accumulator value is chosen
 .macro DECSAT min
 	.local skip
 

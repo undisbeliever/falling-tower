@@ -248,7 +248,7 @@ tmp_slotIndex	:= tmp1
 		; If address has changed, decrement reference count
 		; If address if equal, just return true
 
-		; luckally palette bits match the palette slot index
+		; luckily palette bits match the palette slot index
 		LDA	z:MSDP::blockOneCharAttrOffset + 1
 		AND	#OAM_ATTR_PALETTE_MASK
 		TAX
@@ -380,7 +380,7 @@ SetMetaSpriteState:
 	; (c never changed by AND or ORA or TSB)
 
 	; Set palette bits in offsets
-	; luckally palette bits match the palette slot index
+	; luckily palette bits match the palette slot index
 	; slotIndex always <= 7 * 2
 
 	LDA	z:MSDP::blockOneCharAttrOffset + 1

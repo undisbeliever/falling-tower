@@ -11,7 +11,7 @@
 CONFIG ENTITY_STRUCT_SIZE, 64
 
 .enum EntityFunctions
-	;; Called when ititializing the entity
+	;; Called when initializing the entity
 	;;
 	;; REGISTERS: 16 bit A, 16 bit Index, DB = $7E
 	;; INPUT: DP = entity
@@ -108,7 +108,7 @@ CONFIG ENTITY_STRUCT_SIZE, 64
 	;; Add a platform to the system
 	;; REQUIRES: 16 bit A, 16 bit Index, DB = $7E
 	;; INPUT:
-	;;	A - the location of the entity function ptr
+	;;	A - the location of the entity function pointer
 	;;	Y - the parameter to pass to the Init Function
 	;; OUTPUT: DP - the memory location of the entity created
 	.importroutine NewPlatformEntity

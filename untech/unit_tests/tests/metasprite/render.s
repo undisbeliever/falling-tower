@@ -51,7 +51,7 @@ entity		:= UnitTest_MetaSprite::entities
 	JSR	MetaSprite::RenderLoopInit
 	JSR	MetaSprite::RenderLoopEnd
 
-	; Ensure objects are offscreen
+	; Ensure objects are off-screen
 	LDX	#0
 	JMP	_TestRestOfBuffer
 .endroutine
@@ -456,7 +456,7 @@ Failure:
 
 
 
-; Tests the rendering of an image when offscreen
+; Tests the rendering of an image when off-screen
 .A8
 .I16
 .routine RenderFrame_Offscreen
@@ -620,7 +620,7 @@ Failure:
 
 	JSR	MetaSprite::RenderLoopEnd
 
-	; Test that sprites 3-127 are offscreen
+	; Test that sprites 3-127 are off-screen
 
 	LDX	#3 * 4
 	JSR	_TestRestOfBuffer
@@ -630,7 +630,7 @@ Failure:
 	JSR	MetaSprite::RenderLoopInit
 	JSR	MetaSprite::RenderLoopEnd
 
-	; Test that all sprites are offscreen
+	; Test that all sprites are off-screen
 
 	LDX	#0
 	JSR	_TestRestOfBuffer
@@ -819,17 +819,17 @@ FrameObjects_Four_ExpectedHi:
 	.byte	%10001000
 
 
-; table to test the offscreen test, half of these will not appear onscreen.
+; table to test the off-screen test, half of these will not appear on-screen.
 offscreen0_xPos = 20
 offscreen0_yPos = 30
 
 FrameObjects_Offscreen0:
 	.byte	6
-		Object	-28,   0, $00, $00   ; offscreen
+		Object	-28,   0, $00, $00   ; off-screen
 		Object	-22, -32, $00, $00
-		Object	  0, -58, $00, $00   ; offscreen
+		Object	  0, -58, $00, $00   ; off-screen
 		Object	-28,   0, $00, $01
-		Object	  0, -50, $00, $01   ; offscreen
+		Object	  0, -50, $00, $01   ; off-screen
 		Object	  0, -38, $00, $01
 
 
@@ -839,10 +839,10 @@ offscreen1_yPos = 180
 FrameObjects_Offscreen1:
 	.byte	5
 		Object	-28,   0, $00, $00
-		Object	 36,   0, $00, $00   ; offscreen
-		Object	  0,  54, $00, $00   ; offscreen
-		Object	 36,   0, $00, $01   ; offscreen
-		Object	  0,  49, $00, $01   ; offscreen
+		Object	 36,   0, $00, $00   ; off-screen
+		Object	  0,  54, $00, $00   ; off-screen
+		Object	 36,   0, $00, $01   ; off-screen
+		Object	  0,  49, $00, $01   ; off-screen
 
 
 FrameObjects_Offscreen_Expected:

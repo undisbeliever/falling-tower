@@ -200,7 +200,7 @@ FIRST_START_Y	= PlatformEntities::FIRST_START_Y
 	SBC	#Camera::WINDOW_HEIGHT
 	CMP	Camera::yPos
 	IF_GE
-		; Player offscreen - kill it
+		; Player off-screen - kill it
 		CLC
 		RTS
 	ENDIF

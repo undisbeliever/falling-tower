@@ -5,7 +5,7 @@
 
 .include "common/modules.inc"
 
-;; This module is a Linear congruential psudeo random number generator.
+;; This module is a Linear congruential pseudo random number generator.
 ;;
 ;; In order to increase the observed randomness of this module,
 ;; the function `AddJoypadEntropy` should be called once every frame.
@@ -24,7 +24,7 @@
 	;;
 	;; This can add a bit of variety to the random number generator.
 	;;
-	;; REQUIRE: 16 bit A, 16 bit Index, AutoJoy Enbled, DB access shadow
+	;; REQUIRE: 16 bit A, 16 bit Index, AutoJoy Enabled, DB access shadow
 	.importroutine AddJoypadEntropy
 
 
@@ -36,7 +36,7 @@
 	;; INPUT:
 	;;	Y: unsigned 16 bit value.
 	;; OUTPUT:
-	;;	A: unsigned 16 bit value between 0 and (A-1) (inlusive).
+	;;	A: unsigned 16 bit value between 0 and (A-1) (illusive).
 	.importroutine	Rnd_U16A
 
 
