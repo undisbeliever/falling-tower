@@ -231,35 +231,35 @@ walk1_left:
 .segment METASPRITE_FRAME_DATA_BLOCK
 N_FRAMES = 22
 FrameData:
-	.addr	FO::stand_right, 0, THB::stand,       0, Tileset
-	.addr	FO::blink_right, 0, THB::stand,       0, Tileset
-	.addr	FO::jump_right,  0, THB::jump_right,  0, Tileset
-	.addr	FO::fall_right,  0, THB::fall,        0, Tileset
-	.addr	FO::die_right,   0, THB::die_right,   0, Tileset
-	.addr	FO::walk0_right, 0, THB::walk_right,  0, Tileset
-	.addr	FO::walk1_right, 0, THB::walk1_right, 0, Tileset
-	.addr	FO::walk2_right, 0, THB::walk_right,  0, Tileset
-	.addr	FO::walk3_right, 0, THB::walk_right,  0, Tileset
-	.addr	FO::walk4_right, 0, THB::walk_right,  0, Tileset
-	.addr	FO::walk5_right, 0, THB::walk_right,  0, Tileset
+	.addr	FO::stand_right, THB::stand,       Tileset
+	.addr	FO::blink_right, THB::stand,       Tileset
+	.addr	FO::jump_right,  THB::jump_right,  Tileset
+	.addr	FO::fall_right,  THB::fall,        Tileset
+	.addr	FO::die_right,   THB::die_right,   Tileset
+	.addr	FO::walk0_right, THB::walk_right,  Tileset
+	.addr	FO::walk1_right, THB::walk1_right, Tileset
+	.addr	FO::walk2_right, THB::walk_right,  Tileset
+	.addr	FO::walk3_right, THB::walk_right,  Tileset
+	.addr	FO::walk4_right, THB::walk_right,  Tileset
+	.addr	FO::walk5_right, THB::walk_right,  Tileset
 
-	.addr	FO::stand_left, 0, THB::stand,       0, Tileset
-	.addr	FO::blink_left, 0, THB::stand,       0, Tileset
-	.addr	FO::jump_left,  0, THB::jump_right,  0, Tileset
-	.addr	FO::fall_left,  0, THB::fall,        0, Tileset
-	.addr	FO::die_left,   0, THB::die_right,   0, Tileset
-	.addr	FO::walk0_left, 0, THB::walk_right,  0, Tileset
-	.addr	FO::walk1_left, 0, THB::walk1_right, 0, Tileset
-	.addr	FO::walk2_left, 0, THB::walk_right,  0, Tileset
-	.addr	FO::walk3_left, 0, THB::walk_right,  0, Tileset
-	.addr	FO::walk4_left, 0, THB::walk_right,  0, Tileset
-	.addr	FO::walk5_left, 0, THB::walk_right,  0, Tileset
+	.addr	FO::stand_left, THB::stand,       Tileset
+	.addr	FO::blink_left, THB::stand,       Tileset
+	.addr	FO::jump_left,  THB::jump_right,  Tileset
+	.addr	FO::fall_left,  THB::fall,        Tileset
+	.addr	FO::die_left,   THB::die_right,   Tileset
+	.addr	FO::walk0_left, THB::walk_right,  Tileset
+	.addr	FO::walk1_left, THB::walk1_right, Tileset
+	.addr	FO::walk2_left, THB::walk_right,  Tileset
+	.addr	FO::walk3_left, THB::walk_right,  Tileset
+	.addr	FO::walk4_left, THB::walk_right,  Tileset
+	.addr	FO::walk5_left, THB::walk_right,  Tileset
 
 
 .segment METASPRITE_FRAME_LIST_BLOCK
 FrameList:
 .repeat N_FRAMES, i
-	.addr	FrameData + 10 * i
+	.addr	FrameData + 6 * i
 .endrepeat
 
 
@@ -271,8 +271,6 @@ FrameSet:
 	.byte   TilesetFormat	; tilesetType
 	.addr	FrameList	; frameList
 	.byte	N_FRAMES	; nFrames
-	.addr	0		; animationList
-	.byte	0		; nAnimations
 
 
 .segment METASPRITE_FRAMESET_LIST_BLOCK

@@ -16,16 +16,16 @@
 
 .enum MetaSprite__FrameSet_TilesetSize
 	;; The tileset uses a single 16x16 tile
-        ONE_16_TILE	= 0
+	ONE_16_TILE	= 0
 
 	;; The tileset uses two 16x16 tiles
-        TWO_16_TILES	= 2
+	TWO_16_TILES	= 2
 
 	;; The tileset uses a single VRAM row of 8 16x16 tiles
 	ONE_VRAM_ROW	= 4
 
 	;; The tileset uses two VRAM rows of 8 16x16 tiles.
-        TWO_VRAM_ROWS	= 6
+	TWO_VRAM_ROWS	= 6
 .endenum
 
 
@@ -48,20 +48,9 @@
 	;;
 	;; The table is a list of `.addr`s that point to the frame data
 	;; in the `METASPRITE_FRAME_DATA_BLOCK`
-	;;
-	;; This table may contain more than `nFrames`. But they will only
-	;; be accessible by the animation subsystem.
 	frameList		.addr
 	;; Number of frames in the frame table
 	nFrames			.byte
-
-	;; Address of the animation table in `METASPRITE_ANIMATION_LIST_BLOCK` bank.
-	;;
-	;; The table is a list of `.addr`s that point to the animation data
-	;; in the `METASPRITE_ANIMATION_DATA_BLOCK`
-	animationList		.addr
-	;; Number of animations in the animation table
-	nAnimations		.byte
 .endstruct
 
 .struct MetaSprite__Frame
@@ -69,17 +58,9 @@
 	;; `METASPRITE_FRAME_OBJECTS_BLOCK` bank.
 	frameObjectsList	.addr
 
-	;; Address of the `MetaSprite__EntityCollisionHitboxes` struct within the
-	;; `METASPRITE_ENTITY_COLLISION_HITBOXES_BLOCK` bank.
-	entityCollisionHitbox	.addr
-
 	;; Address of the `MetaSprite__TileCollisionHitbox` struct within the
 	;; `METASPRITE_TILE_COLLISION_HITBOXES_BLOCK` bank.
 	tileCollisionHitbox	.addr
-
-	;; Address of the `MetaSprite__ActionPoints` struct within the
-	;; `METASPRITE_ACTION_POINT_BLOCK` bank.
-	actionPoints		.addr
 
 	;; Address of the `MetaSprite__Tileset` struct within the
 	;; `METASPRITE_TILESET_BLOCK` bank.
@@ -97,10 +78,10 @@
 ;; This format is designed upon the following assumptions:
 ;;
 ;;	* Each entity/frame uses only a single palette which is already
-;;	  preloaded into CGRAM by the animation subsystem.
+;;	  preloaded into CGRAM by the palette subsystem.
 ;;
-;;	* The animation subsystem can allocate one or two blocks of VRAM for
-;;	  each entity.
+;;	* The VRAM subsystem can allocate one or two blocks of VRAM for each
+;;    entity.
 ;;
 ;;	  By having the entity allocate one or two blocks of VRAM we prevent
 ;;	  fragmentation when allocating VRAM tiles for entities that need
@@ -193,112 +174,10 @@
 .endstruct
 
 
-;; The hitbox of the entity, used by the physics engine for entity
-;; collisions.
-;;
-;; The collision hitbox is represented by multiple Axis-Aligned
-;; Bounding Boxes, each of a different type.
-;;
-;; The type is dependant of the implementation code, but allows for
-;; flexibility in defining different collision areas on a frame.
-;;
-;; For example, an enemy frame could consist of:
-;;
-;;	* a sword AABB (the part the hurts the player)
-;;	* a shield AABB (the part where no damage would occur if hit)
-;;	* a weak-point AABB (where double damage would occur if hit)
-;;	* a body AABB (where normal damage would occur if hit)
-;;
-;;
-;; In order to save processing an "outer" hitbox is used. This hitbox
-;; is tested first, then only if that hits, will the inner hitboxes
-;; be tested.
-;;
-;; Some hitboxes only involve one AABB. In this case count is 0 and
-;; the outer hitbox is checked.
-
-.struct MetaSprite__EntityCollisionHitboxes
-	;; The outer hitbox
-	.struct Outer
-		;; xOffset of the hitbox, relative to `origin.x - 128`
-		;;
-		;; unsigned 8 bit integer
-		xOffset		.byte
-
-		;; yOffset of the hitbox, relative to `origin.y - 128`
-		;;
-		;; unsigned 8 bit integer
-		yOffset		.byte
-
-		;; Width of the hitbox
-		;;
-		;; unsigned 8 bit integer
-		width		.byte
-
-		;; Width of the hitbox
-		;;
-		;; unsigned 8 bit integer
-		height		.byte
-	.endstruct
-
-	;; Number of inner hitboxes used by the entity.
-	;;
-	;; If zero then only the outer hitbox is checked, the inner hitboxes
-	;; are not processed
-	;;
-	;; unsigned 8 bit integer
-	count		.byte
-
-	.union
-		.struct SingleHitbox
-			;; The type of outer hitbox
-			;;
-			;; It is processed ONLY if count is 0.
-			;;
-			;; The format/value of this byte depends on the entity
-			;; and is parsed by the entity's update routine.
-			type		.byte
-		.endstruct
-
-		;; The inner hitboxes, repeated `count` times
-		;;
-		;; All inner hitboxes MUST be inside the outer hitbox.
-		.struct Inner
-			;; xOffset of the hitbox, relative to `origin.x - 128`
-			;;
-			;; unsigned 8 bit integer
-			xOffset		.byte
-
-			;; yOffset of the hitbox, relative to `origin.y - 128`
-			;;
-			;; unsigned 8 bit integer
-			yOffset		.byte
-
-			;; Width of the hitbox
-			;;
-			;; unsigned 8 bit integer
-			width		.byte
-
-			;; Width of the hitbox
-			;;
-			;; unsigned 8 bit integer
-			height		.byte
-
-			;; The type of hitbox
-			;;
-			;; The format/value of this byte depends on the
-			;; entity and is parsed by the entity's update routine
-			type		.byte
-		.endstruct
-	.endunion
-.endstruct
-
-
 ;; A hitbox of the entity, used by the physics engine for collisions
 ;; with the meta-tilemap.
 ;;
 ;; For the moment the engine only supports a single AABB hitbox.
-
 .struct MetaSprite__TileCollisionHitbox
 	;; xOffset of the hitbox, relative to `origin.x - 128`
 	;;
@@ -319,52 +198,6 @@
 	;;
 	;; unsigned 8 bit integer
 	height		.byte
-.endstruct
-
-
-;; Action points used by the metasprite animation engine
-;;
-;; This is used by the animator to tell the game-loop
-;; when to preform certain actions.
-;;
-;; Action points only occur for one frame. On the next processing frame the
-;; pointer to the ActionPoints data location is reset to NULL.
-;;
-;; Examples of action points include:
-;;	* Fire weapon frame - would includes the position and direction
-;;	  of the projectile launched
-;;	* Feed touching ground - used for run/walk sounds.
-;;
-;;
-;; The location of the action point is calculated in the same manner as the
-;; metasprite frames.
-;;
-;;	xPos = entity.xPos - actionPoints.xOffset + point.xPos
-;;	yPos = entity.yPos - actionPoints.yOffset + point.yPos
-
-.struct MetaSprite__ActionPoints
-	;; The number of action points
-	;;
-	;; 8 bit signed integer
-	count		.byte
-
-	.struct Point
-		;; The type of action point
-		;;
-		;; The format/value of this byte depends on the entity
-		;; code and is parsed by the entity's update routine.
-		type		.byte
-
-		;; xPos of the point, relative to `origin.x - 128`
-		;;
-		;; 8 bit signed integer
-		xPos		.byte
-
-		;; yPos of the point, relative to `origin.x - 128`
-		;;
-		;; 8 bit signed integer
-		yPos		.byte
-	.endstruct
 .endstruct
 
 .endif ; ::_METASPRITE_DATAFORMAT_H_

@@ -97,16 +97,16 @@ platform_small:
 .segment METASPRITE_FRAME_DATA_BLOCK
 N_FRAMES = 4
 FrameData:
-	.addr	FO::platform_huge,   0, THB::platform_huge,   0, Tileset
-	.addr	FO::platform_large,  0, THB::platform_large,  0, Tileset
-	.addr	FO::platform_medium, 0, THB::platform_medium, 0, Tileset
-	.addr	FO::platform_small,  0, THB::platform_small,  0, Tileset
+	.addr	FO::platform_huge,   THB::platform_huge,   Tileset
+	.addr	FO::platform_large,  THB::platform_large,  Tileset
+	.addr	FO::platform_medium, THB::platform_medium, Tileset
+	.addr	FO::platform_small,  THB::platform_small,  Tileset
 
 
 .segment METASPRITE_FRAME_LIST_BLOCK
 FrameList:
 .repeat N_FRAMES, i
-	.addr	FrameData + 10 * i
+	.addr	FrameData + 6 * i
 .endrepeat
 
 
@@ -118,8 +118,6 @@ FrameSet:
 	.byte   TilesetFormat	; tilesetType
 	.addr	FrameList	; frameList
 	.byte	N_FRAMES	; nFrames
-	.addr	0		; animationList
-	.byte	0		; nAnimations
 
 
 .segment METASPRITE_FRAMESET_LIST_BLOCK

@@ -76,8 +76,6 @@
 			; Only testing tileset
 			.addr	0
 			.addr	0
-			.addr	0
-			.addr	0
 			.addr	tileset
 		.endproc
 	.popseg

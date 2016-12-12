@@ -65,14 +65,6 @@ MetaSprite__Frame_List:
 .assert .loword(*) <> 0, error, "Cannot start data with addr=0"
 .exportzp MetaSprite__TileCollisionHitbox_Bank = .bankbyte(*)
 
-.segment METASPRITE_ENTITY_COLLISION_HITBOXES_BLOCK
-.assert .loword(*) <> 0, error, "Cannot start data with addr=0"
-.exportzp MetaSprite__EntityCollisionHitboxes_Bank = .bankbyte(*)
-
-.segment METASPRITE_ACTION_POINT_BLOCK
-.assert .loword(*) <> 0, error, "Cannot start data with addr=0"
-.exportzp MetaSprite__ActionPoints_Bank = .bankbyte(*)
-
 
 
 .include "resources/metasprites/player.inc"
