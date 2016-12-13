@@ -38,7 +38,7 @@
 		;; previous item in the list.
 		;; NOT set when in free list
 		;; (byte index, >= $80 is NULL)
-		prev = next - 1
+		prev = next + 1
 
 		;; address of the palette in `METASPRITE_PALETTE_DATA_BLOCK`
 		;; (word address)
