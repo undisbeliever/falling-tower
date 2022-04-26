@@ -42,8 +42,8 @@
 
 
 .segment "ROMHEADER"
-	.byte "FF"					; $FFB0 2 Digit maker code
-	.byte "SNES"					; $FFB2 4 Character game ID
+	.byte "  "					; $FFB0 2 Digit maker code (blank = unlicensed)
+	.byte "    "					; $FFB2 4 Character game ID (blank = unlicensed)
 
 	.byte $00, $00, $00, $00, $00, $00, $00		; $FFB6 Fixed Value (7 bytes)
 
