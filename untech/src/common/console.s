@@ -114,7 +114,7 @@ CURSOR_YMASK = $FFFF - CURSOR_XMASK
 	LDX	#.loword(buffer)
 	LDY	#.loword(buffer) + 2
 	LDA	#buffer_size - 3
-	MVN	.bankbyte(buffer), .bankbyte(buffer)
+	MVN	#.bankbyte(buffer), #.bankbyte(buffer)
 
 	; cursor = startMargin
 	; endOfLine = (endMargin & CURSOR_XMASK) | (cursor & ~CORSOR_XMASK)
@@ -269,7 +269,7 @@ tmpCurrent	= tmp1
 		STA	tmpCurrent
 		TAX
 		LDA	tmpBytesToCopy
-		MVN	.bankbyte(buffer), .bankbyte(buffer)
+		MVN	#.bankbyte(buffer), #.bankbyte(buffer)
 
 		CPX	tmpEndBlock
 	UNTIL_GE
@@ -286,7 +286,7 @@ tmpCurrent	= tmp1
 	LDA	tmpBytesToCopy
 	DEC
 	DEC
-	MVN	.bankbyte(buffer), .bankbyte(buffer)
+	MVN	#.bankbyte(buffer), #.bankbyte(buffer)
 
 	PLA
 	SUB	#64
